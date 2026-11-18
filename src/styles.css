@@ -298,3 +298,31 @@ fieldset.rest-of-form:disabled {
 details.card:not([open]) {
   gap: 0;
 }
+
+/* Account screen */
+dl.details {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 6px 16px;
+  margin: 0;
+}
+
+dl.details dt {
+  color: var(--muted);
+}
+
+dl.details dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+button.danger {
+  background: white;
+  border-color: var(--error);
+  color: var(--error);
+  font-weight: 600;
+}
+
+.card p {
+  margin: 0;
+}

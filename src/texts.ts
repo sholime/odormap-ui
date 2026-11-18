@@ -11,6 +11,8 @@ export const TEXTS = {
   sr: {
     tagline: 'Prijavi neprijatan miris u svom kraju.',
     logOut: 'Odjavi se',
+    myAccount: 'Moj nalog',
+    report: 'Prijava',
     guestNotice: 'Koristiš aplikaciju kao gost.',
     createAccount: 'Napravi nalog da sačuvaš prijave',
 
@@ -51,10 +53,23 @@ export const TEXTS = {
     tooMany: 'Poslao/la si mnogo prijava u poslednjih sat vremena. Pokušaj kasnije.',
     thanks: 'Hvala! Prijava je poslata.',
     reportAgain: 'Nova prijava',
+
+    // Account screen
+    accountType: 'Vrsta naloga',
+    guestAccount: 'Gost',
+    fullAccount: 'Nalog',
+    memberSince: 'Član od',
+    deleteAccount: 'Obriši nalog',
+    deleteWarning: 'Brišu se tvoj nalog i sve tvoje prijave. Ovo ne može da se poništi.',
+    deleteAreYouSure: 'Da li si siguran/na?',
+    deleteForever: 'Da, obriši sve',
+    cancel: 'Otkaži',
   },
   hu: {
     tagline: 'Jelentsd a kellemetlen szagot a környékeden.',
     logOut: 'Kijelentkezés',
+    myAccount: 'Fiókom',
+    report: 'Bejelentés',
     guestNotice: 'Vendégként használod az alkalmazást.',
     createAccount: 'Hozz létre fiókot a bejelentéseid megőrzéséhez',
 
@@ -95,6 +110,17 @@ export const TEXTS = {
     tooMany: 'Az elmúlt órában sok bejelentést küldtél. Próbáld később.',
     thanks: 'Köszönjük! A bejelentés elküldve.',
     reportAgain: 'Új bejelentés',
+
+    // Account screen
+    accountType: 'Fiók típusa',
+    guestAccount: 'Vendég',
+    fullAccount: 'Fiók',
+    memberSince: 'Regisztráció dátuma',
+    deleteAccount: 'Fiók törlése',
+    deleteWarning: 'A fiókod és minden bejelentésed törlődik. Ez nem vonható vissza.',
+    deleteAreYouSure: 'Biztos vagy benne?',
+    deleteForever: 'Igen, mindent törlök',
+    cancel: 'Mégse',
   },
 } satisfies Record<Language, unknown>;
 

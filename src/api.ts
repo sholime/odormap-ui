@@ -78,6 +78,8 @@ async function send<T>(method: string, path: string, body?: unknown, canRefresh 
     const answer = (await response.json().catch(() => ({}))) as { error?: string };
     throw new ApiError(response.status, answer.error ?? response.statusText);
   }
+  // 204 means "done, nothing to send back".
+  if (response.status === 204) return undefined as T;
   return (await response.json()) as T;
 }
 
@@ -118,6 +120,12 @@ export const api = {
     logInWith('/auth/google', { idToken, language, acceptPrivacy }),
 
   me: () => send<User>('GET', '/me'),
+
+  /** Deletes the account and all its reports, then forgets the login. */
+  deleteAccount: async () => {
+    await send<void>('DELETE', '/me');
+    logOut();
+  },
 
   areas: () => send<Area[]>('GET', '/areas'),
 

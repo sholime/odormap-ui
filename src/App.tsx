@@ -1,19 +1,24 @@
-// The whole app: a header, then either the sign-in screen or the report form.
+// The whole app: a header, then one screen.
+// Logged out: the sign-in screen. Logged in: the report form, the account screen,
+// or (for a guest) the sign-in screen again to create a full account.
 
 import { useEffect, useState } from 'react';
 import { LANGUAGES, type Language, type User } from '@odormap/common';
 import { api, isLoggedIn, logOut } from './api';
 import { TEXTS } from './texts';
+import { Account } from './views/Account';
 import { ReportForm } from './views/ReportForm';
 import { SignIn } from './views/SignIn';
 
 const LANGUAGE_KEY = 'odormap.language';
 
+type Screen = 'report' | 'account' | 'createAccount';
+
 export function App() {
   const [language, setLanguage] = useState<Language>(savedLanguage);
   const [loggedIn, setLoggedIn] = useState(isLoggedIn);
   const [user, setUser] = useState<User>();
-  const [creatingAccount, setCreatingAccount] = useState(false);
+  const [screen, setScreen] = useState<Screen>('report');
   // Goes up on every login, so the profile is loaded again (e.g. when a guest creates an account).
   const [logins, setLogins] = useState(0);
   const t = TEXTS[language];
@@ -33,14 +38,16 @@ export function App() {
   }, [loggedIn, logins]);
 
   function handleLoggedIn() {
-    setCreatingAccount(false);
+    setScreen('report');
     setLoggedIn(true);
     setLogins((n) => n + 1);
   }
 
-  function handleLogOut() {
+  /** After logging out or deleting the account. */
+  function handleLoggedOut() {
     logOut();
     setLoggedIn(false);
+    setScreen('report');
   }
 
   return (
@@ -55,29 +62,33 @@ export function App() {
           ))}
         </div>
         {loggedIn && (
-          <button className="link" onClick={handleLogOut}>
-            {t.logOut}
+          <button className="link" onClick={() => setScreen(screen === 'account' ? 'report' : 'account')}>
+            {screen === 'account' ? t.report : t.myAccount}
           </button>
         )}
       </header>
 
       {!loggedIn && <SignIn language={language} isGuest={false} onLoggedIn={handleLoggedIn} />}
 
-      {loggedIn && creatingAccount && (
-        <SignIn
+      {loggedIn && screen === 'createAccount' && (
+        <SignIn language={language} isGuest onLoggedIn={handleLoggedIn} onBack={() => setScreen('report')} />
+      )}
+
+      {loggedIn && screen === 'account' && user && (
+        <Account
           language={language}
-          isGuest
-          onLoggedIn={handleLoggedIn}
-          onBack={() => setCreatingAccount(false)}
+          user={user}
+          onCreateAccount={() => setScreen('createAccount')}
+          onLoggedOut={handleLoggedOut}
         />
       )}
 
-      {loggedIn && !creatingAccount && (
+      {loggedIn && screen === 'report' && (
         <>
           {user?.isGuest && (
             <p className="guest-notice">
               {t.guestNotice}{' '}
-              <button className="link" onClick={() => setCreatingAccount(true)}>
+              <button className="link" onClick={() => setScreen('createAccount')}>
                 {t.createAccount}
               </button>
             </p>
