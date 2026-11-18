@@ -13,7 +13,7 @@ Built with React and Vite. The screens are in Serbian (Latin script) and Hungari
 2. **Report**: the phone's location is found automatically. Pick how strong the odor is (1 to 5) and send.
    Odor kind and a comment are optional, each folded away until opened.
 
-3. **My account**: name, email, account type and date joined; log out; delete the account and all its reports
+3. **My account**: name, email, account type and date joined; log out; delete the account (reports stay on the map, unlinked and without comments)
    (asks a second time before deleting).
 
 A guest can create an account later from the report screen and keeps their reports.

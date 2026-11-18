@@ -32,7 +32,7 @@ describe('Account', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Obriši nalog' }));
     expect(fetch).not.toHaveBeenCalled();
 
-    await userEvent.click(screen.getByRole('button', { name: 'Da, obriši sve' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Da, obriši nalog' }));
     const [url, options] = fetch.mock.calls[0] as unknown as [string, RequestInit];
     expect(url).toMatch(/\/api\/v1\/me$/);
     expect(options.method).toBe('DELETE');

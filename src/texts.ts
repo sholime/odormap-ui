@@ -60,9 +60,9 @@ export const TEXTS = {
     fullAccount: 'Nalog',
     memberSince: 'Član od',
     deleteAccount: 'Obriši nalog',
-    deleteWarning: 'Brišu se tvoj nalog i sve tvoje prijave. Ovo ne može da se poništi.',
+    deleteWarning: 'Tvoj nalog se briše. Prijave ostaju na mapi, ali bez veze sa tobom i bez komentara. Ovo ne može da se poništi.',
     deleteAreYouSure: 'Da li si siguran/na?',
-    deleteForever: 'Da, obriši sve',
+    deleteForever: 'Da, obriši nalog',
     cancel: 'Otkaži',
   },
   hu: {
@@ -117,9 +117,9 @@ export const TEXTS = {
     fullAccount: 'Fiók',
     memberSince: 'Regisztráció dátuma',
     deleteAccount: 'Fiók törlése',
-    deleteWarning: 'A fiókod és minden bejelentésed törlődik. Ez nem vonható vissza.',
+    deleteWarning: 'A fiókod törlődik. A bejelentések a térképen maradnak, de nem köthetők hozzád, és megjegyzés nélkül. Ez nem vonható vissza.',
     deleteAreYouSure: 'Biztos vagy benne?',
-    deleteForever: 'Igen, mindent törlök',
+    deleteForever: 'Igen, törlöm a fiókot',
     cancel: 'Mégse',
   },
 } satisfies Record<Language, unknown>;

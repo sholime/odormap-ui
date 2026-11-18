@@ -29,7 +29,10 @@ function Serbian() {
         Drugi korisnici vide prijave bez tvog imena i komentara, a lokacija je zaokružena na oko 100 m. Tačnu lokaciju vidiš
         samo ti i administratori, i koristi se za analizu izvora mirisa.
       </p>
-      <p>Nalog i sve svoje prijave možeš da obrišeš u svakom trenutku, pod „Moj nalog”.</p>
+      <p>
+        Nalog možeš da obrišeš u svakom trenutku, pod „Moj nalog”. Tvoje prijave tada ostaju na mapi, ali bez ikakve veze sa
+        tobom i bez komentara.
+      </p>
       <p>Za podatke je odgovoran: {RESPONSIBLE.sr}.</p>
     </div>
   );
@@ -51,7 +54,10 @@ function Hungarian() {
         A többi felhasználó a bejelentéseket a neved és a megjegyzés nélkül látja, a hely pedig kb. 100 m-re kerekítve
         jelenik meg. A pontos helyet csak te és az adminisztrátorok látjátok; a szagforrások elemzéséhez használjuk.
       </p>
-      <p>A fiókodat és minden bejelentésedet bármikor törölheted a „Fiókom” menüpontban.</p>
+      <p>
+        A fiókodat bármikor törölheted a „Fiókom” menüpontban. A bejelentéseid ekkor a térképen maradnak, de nem köthetők
+        hozzád, és megjegyzés nélkül.
+      </p>
       <p>Az adatokért felelős: {RESPONSIBLE.hu}.</p>
     </div>
   );

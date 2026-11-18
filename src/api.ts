@@ -121,7 +121,7 @@ export const api = {
 
   me: () => send<User>('GET', '/me'),
 
-  /** Deletes the account and all its reports, then forgets the login. */
+  /** Deletes the account (its reports stay, unlinked), then forgets the login. */
   deleteAccount: async () => {
     await send<void>('DELETE', '/me');
     logOut();

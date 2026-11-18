@@ -1,5 +1,5 @@
 // "My account": who is logged in, logging out, and deleting the account.
-// Deleting asks for a second tap, and removes the account and all its reports.
+// Deleting asks for a second tap. It removes the account; the reports stay, without any link to the person.
 
 import { useState } from 'react';
 import type { Language, User } from '@odormap/common';
