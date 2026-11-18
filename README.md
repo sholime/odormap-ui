@@ -11,7 +11,7 @@ Built with React and Vite. The screens are in Serbian (Latin script) and Hungari
 1. **Sign in**: continue without an account (guest), log in or create an account with email, or use Google.
    The privacy notice must be accepted first.
 2. **Report**: the phone's location is found automatically. Pick how strong the odor is (1 to 5) and send.
-   Odor kind, duration and a comment are optional, under "More details".
+   Odor kind and a comment are optional, each folded away until opened.
 
 A guest can create an account later from the report screen and keeps their reports.
 

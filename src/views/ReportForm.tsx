@@ -1,17 +1,18 @@
 // The main screen: report an odor that is present right now.
 // Only the location (found automatically) and the strength are needed; the rest is optional.
+// Until the location is found inside an area OdorMap covers, the rest of the form is locked.
 
 import { useEffect, useState, type FormEvent } from 'react';
 import {
-  DURATIONS,
+  findAreaFor,
   LABELS,
   ODOR_KINDS,
   ODOR_STRENGTHS,
-  type Duration,
   type Language,
   type OdorKind,
   type OdorStrength,
   type Point,
+  type Area,
 } from '@odormap/common';
 import { ApiError, api } from '../api';
 import { TEXTS } from '../texts';
@@ -20,24 +21,29 @@ type Location = { point: Point; accuracyM: number };
 type LocationState =
   | { status: 'locating' }
   | { status: 'found'; location: Location }
-  | { status: 'denied' }
-  | { status: 'failed' };
+  | { status: 'denied' } // the browser is not allowed to use the location
+  | { status: 'off' }; // the phone's location (GPS) is off or gave no answer
 
 export function ReportForm({ language }: { language: Language }) {
   const t = TEXTS[language];
   const labels = LABELS[language];
   const { state: locationState, retry: retryLocation } = useCurrentLocation();
+  const { areas, failed: areasFailed, reload: reloadAreas } = useAreas();
+  // The area the person is in. Undefined while locating, or when outside every area.
+  const area =
+    locationState.status === 'found' && areas ? findAreaFor(locationState.location.point, areas) : undefined;
+  const outsideAreas = locationState.status === 'found' && areas !== undefined && area === undefined;
+  const ready = area !== undefined;
 
   const [strength, setStrength] = useState<OdorStrength>();
   const [odorKind, setOdorKind] = useState<OdorKind>('not_set');
   const [odorKindOther, setOdorKindOther] = useState('');
-  const [duration, setDuration] = useState<Duration>('not_set');
   const [comment, setComment] = useState('');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const [sent, setSent] = useState(false);
 
-  const canSend = locationState.status === 'found' && strength !== undefined && !busy;
+  const canSend = ready && strength !== undefined && !busy;
 
   async function send(event: FormEvent) {
     event.preventDefault();
@@ -51,13 +57,11 @@ export function ReportForm({ language }: { language: Language }) {
         strength,
         odorKind,
         odorKindOther: odorKind === 'other' ? odorKindOther.trim() : undefined,
-        duration,
         comment: comment.trim() || undefined,
       });
       setSent(true);
     } catch (e) {
-      if (e instanceof ApiError && e.status === 400 && e.message.includes('outside')) setError(t.outsideArea);
-      else if (e instanceof ApiError && e.status === 429) setError(t.tooMany);
+      if (e instanceof ApiError && e.status === 429) setError(t.tooMany);
       else setError(t.somethingWrong);
     } finally {
       setBusy(false);
@@ -68,7 +72,6 @@ export function ReportForm({ language }: { language: Language }) {
     setStrength(undefined);
     setOdorKind('not_set');
     setOdorKindOther('');
-    setDuration('not_set');
     setComment('');
     setSent(false);
     retryLocation();
@@ -91,12 +94,25 @@ export function ReportForm({ language }: { language: Language }) {
     <main className="screen">
       <form onSubmit={send}>
         <section className="card">
-          <h2>{t.whereAreYou}</h2>
-          {locationState.status === 'locating' && <p>{t.locating}</p>}
-          {locationState.status === 'found' && <p>{t.locationFound(Math.round(locationState.location.accuracyM))}</p>}
-          {(locationState.status === 'denied' || locationState.status === 'failed') && (
+          <h2>{t.location}</h2>
+          {(locationState.status === 'locating' || (locationState.status === 'found' && !areas && !areasFailed)) && (
+            <p className="locating">
+              <span className="spinner" aria-hidden="true" /> {t.locating}
+            </p>
+          )}
+          {area && <p className="area">{area.name}</p>}
+          {outsideAreas && <p className="error">{t.outsideAreas}</p>}
+          {areasFailed && (
             <>
-              <p className="error">{locationState.status === 'denied' ? t.locationDenied : t.locationFailed}</p>
+              <p className="error">{t.somethingWrong}</p>
+              <button type="button" onClick={reloadAreas}>
+                {t.tryAgain}
+              </button>
+            </>
+          )}
+          {(locationState.status === 'off' || locationState.status === 'denied') && (
+            <>
+              <p className="error">{locationState.status === 'off' ? t.locationOff : t.locationDenied}</p>
               <button type="button" onClick={retryLocation}>
                 {t.tryAgain}
               </button>
@@ -104,75 +120,68 @@ export function ReportForm({ language }: { language: Language }) {
           )}
         </section>
 
-        <section className="card">
-          <h2>{t.howStrong}</h2>
-          <div className="strengths">
-            {ODOR_STRENGTHS.map((value) => (
-              <button
-                key={value}
-                type="button"
-                className={value === strength ? 'chosen' : ''}
-                aria-pressed={value === strength}
-                onClick={() => setStrength(value)}
-              >
-                <span className="number">{value}</span>
-                <span className="label">{labels.odorStrength[value]}</span>
-              </button>
-            ))}
-          </div>
-        </section>
+        {/* Everything below stays locked (and greyed out) until the location is known. */}
+        <fieldset disabled={!ready} className="rest-of-form">
+          <section className="card">
+            <h2>{t.howStrong}</h2>
+            <div className="strengths">
+              {ODOR_STRENGTHS.map((value) => (
+                <button
+                  key={value}
+                  type="button"
+                  className={value === strength ? 'chosen' : ''}
+                  aria-pressed={value === strength}
+                  onClick={() => setStrength(value)}
+                >
+                  <span className="number">{value}</span>
+                  <span className="label">{labels.odorStrength[value]}</span>
+                </button>
+              ))}
+            </div>
+          </section>
 
-        <details className="card">
-          <summary>{t.moreDetails}</summary>
+          <details className="card">
+            <summary>{t.odorKindOptional}</summary>
+            <div className="chips">
+              {ODOR_KINDS.filter((kind) => kind !== 'not_set').map((kind) => (
+                <button
+                  key={kind}
+                  type="button"
+                  className={kind === odorKind ? 'chosen' : ''}
+                  aria-pressed={kind === odorKind}
+                  // Tapping the chosen kind again clears it.
+                  onClick={() => setOdorKind(kind === odorKind ? 'not_set' : kind)}
+                >
+                  {labels.odorKind[kind]}
+                </button>
+              ))}
+            </div>
+            {odorKind === 'other' && (
+              <label>
+                {t.describeOther}
+                <input value={odorKindOther} onChange={(e) => setOdorKindOther(e.target.value)} required maxLength={100} />
+              </label>
+            )}
+          </details>
 
-          <h3>{t.whatKind}</h3>
-          <div className="chips">
-            {ODOR_KINDS.filter((kind) => kind !== 'not_set').map((kind) => (
-              <button
-                key={kind}
-                type="button"
-                className={kind === odorKind ? 'chosen' : ''}
-                aria-pressed={kind === odorKind}
-                // Tapping the chosen kind again clears it.
-                onClick={() => setOdorKind(kind === odorKind ? 'not_set' : kind)}
-              >
-                {labels.odorKind[kind]}
-              </button>
-            ))}
-          </div>
-          {odorKind === 'other' && (
+          <details className="card">
+            <summary>{t.commentOptional}</summary>
             <label>
-              {t.describeOther}
-              <input value={odorKindOther} onChange={(e) => setOdorKindOther(e.target.value)} required maxLength={100} />
+              <small>{t.commentHint}</small>
+              <textarea value={comment} onChange={(e) => setComment(e.target.value)} maxLength={500} rows={3} />
             </label>
+          </details>
+
+          {error && (
+            <p className="error" role="alert">
+              {error}
+            </p>
           )}
 
-          <label>
-            {t.howLong}
-            <select value={duration} onChange={(e) => setDuration(e.target.value as Duration)}>
-              {DURATIONS.map((value) => (
-                <option key={value} value={value}>
-                  {labels.duration[value]}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          <label>
-            {t.comment} <small>({t.commentHint})</small>
-            <textarea value={comment} onChange={(e) => setComment(e.target.value)} maxLength={500} rows={3} />
-          </label>
-        </details>
-
-        {error && (
-          <p className="error" role="alert">
-            {error}
-          </p>
-        )}
-
-        <button type="submit" className="primary big" disabled={!canSend}>
-          {busy ? t.sending : t.sendReport}
-        </button>
+          <button type="submit" className="primary big" disabled={!canSend}>
+            {busy ? t.sending : t.sendReport}
+          </button>
+        </fieldset>
       </form>
     </main>
   );
@@ -184,7 +193,7 @@ function useCurrentLocation() {
   const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
-    if (!('geolocation' in navigator)) return setState({ status: 'failed' });
+    if (!('geolocation' in navigator)) return setState({ status: 'off' });
     setState({ status: 'locating' });
     navigator.geolocation.getCurrentPosition(
       (position) =>
@@ -195,10 +204,24 @@ function useCurrentLocation() {
             accuracyM: position.coords.accuracy,
           },
         }),
-      (error) => setState({ status: error.code === error.PERMISSION_DENIED ? 'denied' : 'failed' }),
+      (error) => setState({ status: error.code === error.PERMISSION_DENIED ? 'denied' : 'off' }),
       { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 },
     );
   }, [attempt]);
 
   return { state, retry: () => setAttempt((n) => n + 1) };
+}
+
+/** The areas OdorMap covers, loaded once from the API. */
+function useAreas() {
+  const [areas, setAreas] = useState<Area[]>();
+  const [failed, setFailed] = useState(false);
+  const [attempt, setAttempt] = useState(0);
+
+  useEffect(() => {
+    setFailed(false);
+    api.areas().then(setAreas, () => setFailed(true));
+  }, [attempt]);
+
+  return { areas, failed, reload: () => setAttempt((n) => n + 1) };
 }

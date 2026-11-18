@@ -1,5 +1,5 @@
 // Every text on screen, in Serbian (Latin script) and Hungarian.
-// Names of odor kinds, strengths and durations come from LABELS in @odormap/common.
+// Names of odor kinds and strengths come from LABELS in @odormap/common.
 //
 // Use: const t = TEXTS[language];  then  t.sendReport
 //
@@ -34,22 +34,20 @@ export const TEXTS = {
     back: 'Nazad',
 
     // Report form
-    whereAreYou: 'Gde si?',
+    location: 'Lokacija',
     locating: 'Tražim tvoju lokaciju…',
-    locationFound: (accuracy: number) => `Lokacija pronađena (±${accuracy} m)`,
-    locationDenied: 'Dozvoli pristup lokaciji u podešavanjima pregledača, pa pokušaj ponovo.',
-    locationFailed: 'Lokacija nije pronađena.',
+    locationFound: 'Lokacija pronađena',
+    locationOff: 'Uključi lokaciju (GPS) na telefonu, pa pritisni „Pokušaj ponovo”.',
+    locationDenied: 'Pregledač ne dozvoljava pristup lokaciji. Dozvoli ga u podešavanjima pregledača, pa pokušaj ponovo.',
+    outsideAreas: 'Ova lokacija je van oblasti koje OdorMap pokriva.',
     tryAgain: 'Pokušaj ponovo',
     howStrong: 'Koliko je jak miris?',
-    moreDetails: 'Više detalja (nije obavezno)',
-    whatKind: 'Kakav je miris?',
+    odorKindOptional: 'Kakav je miris? (nije obavezno)',
     describeOther: 'Opiši miris',
-    howLong: 'Koliko dugo traje?',
-    comment: 'Komentar',
+    commentOptional: 'Komentar (nije obavezno)',
     commentHint: 'Vidiš ga samo ti.',
     sendReport: 'Pošalji prijavu',
     sending: 'Šaljem…',
-    outsideArea: 'Ova lokacija je van oblasti koje OdorMap pokriva.',
     tooMany: 'Poslao/la si mnogo prijava u poslednjih sat vremena. Pokušaj kasnije.',
     thanks: 'Hvala! Prijava je poslata.',
     reportAgain: 'Nova prijava',
@@ -80,22 +78,20 @@ export const TEXTS = {
     back: 'Vissza',
 
     // Report form
-    whereAreYou: 'Hol vagy?',
+    location: 'Hely',
     locating: 'Helymeghatározás…',
-    locationFound: (accuracy: number) => `Hely megtalálva (±${accuracy} m)`,
-    locationDenied: 'Engedélyezd a helyhozzáférést a böngésző beállításaiban, majd próbáld újra.',
-    locationFailed: 'Nem sikerült meghatározni a helyet.',
+    locationFound: 'Hely megtalálva',
+    locationOff: 'Kapcsold be a helymeghatározást (GPS) a telefonon, majd nyomd meg az „Újra” gombot.',
+    locationDenied: 'A böngésző nem engedi a helyhozzáférést. Engedélyezd a böngésző beállításaiban, majd próbáld újra.',
+    outsideAreas: 'Ez a hely kívül esik az OdorMap által lefedett területeken.',
     tryAgain: 'Újra',
     howStrong: 'Mennyire erős a szag?',
-    moreDetails: 'További részletek (nem kötelező)',
-    whatKind: 'Milyen a szag?',
+    odorKindOptional: 'Milyen a szag? (nem kötelező)',
     describeOther: 'Írd le a szagot',
-    howLong: 'Mióta tart?',
-    comment: 'Megjegyzés',
+    commentOptional: 'Megjegyzés (nem kötelező)',
     commentHint: 'Csak te látod.',
     sendReport: 'Bejelentés küldése',
     sending: 'Küldés…',
-    outsideArea: 'Ez a hely kívül esik az OdorMap által lefedett területeken.',
     tooMany: 'Az elmúlt órában sok bejelentést küldtél. Próbáld később.',
     thanks: 'Köszönjük! A bejelentés elküldve.',
     reportAgain: 'Új bejelentés',

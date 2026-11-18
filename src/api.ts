@@ -6,6 +6,7 @@
 // Both are kept in the browser's localStorage, so the person stays logged in.
 
 import type {
+  Area,
   AuthTokens,
   CreateReportRequest,
   Language,
@@ -117,6 +118,8 @@ export const api = {
     logInWith('/auth/google', { idToken, language, acceptPrivacy }),
 
   me: () => send<User>('GET', '/me'),
+
+  areas: () => send<Area[]>('GET', '/areas'),
 
   sendReport: (report: CreateReportRequest) => send<OdorReport>('POST', '/reports', report),
 };
