@@ -1,0 +1,328 @@
+/* Mobile first: one column, big buttons that are easy to tap. */
+
+:root {
+  --green: #2f6f4f;
+  --green-light: #e6f0eb;
+  --text: #1d2420;
+  --muted: #5d6862;
+  --border: #cfd8d3;
+  --background: #f6f8f7;
+  --card: #ffffff;
+  --error: #b3261e;
+
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-size: 17px;
+  line-height: 1.45;
+  color: var(--text);
+  background: var(--background);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--green);
+  color: white;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 1.25rem;
+  flex: 1;
+}
+
+header button {
+  color: white;
+}
+
+.languages {
+  display: flex;
+  gap: 4px;
+}
+
+.languages button {
+  padding: 4px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  background: transparent;
+  border-radius: 6px;
+}
+
+.languages button.chosen {
+  background: white;
+  color: var(--green);
+}
+
+.screen {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.screen form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+h2,
+h3 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-weight: 500;
+}
+
+label.checkbox {
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+label.checkbox input {
+  width: 22px;
+  height: 22px;
+  margin: 0;
+  flex-shrink: 0;
+}
+
+input,
+select,
+textarea {
+  font: inherit;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: white;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: white;
+  color: var(--text);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+button.primary {
+  background: var(--green);
+  border-color: var(--green);
+  color: white;
+  font-weight: 600;
+}
+
+button.big {
+  padding: 16px;
+  font-size: 1.1rem;
+}
+
+button.link {
+  border: none;
+  background: none;
+  padding: 4px 0;
+  text-decoration: underline;
+  color: inherit;
+}
+
+button.chosen {
+  background: var(--green-light);
+  border-color: var(--green);
+  font-weight: 600;
+}
+
+/* Strength: five buttons in a row, number on top and a short label below. */
+.strengths {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+}
+
+.strengths button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 2px;
+}
+
+.strengths .number {
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.strengths .label {
+  font-size: 0.7rem;
+  color: var(--muted);
+  text-align: center;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chips button {
+  border-radius: 999px;
+  padding: 8px 14px;
+}
+
+details summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.privacy {
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.tagline {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.or {
+  margin: 0;
+  text-align: center;
+  color: var(--muted);
+}
+
+.google-button {
+  display: flex;
+  justify-content: center;
+}
+
+.error {
+  color: var(--error);
+  margin: 0;
+}
+
+.thanks {
+  font-size: 1.2rem;
+  text-align: center;
+}
+
+.guest-notice {
+  max-width: 480px;
+  margin: 12px auto 0;
+  padding: 0 16px;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+small {
+  font-weight: normal;
+  color: var(--muted);
+}
+
+/* Location box */
+.locating {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+}
+
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 3px solid var(--green-light);
+  border-top-color: var(--green);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.area {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--green);
+}
+
+/* The rest of the form, locked until the location is known. */
+fieldset.rest-of-form {
+  border: none;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+fieldset.rest-of-form:disabled {
+  opacity: 0.4;
+  filter: grayscale(1);
+}
+
+/* A closed fold-out is just its title, with no empty space below it. */
+details.card:not([open]) {
+  gap: 0;
+}
+
+/* Account screen */
+dl.details {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 6px 16px;
+  margin: 0;
+}
+
+dl.details dt {
+  color: var(--muted);
+}
+
+dl.details dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+button.danger {
+  background: white;
+  border-color: var(--error);
+  color: var(--error);
+  font-weight: 600;
+}
+
+.card p {
+  margin: 0;
+}
