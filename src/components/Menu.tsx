@@ -6,7 +6,7 @@ import { useEffect, useState, type ReactNode } from 'react';
 import type { Language } from '@odormap/common';
 import { TEXTS } from '../texts';
 
-export type MenuItem = 'report' | 'account';
+export type MenuItem = 'report' | 'myReports' | 'account';
 
 type Props = {
   language: Language;
@@ -19,6 +19,7 @@ export function Menu({ language, current, onChange }: Props) {
   const t = TEXTS[language];
   const items: { id: MenuItem; label: string; icon: ReactNode }[] = [
     { id: 'report', label: t.reportTab, icon: <PinIcon /> },
+    { id: 'myReports', label: t.myReports, icon: <ListIcon /> },
     { id: 'account', label: t.myAccount, icon: <PersonIcon /> },
   ];
 
@@ -74,6 +75,14 @@ function PersonIcon() {
     <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
       <circle cx="12" cy="8" r="4" fill="currentColor" />
       <path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8z" fill="currentColor" />
+    </svg>
+  );
+}
+
+function ListIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
+      <path d="M4 5h2v2H4zm4 0h12v2H8zM4 11h2v2H4zm4 0h12v2H8zM4 17h2v2H4zm4 0h12v2H8z" fill="currentColor" />
     </svg>
   );
 }

@@ -15,6 +15,10 @@ export const TEXTS = {
     home: 'Početna',
     reportTab: 'Prijavi neprijatan miris',
     menu: 'Meni',
+    myReports: 'Moje prijave',
+    noReports: 'Još nemaš nijednu prijavu.',
+    loading: 'Učitavam…',
+    wind: 'Vetar',
     guestNotice: 'Koristiš aplikaciju kao gost.',
     createAccount: 'Napravi nalog da sačuvaš prijave',
 
@@ -74,6 +78,10 @@ export const TEXTS = {
     home: 'Főoldal',
     reportTab: 'Bejelentés',
     menu: 'Menü',
+    myReports: 'Bejelentéseim',
+    noReports: 'Még nincs bejelentésed.',
+    loading: 'Betöltés…',
+    wind: 'Szél',
     guestNotice: 'Vendégként használod az alkalmazást.',
     createAccount: 'Hozz létre fiókot a bejelentéseid megőrzéséhez',
 

@@ -416,3 +416,51 @@ header .menu-button {
   color: var(--green);
   font-weight: 600;
 }
+
+/* My reports */
+.muted {
+  color: var(--muted);
+}
+
+.small {
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.report-item {
+  gap: 8px;
+}
+
+.report-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 0.9rem;
+}
+
+.report-body {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* The strength number in a circle: light yellow for 1 up to dark red for 5. */
+.strength-badge {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+.strength-badge.s1 { background: #fff3c4; color: #6b5800; }
+.strength-badge.s2 { background: #ffd98a; color: #6b4300; }
+.strength-badge.s3 { background: #ffb366; color: #6b2e00; }
+.strength-badge.s4 { background: #f2784b; color: white; }
+.strength-badge.s5 { background: #c0392b; color: white; }
+
+.report-comment {
+  margin: 0;
+  font-style: italic;
+}

@@ -12,12 +12,13 @@ import { api, isLoggedIn, logOut } from './api';
 import { Menu } from './components/Menu';
 import { TEXTS } from './texts';
 import { Account } from './views/Account';
+import { MyReports } from './views/MyReports';
 import { ReportForm } from './views/ReportForm';
 import { SignIn } from './views/SignIn';
 
 const LANGUAGE_KEY = 'odormap.language';
 
-type Screen = 'report' | 'account' | 'createAccount';
+type Screen = 'report' | 'myReports' | 'account' | 'createAccount';
 
 export function App() {
   const [language, setLanguage] = useState<Language>(savedLanguage);
@@ -90,7 +91,7 @@ export function App() {
         </div>
         {loggedIn && (
           // Creating an account is reached from "My account", so that item stays highlighted.
-          <Menu language={language} current={screen === 'report' ? 'report' : 'account'} onChange={goTo} />
+          <Menu language={language} current={screen === 'createAccount' ? 'account' : screen} onChange={goTo} />
         )}
       </header>
 
@@ -99,6 +100,8 @@ export function App() {
       {loggedIn && screen === 'createAccount' && (
         <SignIn language={language} isGuest onLoggedIn={handleLoggedIn} />
       )}
+
+      {loggedIn && screen === 'myReports' && <MyReports language={language} />}
 
       {loggedIn && screen === 'account' && user && (
         <Account
