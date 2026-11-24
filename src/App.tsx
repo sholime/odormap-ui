@@ -6,31 +6,26 @@
 // screens is kept in the browser history, so the phone's back button returns to the
 // previous screen. Tapping "OdorMap" in the header always goes home.
 
-import { useEffect, useState } from "react";
-import { LANGUAGES, type Language, type User } from "@odormap/common";
-import { api, isLoggedIn, logOut } from "./api";
-import { Menu } from "./components/Menu";
-import { TEXTS } from "./texts";
-import { Account } from "./views/Account";
-import { AllReports } from "./views/AllReports";
-import { MyReports } from "./views/MyReports";
-import { ReportForm } from "./views/ReportForm";
-import { SignIn } from "./views/SignIn";
+import { useEffect, useState } from 'react';
+import { LANGUAGES, type Language, type User } from '@odormap/common';
+import { api, isLoggedIn, logOut } from './api';
+import { Menu } from './components/Menu';
+import { TEXTS } from './texts';
+import { Account } from './views/Account';
+import { AllReports } from './views/AllReports';
+import { MyReports } from './views/MyReports';
+import { ReportForm } from './views/ReportForm';
+import { SignIn } from './views/SignIn';
 
-const LANGUAGE_KEY = "odormap.language";
+const LANGUAGE_KEY = 'odormap.language';
 
-type Screen =
-  | "report"
-  | "myReports"
-  | "account"
-  | "createAccount"
-  | "allReports";
+type Screen = 'report' | 'myReports' | 'account' | 'createAccount' | 'allReports';
 
 export function App() {
   const [language, setLanguage] = useState<Language>(savedLanguage);
   const [loggedIn, setLoggedIn] = useState(isLoggedIn);
   const [user, setUser] = useState<User>();
-  const [screen, setScreen] = useState<Screen>("report");
+  const [screen, setScreen] = useState<Screen>('report');
   // Goes up on every login, so the profile is loaded again (e.g. when a guest creates an account).
   const [logins, setLogins] = useState(0);
   const t = TEXTS[language];
@@ -51,25 +46,24 @@ export function App() {
 
   // The phone's back button: show the screen saved in that history entry (home if none).
   useEffect(() => {
-    const onBack = (event: PopStateEvent) =>
-      setScreen((event.state as Screen | null) ?? "report");
-    window.addEventListener("popstate", onBack);
-    return () => window.removeEventListener("popstate", onBack);
+    const onBack = (event: PopStateEvent) => setScreen((event.state as Screen | null) ?? 'report');
+    window.addEventListener('popstate', onBack);
+    return () => window.removeEventListener('popstate', onBack);
   }, []);
 
   /** Opens a screen and adds it to the browser history. */
   function goTo(next: Screen) {
     if (next === screen) return;
-    window.history.pushState(next, "");
+    window.history.pushState(next, '');
     setScreen(next);
   }
 
   function goHome() {
-    goTo("report");
+    goTo('report');
   }
 
   function handleLoggedIn() {
-    setScreen("report");
+    setScreen('report');
     setLoggedIn(true);
     setLogins((n) => n + 1);
   }
@@ -78,7 +72,7 @@ export function App() {
   function handleLoggedOut() {
     logOut();
     setLoggedIn(false);
-    setScreen("report");
+    setScreen('report');
   }
 
   return (
@@ -91,11 +85,7 @@ export function App() {
         </h1>
         <div className="languages">
           {LANGUAGES.map((code) => (
-            <button
-              key={code}
-              className={code === language ? "chosen" : ""}
-              onClick={() => setLanguage(code)}
-            >
+            <button key={code} className={code === language ? 'chosen' : ''} onClick={() => setLanguage(code)}>
               {code.toUpperCase()}
             </button>
           ))}
@@ -104,46 +94,38 @@ export function App() {
           // Creating an account is reached from "My account", so that item stays highlighted.
           <Menu
             language={language}
-            current={screen === "createAccount" ? "account" : screen}
-            isAdmin={user?.role === "admin"}
+            current={screen === 'createAccount' ? 'account' : screen}
+            isAdmin={user?.role === 'admin'}
             onChange={goTo}
           />
         )}
       </header>
 
-      {!loggedIn && (
-        <SignIn
-          language={language}
-          isGuest={false}
-          onLoggedIn={handleLoggedIn}
-        />
-      )}
+      {!loggedIn && <SignIn language={language} isGuest={false} onLoggedIn={handleLoggedIn} />}
 
-      {loggedIn && screen === "createAccount" && (
+      {loggedIn && screen === 'createAccount' && (
         <SignIn language={language} isGuest onLoggedIn={handleLoggedIn} />
       )}
 
-      {loggedIn && screen === "myReports" && <MyReports language={language} />}
+      {loggedIn && screen === 'myReports' && <MyReports language={language} />}
 
-      {loggedIn && screen === "allReports" && user?.role === "admin" && (
-        <AllReports language={language} />
-      )}
+      {loggedIn && screen === 'allReports' && user?.role === 'admin' && <AllReports language={language} />}
 
-      {loggedIn && screen === "account" && user && (
+      {loggedIn && screen === 'account' && user && (
         <Account
           language={language}
           user={user}
-          onCreateAccount={() => goTo("createAccount")}
+          onCreateAccount={() => goTo('createAccount')}
           onLoggedOut={handleLoggedOut}
         />
       )}
 
-      {loggedIn && screen === "report" && (
+      {loggedIn && screen === 'report' && (
         <>
           {user?.isGuest && (
             <p className="guest-notice">
-              {t.guestNotice}{" "}
-              <button className="link" onClick={() => goTo("createAccount")}>
+              {t.guestNotice}{' '}
+              <button className="link" onClick={() => goTo('createAccount')}>
                 {t.createAccount}
               </button>
             </p>
@@ -157,5 +139,5 @@ export function App() {
 
 function savedLanguage(): Language {
   const saved = localStorage.getItem(LANGUAGE_KEY);
-  return LANGUAGES.find((code) => code === saved) ?? "sr";
+  return LANGUAGES.find((code) => code === saved) ?? 'sr';
 }
