@@ -140,7 +140,8 @@ export function ReportForm({ language }: { language: Language }) {
           <details className="card" open={odorKindOpen} onToggle={(e) => setOdorKindOpen(e.currentTarget.open)}>
             <summary>
               {t.odorKindOptional}
-              {odorKind !== 'not_set' && (
+              {/* The chosen kind shows here only while the list is closed; open, the list marks it. */}
+              {odorKind !== 'not_set' && !odorKindOpen && (
                 <span className="chosen-kind">
                   {labels.odorKind[odorKind]}
                   <button

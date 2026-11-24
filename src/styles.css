@@ -369,39 +369,50 @@ details.privacy-link summary {
   font-size: 0.9rem;
 }
 
-/* Tab bar fixed at the bottom of the screen (logged in only). */
-.bottom-nav {
+header .menu-button {
+  border: none;
+  background: none;
+  padding: 0 4px;
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+/* The menu panel slides over the right side; the rest of the screen is darkened. */
+.menu-shade {
   position: fixed;
-  left: 0;
+  inset: 0;
+  z-index: 10;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.menu-panel {
+  position: absolute;
+  top: 0;
   right: 0;
   bottom: 0;
-  display: flex;
-  background: var(--card);
-  border-top: 1px solid var(--border);
-  /* Keep clear of the iPhone home bar. */
-  padding-bottom: env(safe-area-inset-bottom);
-}
-
-.bottom-nav button {
-  flex: 1;
+  width: min(72%, 320px);
   display: flex;
   flex-direction: column;
+  gap: 4px;
+  padding: 20px 12px;
+  background: var(--card);
+}
+
+.menu-panel button {
+  display: flex;
   align-items: center;
-  gap: 2px;
-  padding: 8px 4px;
+  gap: 12px;
+  padding: 12px;
   border: none;
-  border-radius: 0;
+  border-radius: 8px;
   background: none;
   color: var(--muted);
-  font-size: 0.8rem;
+  font-size: 1.05rem;
+  text-align: left;
 }
 
-.bottom-nav button.current {
+.menu-panel button.current {
+  background: var(--green-light);
   color: var(--green);
   font-weight: 600;
-}
-
-/* Room at the bottom of each screen so the tab bar never covers its last button. */
-body:has(.bottom-nav) {
-  padding-bottom: calc(72px + env(safe-area-inset-bottom));
 }

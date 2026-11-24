@@ -2,14 +2,14 @@
 // Logged out: the sign-in screen. Logged in: the report form (home), the account screen,
 // or (for a guest) the sign-in screen again to create a full account.
 //
-// Logged in, a tab bar at the bottom switches between the main screens. Moving between
+// Logged in, the ☰ menu in the header switches between the main screens. Moving between
 // screens is kept in the browser history, so the phone's back button returns to the
 // previous screen. Tapping "OdorMap" in the header always goes home.
 
 import { useEffect, useState } from 'react';
 import { LANGUAGES, type Language, type User } from '@odormap/common';
 import { api, isLoggedIn, logOut } from './api';
-import { BottomNav } from './components/BottomNav';
+import { Menu } from './components/Menu';
 import { TEXTS } from './texts';
 import { Account } from './views/Account';
 import { ReportForm } from './views/ReportForm';
@@ -88,6 +88,10 @@ export function App() {
             </button>
           ))}
         </div>
+        {loggedIn && (
+          // Creating an account is reached from "My account", so that item stays highlighted.
+          <Menu language={language} current={screen === 'report' ? 'report' : 'account'} onChange={goTo} />
+        )}
       </header>
 
       {!loggedIn && <SignIn language={language} isGuest={false} onLoggedIn={handleLoggedIn} />}
@@ -117,10 +121,6 @@ export function App() {
           )}
           <ReportForm language={language} />
         </>
-      )}
-      {loggedIn && (
-        // Creating an account is reached from "My account", so that tab stays highlighted.
-        <BottomNav language={language} current={screen === 'report' ? 'report' : 'account'} onChange={goTo} />
       )}
     </>
   );
