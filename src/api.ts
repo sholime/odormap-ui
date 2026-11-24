@@ -130,4 +130,7 @@ export const api = {
   areas: () => send<Area[]>('GET', '/areas'),
 
   sendReport: (report: CreateReportRequest) => send<OdorReport>('POST', '/reports', report),
+
+  /** The last 50 reports of the logged-in person, newest first. */
+  myReports: () => send<OdorReport[]>('GET', '/reports/mine'),
 };
