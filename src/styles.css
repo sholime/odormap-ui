@@ -287,7 +287,7 @@ small {
   color: var(--green);
 }
 
-/* The rest of the form, locked until the location is known. */
+/* The rest of a screen, locked until something is done first (location found, privacy accepted). */
 fieldset.rest-of-form {
   border: none;
   margin: 0;
@@ -301,6 +301,14 @@ fieldset.rest-of-form {
 fieldset.rest-of-form:disabled {
   opacity: 0.4;
   filter: grayscale(1);
+  /* Also blocks the Google button, which is not a form field and ignores "disabled". */
+  pointer-events: none;
+}
+
+.hint {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--muted);
 }
 
 /* A closed fold-out is just its title, with no empty space below it. */

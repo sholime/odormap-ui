@@ -6,17 +6,19 @@ import { SignIn } from './SignIn';
 afterEach(() => vi.unstubAllGlobals());
 
 describe('SignIn', () => {
-  it('asks to accept the privacy notice before continuing as a guest', async () => {
+  it('keeps everything locked until the privacy notice is accepted', async () => {
     const fetch = vi.fn(async () => Response.json({ accessToken: 'a', refreshToken: 'r' }, { status: 201 }));
     vi.stubGlobal('fetch', fetch);
     const onLoggedIn = vi.fn();
     render(<SignIn language="sr" isGuest={false} onLoggedIn={onLoggedIn} />);
 
-    await userEvent.click(screen.getByRole('button', { name: 'Nastavi bez naloga' }));
-    expect(screen.getByRole('alert')).toHaveTextContent('Prvo prihvati obaveštenje o privatnosti.');
+    expect(screen.getByText('Prvo prihvati obaveštenje o privatnosti.')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Nastavi bez naloga' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Prijavi se' })).toBeDisabled();
     expect(fetch).not.toHaveBeenCalled();
 
     await userEvent.click(screen.getByRole('checkbox'));
+    expect(screen.queryByText('Prvo prihvati obaveštenje o privatnosti.')).not.toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: 'Nastavi bez naloga' }));
     expect(onLoggedIn).toHaveBeenCalled();
   });

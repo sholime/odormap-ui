@@ -19,8 +19,6 @@ type Props = {
 export function SignIn({ language, isGuest, onLoggedIn, onBack }: Props) {
   const t = TEXTS[language];
   const [acceptedPrivacy, setAcceptedPrivacy] = useState(false);
-  // Shown right under the checkbox when someone tries to go on without ticking it.
-  const [privacyMissing, setPrivacyMissing] = useState(false);
   const [mode, setMode] = useState<'login' | 'register'>(isGuest ? 'register' : 'login');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -47,35 +45,21 @@ export function SignIn({ language, isGuest, onLoggedIn, onBack }: Props) {
     if (e.status === 401) return t.wrongLogin;
     if (e.status === 409) return t.emailTaken;
     if (e.status === 400 && mode === 'register' && password.length < 8) return t.passwordTooShort;
-    if (e.status === 400 && !acceptedPrivacy) {
-      setPrivacyMissing(true);
-      return '';
-    }
     return t.somethingWrong;
   }
 
-  /** True if the privacy notice is accepted; otherwise shows the warning under the checkbox. */
-  function privacyAccepted(): boolean {
-    setPrivacyMissing(!acceptedPrivacy);
-    return acceptedPrivacy;
-  }
-
   function continueAsGuest() {
-    if (!privacyAccepted()) return;
     attempt(() => api.continueAsGuest(language));
   }
 
   function submitEmailForm(event: FormEvent) {
     event.preventDefault();
     if (mode === 'login') return attempt(() => api.logIn(email, password));
-    if (!privacyAccepted()) return;
     if (password.length < 8) return setError(t.passwordTooShort);
     attempt(() => api.register({ email, password, displayName: name, language, acceptPrivacy: true }));
   }
 
   function logInWithGoogle(idToken: string) {
-    // A new Google user must accept the notice; an existing one may log in without it.
-    // The API answers 400 in the first case, so the warning then shows under the checkbox.
     attempt(() => api.logInWithGoogle(idToken, language, acceptedPrivacy));
   }
 
@@ -93,63 +77,59 @@ export function SignIn({ language, isGuest, onLoggedIn, onBack }: Props) {
           <input
             type="checkbox"
             checked={acceptedPrivacy}
-            onChange={(e) => {
-              setAcceptedPrivacy(e.target.checked);
-              if (e.target.checked) setPrivacyMissing(false);
-            }}
+            onChange={(e) => setAcceptedPrivacy(e.target.checked)}
           />
           {t.acceptPrivacy}
         </label>
-        {privacyMissing && (
-          <p className="error" role="alert">
-            {t.privacyRequired}
-          </p>
-        )}
+        {!acceptedPrivacy && <p className="hint">{t.privacyRequired}</p>}
         <details>
           <summary>{t.privacyTitle}</summary>
           <PrivacyNotice language={language} />
         </details>
       </section>
 
-      {!isGuest && (
-        <>
-          <button className="primary big" onClick={continueAsGuest} disabled={busy}>
-            {t.continueAsGuest}
-          </button>
-          <p className="or">{t.or}</p>
-        </>
-      )}
-
-      <GoogleButton language={language} onIdToken={logInWithGoogle} />
-
-      <form className="card" onSubmit={submitEmailForm}>
-        {mode === 'register' && (
-          <label>
-            {t.name}
-            <input value={name} onChange={(e) => setName(e.target.value)} required maxLength={50} autoComplete="name" />
-          </label>
+      {/* Everything below stays locked (and greyed out) until the privacy notice is accepted. */}
+      <fieldset disabled={!acceptedPrivacy} className="rest-of-form">
+        {!isGuest && (
+          <>
+            <button className="primary big" onClick={continueAsGuest} disabled={busy}>
+              {t.continueAsGuest}
+            </button>
+            <p className="or">{t.or}</p>
+          </>
         )}
-        <label>
-          {t.email}
-          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="email" />
-        </label>
-        <label>
-          {t.password}
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
-          />
-        </label>
-        <button type="submit" disabled={busy}>
-          {mode === 'login' ? t.logIn : t.register}
-        </button>
-        <button type="button" className="link" onClick={() => setMode(mode === 'login' ? 'register' : 'login')}>
-          {mode === 'login' ? t.noAccount : t.haveAccount}
-        </button>
-      </form>
+
+        <GoogleButton language={language} onIdToken={logInWithGoogle} />
+
+        <form className="card" onSubmit={submitEmailForm}>
+          {mode === 'register' && (
+            <label>
+              {t.name}
+              <input value={name} onChange={(e) => setName(e.target.value)} required maxLength={50} autoComplete="name" />
+            </label>
+          )}
+          <label>
+            {t.email}
+            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="email" />
+          </label>
+          <label>
+            {t.password}
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+            />
+          </label>
+          <button type="submit" disabled={busy}>
+            {mode === 'login' ? t.logIn : t.register}
+          </button>
+          <button type="button" className="link" onClick={() => setMode(mode === 'login' ? 'register' : 'login')}>
+            {mode === 'login' ? t.noAccount : t.haveAccount}
+          </button>
+        </form>
+      </fieldset>
 
       {error && (
         <p className="error" role="alert">
