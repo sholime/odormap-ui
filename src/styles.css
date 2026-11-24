@@ -464,3 +464,48 @@ header .menu-button {
   margin: 0;
   font-style: italic;
 }
+
+/* Admin */
+.menu-section {
+  margin: 16px 12px 4px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  font-size: 0.8rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.filters {
+  gap: 8px;
+}
+
+.date-range {
+  display: flex;
+  gap: 8px;
+}
+
+.date-range label {
+  flex: 1;
+  min-width: 0;
+}
+
+.date-range input {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.totals {
+  flex-direction: row;
+  justify-content: space-around;
+  text-align: center;
+}
+
+.totals div {
+  display: flex;
+  flex-direction: column;
+}
+
+.totals strong {
+  font-size: 1.4rem;
+}

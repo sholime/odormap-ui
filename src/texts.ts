@@ -19,6 +19,18 @@ export const TEXTS = {
     noReports: 'Još nemaš nijednu prijavu.',
     loading: 'Učitavam…',
     wind: 'Vetar',
+
+    // Admin
+    admin: 'Administracija',
+    allReports: 'Sve prijave',
+    area: 'Područje',
+    from: 'Od',
+    to: 'Do',
+    reportsCount: 'prijava',
+    averageStrength: 'prosečna jačina',
+    commonWind: 'najčešći vetar',
+    downloadCsv: 'Preuzmi CSV (Excel)',
+    dateRangeTooLong: 'Izaberi period od najviše 31 dan.',
     guestNotice: 'Koristiš aplikaciju kao gost.',
     createAccount: 'Napravi nalog da sačuvaš prijave',
 
@@ -82,6 +94,18 @@ export const TEXTS = {
     noReports: 'Még nincs bejelentésed.',
     loading: 'Betöltés…',
     wind: 'Szél',
+
+    // Admin
+    admin: 'Adminisztráció',
+    allReports: 'Összes bejelentés',
+    area: 'Terület',
+    from: 'Ettől',
+    to: 'Eddig',
+    reportsCount: 'bejelentés',
+    averageStrength: 'átlagos erősség',
+    commonWind: 'leggyakoribb szél',
+    downloadCsv: 'CSV letöltése (Excel)',
+    dateRangeTooLong: 'Legfeljebb 31 napos időszakot válassz.',
     guestNotice: 'Vendégként használod az alkalmazást.',
     createAccount: 'Hozz létre fiókot a bejelentéseid megőrzéséhez',
 
