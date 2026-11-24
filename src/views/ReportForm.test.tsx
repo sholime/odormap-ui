@@ -53,7 +53,7 @@ describe('ReportForm', () => {
     expect(screen.getByRole('button', { name: 'Pošalji prijavu' })).toBeEnabled();
   });
 
-  it('stays locked outside the areas OdorMap covers', async () => {
+  it('allows reports outside the known areas, shown as an unknown area', async () => {
     fakeApi();
     Object.defineProperty(navigator, 'geolocation', {
       configurable: true,
@@ -65,8 +65,25 @@ describe('ReportForm', () => {
     });
     render(<ReportForm language="sr" />);
 
-    expect(await screen.findByText('Ova lokacija je van oblasti koje OdorMap pokriva.')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /^4/ })).toBeDisabled();
+    expect(await screen.findByText('Nepoznato područje')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^4/ })).toBeEnabled();
+  });
+
+  it('allows one odor kind, closes the section when chosen and shows the choice', async () => {
+    fakeApi();
+    render(<ReportForm language="sr" />);
+    await screen.findByText('Bačka Topola');
+
+    await userEvent.click(screen.getByText('Kakav je miris? (nije obavezno)'));
+    await userEvent.click(screen.getByRole('button', { name: 'Trulo meso' }));
+
+    const section = screen.getByText('Kakav je miris? (nije obavezno)').closest('details')!;
+    expect(section.open).toBe(false);
+    expect(section.querySelector('summary')).toHaveTextContent('Trulo meso');
+
+    await userEvent.click(screen.getByRole('button', { name: 'Ukloni vrstu mirisa' }));
+    expect(section.querySelector('summary')).not.toHaveTextContent('Trulo meso');
+    expect(section.open).toBe(false);
   });
 
   it('asks to turn the location on when the phone gives none', async () => {

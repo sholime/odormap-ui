@@ -19,6 +19,8 @@ type Props = {
 export function SignIn({ language, isGuest, onLoggedIn, onBack }: Props) {
   const t = TEXTS[language];
   const [acceptedPrivacy, setAcceptedPrivacy] = useState(false);
+  // Shown right under the checkbox when someone tries to go on without ticking it.
+  const [privacyMissing, setPrivacyMissing] = useState(false);
   const [mode, setMode] = useState<'login' | 'register'>(isGuest ? 'register' : 'login');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -45,36 +47,64 @@ export function SignIn({ language, isGuest, onLoggedIn, onBack }: Props) {
     if (e.status === 401) return t.wrongLogin;
     if (e.status === 409) return t.emailTaken;
     if (e.status === 400 && mode === 'register' && password.length < 8) return t.passwordTooShort;
-    if (e.status === 400 && !acceptedPrivacy) return t.privacyRequired;
+    if (e.status === 400 && !acceptedPrivacy) {
+      setPrivacyMissing(true);
+      return '';
+    }
     return t.somethingWrong;
   }
 
+  /** True if the privacy notice is accepted; otherwise shows the warning under the checkbox. */
+  function privacyAccepted(): boolean {
+    setPrivacyMissing(!acceptedPrivacy);
+    return acceptedPrivacy;
+  }
+
   function continueAsGuest() {
-    if (!acceptedPrivacy) return setError(t.privacyRequired);
+    if (!privacyAccepted()) return;
     attempt(() => api.continueAsGuest(language));
   }
 
   function submitEmailForm(event: FormEvent) {
     event.preventDefault();
     if (mode === 'login') return attempt(() => api.logIn(email, password));
-    if (!acceptedPrivacy) return setError(t.privacyRequired);
+    if (!privacyAccepted()) return;
     if (password.length < 8) return setError(t.passwordTooShort);
     attempt(() => api.register({ email, password, displayName: name, language, acceptPrivacy: true }));
   }
 
   function logInWithGoogle(idToken: string) {
+    // A new Google user must accept the notice; an existing one may log in without it.
+    // The API answers 400 in the first case, so the warning then shows under the checkbox.
     attempt(() => api.logInWithGoogle(idToken, language, acceptedPrivacy));
   }
 
   return (
     <main className="screen">
+      {onBack && (
+        <button className="link back" onClick={onBack}>
+          ← {t.back}
+        </button>
+      )}
       <p className="tagline">{t.tagline}</p>
 
       <section className="card">
         <label className="checkbox">
-          <input type="checkbox" checked={acceptedPrivacy} onChange={(e) => setAcceptedPrivacy(e.target.checked)} />
+          <input
+            type="checkbox"
+            checked={acceptedPrivacy}
+            onChange={(e) => {
+              setAcceptedPrivacy(e.target.checked);
+              if (e.target.checked) setPrivacyMissing(false);
+            }}
+          />
           {t.acceptPrivacy}
         </label>
+        {privacyMissing && (
+          <p className="error" role="alert">
+            {t.privacyRequired}
+          </p>
+        )}
         <details>
           <summary>{t.privacyTitle}</summary>
           <PrivacyNotice language={language} />
@@ -127,11 +157,6 @@ export function SignIn({ language, isGuest, onLoggedIn, onBack }: Props) {
         </p>
       )}
 
-      {onBack && (
-        <button className="link" onClick={onBack}>
-          {t.back}
-        </button>
-      )}
     </main>
   );
 }

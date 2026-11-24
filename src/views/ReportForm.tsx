@@ -1,6 +1,7 @@
 // The main screen: report an odor that is present right now.
 // Only the location (found automatically) and the strength are needed; the rest is optional.
-// Until the location is found inside an area OdorMap covers, the rest of the form is locked.
+// Until the location is found, the rest of the form is locked. A place outside every area
+// OdorMap knows is shown as "unknown area" and can still be reported.
 
 import { useEffect, useState, type FormEvent } from 'react';
 import {
@@ -28,16 +29,19 @@ export function ReportForm({ language }: { language: Language }) {
   const t = TEXTS[language];
   const labels = LABELS[language];
   const { state: locationState, retry: retryLocation } = useCurrentLocation();
-  const { areas, failed: areasFailed, reload: reloadAreas } = useAreas();
-  // The area the person is in. Undefined while locating, or when outside every area.
-  const area =
-    locationState.status === 'found' && areas ? findAreaFor(locationState.location.point, areas) : undefined;
-  const outsideAreas = locationState.status === 'found' && areas !== undefined && area === undefined;
-  const ready = area !== undefined;
+  const { areas, failed: areasFailed } = useAreas();
+  // The name of the area the person is in, once both the location and the list of areas are known.
+  const areasKnown = areas !== undefined || areasFailed;
+  const areaName =
+    locationState.status === 'found' && areasKnown
+      ? (findAreaFor(locationState.location.point, areas ?? [])?.name ?? t.unknownArea)
+      : undefined;
+  const ready = areaName !== undefined;
 
   const [strength, setStrength] = useState<OdorStrength>();
   const [odorKind, setOdorKind] = useState<OdorKind>('not_set');
   const [odorKindOther, setOdorKindOther] = useState('');
+  const [odorKindOpen, setOdorKindOpen] = useState(false);
   const [comment, setComment] = useState('');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
@@ -72,6 +76,7 @@ export function ReportForm({ language }: { language: Language }) {
     setStrength(undefined);
     setOdorKind('not_set');
     setOdorKindOther('');
+    setOdorKindOpen(false);
     setComment('');
     setSent(false);
     retryLocation();
@@ -95,21 +100,12 @@ export function ReportForm({ language }: { language: Language }) {
       <form onSubmit={send}>
         <section className="card">
           <h2>{t.location}</h2>
-          {(locationState.status === 'locating' || (locationState.status === 'found' && !areas && !areasFailed)) && (
+          {(locationState.status === 'locating' || (locationState.status === 'found' && !areasKnown)) && (
             <p className="locating">
               <span className="spinner" aria-hidden="true" /> {t.locating}
             </p>
           )}
-          {area && <p className="area">{area.name}</p>}
-          {outsideAreas && <p className="error">{t.outsideAreas}</p>}
-          {areasFailed && (
-            <>
-              <p className="error">{t.somethingWrong}</p>
-              <button type="button" onClick={reloadAreas}>
-                {t.tryAgain}
-              </button>
-            </>
-          )}
+          {areaName && <p className="area">{areaName}</p>}
           {(locationState.status === 'off' || locationState.status === 'denied') && (
             <>
               <p className="error">{locationState.status === 'off' ? t.locationOff : t.locationDenied}</p>
@@ -140,8 +136,26 @@ export function ReportForm({ language }: { language: Language }) {
             </div>
           </section>
 
-          <details className="card">
-            <summary>{t.odorKindOptional}</summary>
+          {/* One kind at most. Choosing one closes the section; the choice stays visible in its title. */}
+          <details className="card" open={odorKindOpen} onToggle={(e) => setOdorKindOpen(e.currentTarget.open)}>
+            <summary>
+              {t.odorKindOptional}
+              {odorKind !== 'not_set' && (
+                <span className="chosen-kind">
+                  {labels.odorKind[odorKind]}
+                  <button
+                    type="button"
+                    aria-label={t.removeOdorKind}
+                    onClick={(e) => {
+                      e.preventDefault(); // don't open or close the section
+                      setOdorKind('not_set');
+                    }}
+                  >
+                    ✕
+                  </button>
+                </span>
+              )}
+            </summary>
             <div className="chips">
               {ODOR_KINDS.filter((kind) => kind !== 'not_set').map((kind) => (
                 <button
@@ -149,8 +163,13 @@ export function ReportForm({ language }: { language: Language }) {
                   type="button"
                   className={kind === odorKind ? 'chosen' : ''}
                   aria-pressed={kind === odorKind}
-                  // Tapping the chosen kind again clears it.
-                  onClick={() => setOdorKind(kind === odorKind ? 'not_set' : kind)}
+                  onClick={() => {
+                    // Tapping the chosen kind again clears it.
+                    const chosen = kind === odorKind ? 'not_set' : kind;
+                    setOdorKind(chosen);
+                    // "Other" needs a description, so keep the section open for it.
+                    if (chosen !== 'not_set' && chosen !== 'other') setOdorKindOpen(false);
+                  }}
                 >
                   {labels.odorKind[kind]}
                 </button>
@@ -212,16 +231,14 @@ function useCurrentLocation() {
   return { state, retry: () => setAttempt((n) => n + 1) };
 }
 
-/** The areas OdorMap covers, loaded once from the API. */
+/** The areas OdorMap covers, loaded once from the API. If loading fails, the area shows as unknown. */
 function useAreas() {
   const [areas, setAreas] = useState<Area[]>();
   const [failed, setFailed] = useState(false);
-  const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
-    setFailed(false);
     api.areas().then(setAreas, () => setFailed(true));
-  }, [attempt]);
+  }, []);
 
-  return { areas, failed, reload: () => setAttempt((n) => n + 1) };
+  return { areas, failed };
 }
