@@ -41,14 +41,30 @@ src/
 
 ## Deploying (Vercel)
 
-Import the repository in Vercel. It detects Vite on its own. Set two environment variables:
+Vercel builds and hosts the web app. Once set up, it deploys by itself:
 
-| Name | Value |
-|---|---|
-| `VITE_API_URL` | The API's address (the `ApiUrl` output of the odormap-api stack), without a trailing `/` |
-| `VITE_GOOGLE_CLIENT_ID` | The Google OAuth client id, or leave empty to hide the Google button |
+- every merge into `main` updates the live site;
+- every pull request gets its own preview address (it can't log in, because the API only
+  accepts the addresses listed in `ALLOWED_ORIGINS`).
 
-Then add the Vercel address to the API's `ALLOWED_ORIGINS` (and to the Google client's allowed origins).
+One-time setup:
+
+1. Sign in at [vercel.com](https://vercel.com) with GitHub (the free Hobby plan is enough).
+2. **Add New → Project**, import `odormap-ui`. Vercel detects Vite; leave the build settings as they are.
+3. Under **Environment Variables**, add:
+
+   | Name | Value |
+   |---|---|
+   | `VITE_API_URL` | The API's address (the `ApiUrl` output of the odormap-api deploy), without a trailing `/` |
+   | `VITE_GOOGLE_CLIENT_ID` | The Google OAuth client id, or leave empty to hide the Google button |
+
+4. Click **Deploy** and note the address Vercel gives (e.g. `https://odormap-ui.vercel.app`).
+5. Add that address to the API's `ALLOWED_ORIGINS` (GitHub → odormap-api → Settings → Environments)
+   and to the Google client's **Authorized JavaScript origins**, then re-run the API deploy
+   (odormap-api → Actions → Deploy → Run workflow) so it picks up the new setting.
+
+Changing an environment variable later only takes effect after a new deploy
+(Vercel → Deployments → ⋯ → Redeploy).
 
 ## Before launch
 
