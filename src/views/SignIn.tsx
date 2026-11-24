@@ -20,10 +20,9 @@ type Props = {
   /** True when a guest opened this screen to create an account. A guest has already accepted the notice. */
   isGuest: boolean;
   onLoggedIn: () => void;
-  onBack?: () => void;
 };
 
-export function SignIn({ language, isGuest, onLoggedIn, onBack }: Props) {
+export function SignIn({ language, isGuest, onLoggedIn }: Props) {
   const t = TEXTS[language];
   const [mode, setMode] = useState<'login' | 'register'>(isGuest ? 'register' : 'login');
   const [name, setName] = useState('');
@@ -105,18 +104,13 @@ export function SignIn({ language, isGuest, onLoggedIn, onBack }: Props) {
           localStorage.setItem(PRIVACY_KEY, new Date().toISOString());
           attempt(afterAccepting);
         }}
-        onBack={() => setAfterAccepting(undefined)}
+        onCancel={() => setAfterAccepting(undefined)}
       />
     );
   }
 
   return (
     <main className="screen">
-      {onBack && (
-        <button className="link back" onClick={onBack}>
-          ← {t.back}
-        </button>
-      )}
       <p className="tagline">{t.tagline}</p>
 
       {!isGuest && (

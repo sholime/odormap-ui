@@ -337,13 +337,6 @@ button.danger {
   margin: 0;
 }
 
-/* "← Back" at the top of a screen. */
-button.link.back {
-  align-self: flex-start;
-  text-decoration: none;
-  font-weight: 600;
-}
-
 /* The chosen odor kind, shown in the closed section's title, with a button to remove it. */
 .chosen-kind {
   display: inline-flex;
@@ -374,4 +367,52 @@ details.privacy-link summary {
   font-weight: normal;
   color: var(--muted);
   font-size: 0.9rem;
+}
+
+header .menu-button {
+  border: none;
+  background: none;
+  padding: 0 4px;
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+/* The menu panel slides over the right side; the rest of the screen is darkened. */
+.menu-shade {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.menu-panel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(72%, 320px);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 20px 12px;
+  background: var(--card);
+}
+
+.menu-panel button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  background: none;
+  color: var(--muted);
+  font-size: 1.05rem;
+  text-align: left;
+}
+
+.menu-panel button.current {
+  background: var(--green-light);
+  color: var(--green);
+  font-weight: 600;
 }

@@ -74,12 +74,18 @@ describe('ReportForm', () => {
     render(<ReportForm language="sr" />);
     await screen.findByText('Bačka Topola');
 
-    await userEvent.click(screen.getByText('Kakav je miris? (nije obavezno)'));
+    await userEvent.click(screen.getByText('Vrsta neprijatnog mirisa (nije obavezno)'));
     await userEvent.click(screen.getByRole('button', { name: 'Trulo meso' }));
 
-    const section = screen.getByText('Kakav je miris? (nije obavezno)').closest('details')!;
+    const section = screen.getByText('Vrsta neprijatnog mirisa (nije obavezno)').closest('details')!;
     expect(section.open).toBe(false);
     expect(section.querySelector('summary')).toHaveTextContent('Trulo meso');
+
+    // Opened again, the list marks the choice and the summary no longer shows it.
+    await userEvent.click(screen.getByText('Vrsta neprijatnog mirisa (nije obavezno)'));
+    expect(section.querySelector('summary')).not.toHaveTextContent('Trulo meso');
+    expect(screen.getByRole('button', { name: 'Trulo meso' })).toHaveAttribute('aria-pressed', 'true');
+    await userEvent.click(screen.getByText('Vrsta neprijatnog mirisa (nije obavezno)'));
 
     await userEvent.click(screen.getByRole('button', { name: 'Ukloni vrstu mirisa' }));
     expect(section.querySelector('summary')).not.toHaveTextContent('Trulo meso');

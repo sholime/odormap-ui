@@ -10,16 +10,13 @@ type Props = {
   busy: boolean;
   error: string;
   onAccept: () => void;
-  onBack: () => void;
+  onCancel: () => void;
 };
 
-export function AcceptPrivacy({ language, busy, error, onAccept, onBack }: Props) {
+export function AcceptPrivacy({ language, busy, error, onAccept, onCancel }: Props) {
   const t = TEXTS[language];
   return (
     <main className="screen">
-      <button className="link back" onClick={onBack}>
-        ← {t.back}
-      </button>
       <section className="card">
         <h2>{t.privacyTitle}</h2>
         <p>{t.privacyIntro}</p>
@@ -32,6 +29,9 @@ export function AcceptPrivacy({ language, busy, error, onAccept, onBack }: Props
       )}
       <button className="primary big" onClick={onAccept} disabled={busy}>
         {t.acceptAndContinue}
+      </button>
+      <button onClick={onCancel} disabled={busy}>
+        {t.cancel}
       </button>
     </main>
   );

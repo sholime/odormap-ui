@@ -13,6 +13,8 @@ export const TEXTS = {
     logOut: 'Odjavi se',
     myAccount: 'Moj nalog',
     home: 'Početna',
+    reportTab: 'Prijavi neprijatan miris',
+    menu: 'Meni',
     guestNotice: 'Koristiš aplikaciju kao gost.',
     createAccount: 'Napravi nalog da sačuvaš prijave',
 
@@ -33,7 +35,6 @@ export const TEXTS = {
     emailTaken: 'Nalog sa ovim emailom već postoji.',
     passwordTooShort: 'Lozinka mora imati bar 8 znakova.',
     somethingWrong: 'Nešto nije u redu. Pokušaj ponovo.',
-    back: 'Nazad',
 
     // Report form
     location: 'Lokacija',
@@ -43,9 +44,9 @@ export const TEXTS = {
     locationDenied: 'Pregledač ne dozvoljava pristup lokaciji. Dozvoli ga u podešavanjima pregledača, pa pokušaj ponovo.',
     unknownArea: 'Nepoznato područje',
     tryAgain: 'Pokušaj ponovo',
-    howStrong: 'Koliko je jak miris?',
-    odorKindOptional: 'Kakav je miris? (nije obavezno)',
-    describeOther: 'Opiši miris',
+    howStrong: 'Jačina neprijatnog mirisa',
+    odorKindOptional: 'Vrsta neprijatnog mirisa (nije obavezno)',
+    describeOther: 'Opiši neprijatan miris',
     removeOdorKind: 'Ukloni vrstu mirisa',
     commentOptional: 'Komentar (nije obavezno)',
     commentHint: 'Vidiš ga samo ti.',
@@ -71,6 +72,8 @@ export const TEXTS = {
     logOut: 'Kijelentkezés',
     myAccount: 'Fiókom',
     home: 'Főoldal',
+    reportTab: 'Bejelentés',
+    menu: 'Menü',
     guestNotice: 'Vendégként használod az alkalmazást.',
     createAccount: 'Hozz létre fiókot a bejelentéseid megőrzéséhez',
 
@@ -91,7 +94,6 @@ export const TEXTS = {
     emailTaken: 'Ezzel az e-mail-címmel már van fiók.',
     passwordTooShort: 'A jelszónak legalább 8 karakterből kell állnia.',
     somethingWrong: 'Valami hiba történt. Próbáld újra.',
-    back: 'Vissza',
 
     // Report form
     location: 'Hely',
