@@ -9,7 +9,7 @@ describe('Menu', () => {
     render(<Menu language="sr" current="report" onChange={onChange} />);
 
     await userEvent.click(screen.getByRole('button', { name: 'Meni' }));
-    expect(screen.getByRole('button', { name: 'Nova prijava' })).toHaveAttribute('aria-current', 'page');
+    expect(screen.getByRole('button', { name: 'Prijavi neprijatan miris' })).toHaveAttribute('aria-current', 'page');
 
     await userEvent.click(screen.getByRole('button', { name: 'Moj nalog' }));
     expect(onChange).toHaveBeenCalledWith('account');
