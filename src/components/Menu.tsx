@@ -2,11 +2,11 @@
 // main screens; the current one is highlighted. Tapping a screen, the dark area beside
 // the panel, or pressing Escape closes it. Admins also see an "Administration" section.
 
-import { useEffect, useState, type ReactNode } from "react";
-import type { Language } from "@odormap/common";
-import { TEXTS } from "../texts";
+import { useEffect, useState, type ReactNode } from 'react';
+import type { Language } from '@odormap/common';
+import { TEXTS } from '../texts';
 
-export type MenuItem = "report" | "myReports" | "account" | "allReports";
+export type MenuItem = 'report' | 'reports' | 'account' | 'allReports';
 
 type Item = { id: MenuItem; label: string; icon: ReactNode };
 
@@ -21,20 +21,18 @@ export function Menu({ language, current, isAdmin, onChange }: Props) {
   const [open, setOpen] = useState(false);
   const t = TEXTS[language];
   const items: Item[] = [
-    { id: "report", label: t.reportTab, icon: <PinIcon /> },
-    { id: "myReports", label: t.myReports, icon: <ListIcon /> },
-    { id: "account", label: t.myAccount, icon: <PersonIcon /> },
+    { id: 'report', label: t.reportTab, icon: <PinIcon /> },
+    { id: 'reports', label: t.reports, icon: <ListIcon /> },
+    { id: 'account', label: t.myAccount, icon: <PersonIcon /> },
   ];
-  const adminItems: Item[] = [
-    { id: "allReports", label: t.allReports, icon: <TableIcon /> },
-  ];
+  const adminItems: Item[] = [{ id: 'allReports', label: t.allReports, icon: <TableIcon /> }];
 
   function renderItem(item: Item) {
     return (
       <button
         key={item.id}
-        className={item.id === current ? "current" : ""}
-        aria-current={item.id === current ? "page" : undefined}
+        className={item.id === current ? 'current' : ''}
+        aria-current={item.id === current ? 'page' : undefined}
         onClick={() => {
           setOpen(false);
           onChange(item.id);
@@ -48,29 +46,19 @@ export function Menu({ language, current, isAdmin, onChange }: Props) {
 
   useEffect(() => {
     if (!open) return;
-    const onKey = (event: KeyboardEvent) =>
-      event.key === "Escape" && setOpen(false);
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    const onKey = (event: KeyboardEvent) => event.key === 'Escape' && setOpen(false);
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
   }, [open]);
 
   return (
     <>
-      <button
-        className="menu-button"
-        aria-label={t.menu}
-        aria-expanded={open}
-        onClick={() => setOpen(true)}
-      >
+      <button className="menu-button" aria-label={t.menu} aria-expanded={open} onClick={() => setOpen(true)}>
         ☰
       </button>
       {open && (
         <div className="menu-shade" onClick={() => setOpen(false)}>
-          <nav
-            className="menu-panel"
-            aria-label={t.menu}
-            onClick={(event) => event.stopPropagation()}
-          >
+          <nav className="menu-panel" aria-label={t.menu} onClick={(event) => event.stopPropagation()}>
             {items.map(renderItem)}
             {isAdmin && (
               <>
@@ -108,10 +96,7 @@ function PersonIcon() {
 function ListIcon() {
   return (
     <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
-      <path
-        d="M4 5h2v2H4zm4 0h12v2H8zM4 11h2v2H4zm4 0h12v2H8zM4 17h2v2H4zm4 0h12v2H8z"
-        fill="currentColor"
-      />
+      <path d="M4 5h2v2H4zm4 0h12v2H8zM4 11h2v2H4zm4 0h12v2H8zM4 17h2v2H4zm4 0h12v2H8z" fill="currentColor" />
     </svg>
   );
 }

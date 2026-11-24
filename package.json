@@ -12,7 +12,7 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@odormap/common": "git+https://github.com/sholime/odormap-common.git#d78b527",
+    "@odormap/common": "git+https://github.com/sholime/odormap-common.git#ee311b4",
     "react": "^19.3.1",
     "react-dom": "^19.3.1"
   },

@@ -509,3 +509,38 @@ header .menu-button {
 .totals strong {
   font-size: 1.4rem;
 }
+
+/* Reports: two tabs, and the person's own reports highlighted */
+.tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+}
+
+.tabs button {
+  flex: 1;
+  border: none;
+  border-bottom: 3px solid transparent;
+  border-radius: 0;
+  background: none;
+  color: var(--muted);
+}
+
+.tabs button[aria-selected='true'] {
+  border-bottom-color: var(--green);
+  color: var(--green);
+  font-weight: 600;
+}
+
+.report-item.mine {
+  border: 2px solid var(--green);
+  background: #f3f8f5;
+}
+
+.yours-tag {
+  margin-right: 6px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--green);
+  color: white;
+  font-size: 0.8rem;
+}

@@ -1,10 +1,10 @@
-// "My reports": the reports this person sent, newest first (the last 50).
+// The "My reports" tab: the reports this person sent, newest first (the last 50).
 
-import { useEffect, useState } from "react";
-import type { Area, Language, OdorReport } from "@odormap/common";
-import { api } from "../api";
-import { ReportCard } from "../components/ReportCard";
-import { TEXTS } from "../texts";
+import { useEffect, useState } from 'react';
+import type { Area, Language, OdorReport } from '@odormap/common';
+import { api } from '../api';
+import { ReportCard } from '../components/ReportCard';
+import { TEXTS } from '../texts';
 
 type Props = { language: Language };
 
@@ -24,23 +24,16 @@ export function MyReports({ language }: Props) {
     );
   }, []);
 
-  const areaName = (areaId: string) =>
-    areas.find((a) => a.areaId === areaId)?.name ?? t.unknownArea;
+  const areaName = (areaId: string) => areas.find((a) => a.areaId === areaId)?.name ?? t.unknownArea;
 
   return (
-    <main className="screen">
-      <h2>{t.myReports}</h2>
+    <>
       {error && <p className="error">{t.somethingWrong}</p>}
       {!error && !reports && <p className="muted">{t.loading}</p>}
       {reports?.length === 0 && <p className="muted">{t.noReports}</p>}
       {reports?.map((report) => (
-        <ReportCard
-          key={report.id}
-          language={language}
-          report={report}
-          areaName={areaName(report.areaId)}
-        />
+        <ReportCard key={report.id} language={language} report={report} areaName={areaName(report.areaId)} />
       ))}
-    </main>
+    </>
   );
 }

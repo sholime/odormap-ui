@@ -26,7 +26,7 @@ function Serbian() {
         <li>za svaku prijavu: tačnu lokaciju, vreme, jačinu i vrstu mirisa, komentar i vremenske prilike u tom trenutku.</li>
       </ul>
       <p>
-        Drugi korisnici vide prijave bez tvog imena i komentara, a lokacija je zaokružena na oko 100 m. Tačnu lokaciju vidiš
+        Drugi korisnici vide prijave i komentare, ali bez tvog imena, a lokacija je zaokružena na oko 100 m. Tačnu lokaciju vidiš
         samo ti i administratori, i koristi se za analizu izvora mirisa.
       </p>
       <p>
@@ -51,7 +51,7 @@ function Hungarian() {
         <li>minden bejelentésnél: a pontos helyet, az időt, a szag erősségét és fajtáját, a megjegyzést és az akkori időjárást.</li>
       </ul>
       <p>
-        A többi felhasználó a bejelentéseket a neved és a megjegyzés nélkül látja, a hely pedig kb. 100 m-re kerekítve
+        A többi felhasználó látja a bejelentéseket és a megjegyzéseket, de a neved nélkül, a hely pedig kb. 100 m-re kerekítve
         jelenik meg. A pontos helyet csak te és az adminisztrátorok látjátok; a szagforrások elemzéséhez használjuk.
       </p>
       <p>

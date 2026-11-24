@@ -3,18 +3,13 @@
 // Reports are anonymous here: no names, no comments, locations rounded to about 100 m.
 // The menu shows this screen only to admins; the API also refuses the "unknown" area to everyone else.
 
-import { useEffect, useState } from "react";
-import {
-  LABELS,
-  type Area,
-  type Language,
-  type PublicReport,
-} from "@odormap/common";
-import { api } from "../api";
-import { compass, ReportCard, windKmh } from "../components/ReportCard";
-import { TEXTS } from "../texts";
+import { useEffect, useState } from 'react';
+import { LABELS, type Area, type Language, type PublicReport } from '@odormap/common';
+import { api } from '../api';
+import { compass, ReportCard, windKmh } from '../components/ReportCard';
+import { TEXTS } from '../texts';
 
-const UNKNOWN_AREA_ID = "unknown";
+const UNKNOWN_AREA_ID = 'unknown';
 const MAX_DAYS = 31;
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -23,13 +18,11 @@ type Props = { language: Language };
 export function AllReports({ language }: Props) {
   const t = TEXTS[language];
   const [areas, setAreas] = useState<Area[]>([]);
-  const [areaId, setAreaId] = useState("");
-  const [from, setFrom] = useState(
-    dateInputValue(new Date(Date.now() - 7 * DAY_MS)),
-  );
+  const [areaId, setAreaId] = useState('');
+  const [from, setFrom] = useState(dateInputValue(new Date(Date.now() - 7 * DAY_MS)));
   const [to, setTo] = useState(dateInputValue(new Date()));
   const [reports, setReports] = useState<PublicReport[]>();
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
 
   useEffect(() => {
     api.areas().then(
@@ -51,19 +44,15 @@ export function AllReports({ language }: Props) {
       setReports(undefined);
       return setError(t.dateRangeTooLong);
     }
-    setError("");
+    setError('');
     setReports(undefined);
     api.reports(areaId, start.toISOString(), end.toISOString()).then(
-      (found) =>
-        setReports(
-          [...found].sort((a, b) => b.observedAt.localeCompare(a.observedAt)),
-        ),
+      (found) => setReports([...found].sort((a, b) => b.observedAt.localeCompare(a.observedAt))),
       () => setError(t.somethingWrong),
     );
   }, [areaId, from, to, t]);
 
-  const areaName = (id: string) =>
-    areas.find((a) => a.areaId === id)?.name ?? t.unknownArea;
+  const areaName = (id: string) => areas.find((a) => a.areaId === id)?.name ?? t.unknownArea;
 
   return (
     <main className="screen">
@@ -84,19 +73,11 @@ export function AllReports({ language }: Props) {
         <div className="date-range">
           <label>
             {t.from}
-            <input
-              type="date"
-              value={from}
-              onChange={(e) => setFrom(e.target.value)}
-            />
+            <input type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
           </label>
           <label>
             {t.to}
-            <input
-              type="date"
-              value={to}
-              onChange={(e) => setTo(e.target.value)}
-            />
+            <input type="date" value={to} onChange={(e) => setTo(e.target.value)} />
           </label>
         </div>
       </section>
@@ -108,26 +89,12 @@ export function AllReports({ language }: Props) {
         <>
           <Totals language={language} reports={reports} />
           {reports.length > 0 && (
-            <button
-              onClick={() =>
-                downloadCsv(
-                  reports,
-                  language,
-                  areaName,
-                  `odormap-${areaId}-${from}-${to}.csv`,
-                )
-              }
-            >
+            <button onClick={() => downloadCsv(reports, language, areaName, `odormap-${areaId}-${from}-${to}.csv`)}>
               {t.downloadCsv}
             </button>
           )}
           {reports.map((report) => (
-            <ReportCard
-              key={report.id}
-              language={language}
-              report={report}
-              areaName={areaName(report.areaId)}
-            />
+            <ReportCard key={report.id} language={language} report={report} areaName={areaName(report.areaId)} />
           ))}
         </>
       )}
@@ -136,21 +103,11 @@ export function AllReports({ language }: Props) {
 }
 
 /** Number of reports, average strength and the most common wind direction. */
-function Totals({
-  language,
-  reports,
-}: {
-  language: Language;
-  reports: PublicReport[];
-}) {
+function Totals({ language, reports }: { language: Language; reports: PublicReport[] }) {
   const t = TEXTS[language];
-  const average = reports.length
-    ? reports.reduce((sum, r) => sum + r.strength, 0) / reports.length
-    : 0;
-  const winds = reports.flatMap((r) =>
-    r.weather ? [compass(r.weather.windDirectionDeg, language)] : [],
-  );
-  const commonWind = mostCommon(winds) ?? "–";
+  const average = reports.length ? reports.reduce((sum, r) => sum + r.strength, 0) / reports.length : 0;
+  const winds = reports.flatMap((r) => (r.weather ? [compass(r.weather.windDirectionDeg, language)] : []));
+  const commonWind = mostCommon(winds) ?? '–';
 
   return (
     <div className="card totals">
@@ -161,11 +118,8 @@ function Totals({
       <div>
         <strong>
           {reports.length
-            ? average.toLocaleString(
-                language === "hu" ? "hu-HU" : "sr-Latn-RS",
-                { maximumFractionDigits: 1 },
-              )
-            : "–"}
+            ? average.toLocaleString(language === 'hu' ? 'hu-HU' : 'sr-Latn-RS', { maximumFractionDigits: 1 })
+            : '–'}
         </strong>
         <span className="muted small">{t.averageStrength}</span>
       </div>
@@ -187,49 +141,40 @@ function mostCommon(values: string[]): string | undefined {
  * Saves the reports as a CSV file. Uses ";" between columns and starts with a byte-order mark,
  * so Excel with Serbian or Hungarian settings opens it with the right columns and letters.
  */
-function downloadCsv(
-  reports: PublicReport[],
-  language: Language,
-  areaName: (id: string) => string,
-  fileName: string,
-) {
+function downloadCsv(reports: PublicReport[], language: Language, areaName: (id: string) => string, fileName: string) {
   const labels = LABELS[language];
   const header = [
-    "time",
-    "area",
-    "strength",
-    "odor_kind",
-    "odor_kind_other",
-    "lat",
-    "lon",
-    "wind_kmh",
-    "wind_from_deg",
-    "temperature_c",
-    "humidity_percent",
-    "pressure_hpa",
+    'time',
+    'area',
+    'strength',
+    'odor_kind',
+    'odor_kind_other',
+    'lat',
+    'lon',
+    'wind_kmh',
+    'wind_from_deg',
+    'temperature_c',
+    'humidity_percent',
+    'pressure_hpa',
   ];
   const rows = reports.map((r) => [
     r.observedAt,
     areaName(r.areaId),
     r.strength,
     labels.odorKind[r.odorKind],
-    r.odorKindOther ?? "",
+    r.odorKindOther ?? '',
     r.location.lat,
     r.location.lon,
-    r.weather ? windKmh(r.weather.windSpeedMs) : "",
-    r.weather?.windDirectionDeg ?? "",
-    r.weather?.temperatureC ?? "",
-    r.weather?.humidityPercent ?? "",
-    r.weather?.pressureHpa ?? "",
+    r.weather ? windKmh(r.weather.windSpeedMs) : '',
+    r.weather?.windDirectionDeg ?? '',
+    r.weather?.temperatureC ?? '',
+    r.weather?.humidityPercent ?? '',
+    r.weather?.pressureHpa ?? '',
   ]);
-  const csv = [header, ...rows]
-    .map((row) => row.map(csvCell).join(";"))
-    .join("\r\n");
+  const csv = [header, ...rows].map((row) => row.map(csvCell).join(';')).join('\r\n');
 
-  const link = document.createElement("a");
-  link.href = URL.createObjectURL(
-    new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8" }),
-  );
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' }));
   link.download = fileName;
   link.click();
   URL.revokeObjectURL(link.href);
@@ -243,6 +188,6 @@ function csvCell(value: string | number): string {
 
 /** A date as the "YYYY-MM-DD" text a date field uses, in the phone's own time zone. */
 function dateInputValue(date: Date): string {
-  const pad = (n: number) => String(n).padStart(2, "0");
+  const pad = (n: number) => String(n).padStart(2, '0');
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
 }
