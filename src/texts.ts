@@ -17,9 +17,9 @@ export const TEXTS = {
     createAccount: 'Napravi nalog da sačuvaš prijave',
 
     // Sign-in screen
-    acceptPrivacy: 'Pročitao/la sam i prihvatam obaveštenje o privatnosti',
     privacyTitle: 'Obaveštenje o privatnosti',
-    privacyRequired: 'Prvo prihvati obaveštenje o privatnosti.',
+    privacyIntro: 'Pre nego što nastaviš, pročitaj kako koristimo tvoje podatke.',
+    acceptAndContinue: 'Prihvatam i nastavljam',
     continueAsGuest: 'Nastavi bez naloga',
     or: 'ili',
     email: 'Email',
@@ -75,9 +75,9 @@ export const TEXTS = {
     createAccount: 'Hozz létre fiókot a bejelentéseid megőrzéséhez',
 
     // Sign-in screen
-    acceptPrivacy: 'Elolvastam és elfogadom az adatvédelmi tájékoztatót',
     privacyTitle: 'Adatvédelmi tájékoztató',
-    privacyRequired: 'Előbb fogadd el az adatvédelmi tájékoztatót.',
+    privacyIntro: 'Mielőtt folytatod, olvasd el, hogyan használjuk az adataidat.',
+    acceptAndContinue: 'Elfogadom és folytatom',
     continueAsGuest: 'Folytatás fiók nélkül',
     or: 'vagy',
     email: 'E-mail',
