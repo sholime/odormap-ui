@@ -1,5 +1,5 @@
 // "My reports": the reports this person sent, newest first (the last 50).
-// Each shows when and where, how strong, what kind, the wind at that moment, and the comment.
+// Each shows when and where, how strong, what kind, the weather at that moment, and the comment.
 
 import { useEffect, useState } from 'react';
 import { LABELS, type Area, type Language, type OdorReport } from '@odormap/common';
@@ -55,6 +55,8 @@ export function MyReports({ language }: Props) {
             <p className="muted small">
               {t.wind}: {Math.round(report.weather.windSpeedMs * 3.6)} km/h, {compass(report.weather.windDirectionDeg, language)} ·{' '}
               {Math.round(report.weather.temperatureC)} °C
+              <br />
+              {t.humidity}: {Math.round(report.weather.humidityPercent)} % · {t.pressure}: {Math.round(report.weather.pressureHpa)} hPa
             </p>
           )}
           {report.comment && <p className="report-comment">„{report.comment}”</p>}
