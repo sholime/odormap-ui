@@ -1,6 +1,9 @@
 // The whole app: a header, then one screen.
-// Logged out: the sign-in screen. Logged in: the report form, the account screen,
+// Logged out: the sign-in screen. Logged in: the report form (home), the account screen,
 // or (for a guest) the sign-in screen again to create a full account.
+//
+// Moving between screens is kept in the browser history, so the phone's back button
+// returns to the previous screen. Tapping "OdorMap" in the header always goes home.
 
 import { useEffect, useState } from 'react';
 import { LANGUAGES, type Language, type User } from '@odormap/common';
@@ -37,6 +40,24 @@ export function App() {
     });
   }, [loggedIn, logins]);
 
+  // The phone's back button: show the screen saved in that history entry (home if none).
+  useEffect(() => {
+    const onBack = (event: PopStateEvent) => setScreen((event.state as Screen | null) ?? 'report');
+    window.addEventListener('popstate', onBack);
+    return () => window.removeEventListener('popstate', onBack);
+  }, []);
+
+  /** Opens a screen and adds it to the browser history. */
+  function goTo(next: Screen) {
+    if (next === screen) return;
+    window.history.pushState(next, '');
+    setScreen(next);
+  }
+
+  function goHome() {
+    goTo('report');
+  }
+
   function handleLoggedIn() {
     setScreen('report');
     setLoggedIn(true);
@@ -53,7 +74,11 @@ export function App() {
   return (
     <>
       <header>
-        <h1>OdorMap</h1>
+        <h1>
+          <button className="home" onClick={goHome} aria-label={t.home}>
+            OdorMap
+          </button>
+        </h1>
         <div className="languages">
           {LANGUAGES.map((code) => (
             <button key={code} className={code === language ? 'chosen' : ''} onClick={() => setLanguage(code)}>
@@ -61,9 +86,9 @@ export function App() {
             </button>
           ))}
         </div>
-        {loggedIn && (
-          <button className="link" onClick={() => setScreen(screen === 'account' ? 'report' : 'account')}>
-            {screen === 'account' ? t.report : t.myAccount}
+        {loggedIn && screen === 'report' && (
+          <button className="link" onClick={() => goTo('account')}>
+            {t.myAccount}
           </button>
         )}
       </header>
@@ -71,14 +96,15 @@ export function App() {
       {!loggedIn && <SignIn language={language} isGuest={false} onLoggedIn={handleLoggedIn} />}
 
       {loggedIn && screen === 'createAccount' && (
-        <SignIn language={language} isGuest onLoggedIn={handleLoggedIn} onBack={() => setScreen('report')} />
+        <SignIn language={language} isGuest onLoggedIn={handleLoggedIn} onBack={() => window.history.back()} />
       )}
 
       {loggedIn && screen === 'account' && user && (
         <Account
           language={language}
           user={user}
-          onCreateAccount={() => setScreen('createAccount')}
+          onCreateAccount={() => goTo('createAccount')}
+          onBack={() => window.history.back()}
           onLoggedOut={handleLoggedOut}
         />
       )}
@@ -88,7 +114,7 @@ export function App() {
           {user?.isGuest && (
             <p className="guest-notice">
               {t.guestNotice}{' '}
-              <button className="link" onClick={() => setScreen('createAccount')}>
+              <button className="link" onClick={() => goTo('createAccount')}>
                 {t.createAccount}
               </button>
             </p>

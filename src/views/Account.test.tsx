@@ -17,7 +17,7 @@ const ana = {
 
 describe('Account', () => {
   it('shows the name and email', () => {
-    render(<Account language="sr" user={ana} onCreateAccount={vi.fn()} onLoggedOut={vi.fn()} />);
+    render(<Account language="sr" user={ana} onCreateAccount={vi.fn()} onBack={vi.fn()} onLoggedOut={vi.fn()} />);
 
     expect(screen.getByText('Ana')).toBeInTheDocument();
     expect(screen.getByText('ana@example.com')).toBeInTheDocument();
@@ -27,7 +27,7 @@ describe('Account', () => {
     const fetch = vi.fn(async () => new Response(null, { status: 204 }));
     vi.stubGlobal('fetch', fetch);
     const onLoggedOut = vi.fn();
-    render(<Account language="sr" user={ana} onCreateAccount={vi.fn()} onLoggedOut={onLoggedOut} />);
+    render(<Account language="sr" user={ana} onCreateAccount={vi.fn()} onBack={vi.fn()} onLoggedOut={onLoggedOut} />);
 
     await userEvent.click(screen.getByRole('button', { name: 'Obriši nalog' }));
     expect(fetch).not.toHaveBeenCalled();

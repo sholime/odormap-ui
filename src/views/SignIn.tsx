@@ -1,5 +1,9 @@
 // First screen: continue as a guest, log in, create an account or use Google.
 // A guest who comes back here to create an account keeps their reports (the API handles that).
+//
+// New people (a new guest, a new account, a first Google sign-in) first see the privacy
+// notice on its own page and accept it there. Logging in to an existing account skips it,
+// and so does anyone who already accepted it on this device (e.g. a guest who logged out).
 
 import { useState, type FormEvent } from 'react';
 import type { Language } from '@odormap/common';
@@ -7,10 +11,13 @@ import { ApiError, api } from '../api';
 import { GoogleButton } from '../components/GoogleButton';
 import { PrivacyNotice } from '../components/PrivacyNotice';
 import { TEXTS } from '../texts';
+import { AcceptPrivacy } from './AcceptPrivacy';
+
+const PRIVACY_KEY = 'odormap.privacyAccepted';
 
 type Props = {
   language: Language;
-  /** True when a guest opened this screen to create an account. */
+  /** True when a guest opened this screen to create an account. A guest has already accepted the notice. */
   isGuest: boolean;
   onLoggedIn: () => void;
   onBack?: () => void;
@@ -18,13 +25,14 @@ type Props = {
 
 export function SignIn({ language, isGuest, onLoggedIn, onBack }: Props) {
   const t = TEXTS[language];
-  const [acceptedPrivacy, setAcceptedPrivacy] = useState(false);
   const [mode, setMode] = useState<'login' | 'register'>(isGuest ? 'register' : 'login');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+  // What to do once the privacy notice is accepted. While set, the privacy page is shown.
+  const [afterAccepting, setAfterAccepting] = useState<() => Promise<void>>();
 
   /** Runs a login request and shows a readable message if it fails. */
   async function attempt(logIn: () => Promise<void>) {
@@ -45,41 +53,71 @@ export function SignIn({ language, isGuest, onLoggedIn, onBack }: Props) {
     if (e.status === 401) return t.wrongLogin;
     if (e.status === 409) return t.emailTaken;
     if (e.status === 400 && mode === 'register' && password.length < 8) return t.passwordTooShort;
-    if (e.status === 400 && !acceptedPrivacy) return t.privacyRequired;
     return t.somethingWrong;
   }
 
+  /** Shows the privacy page first (unless already accepted), then runs the request. */
+  function askPrivacyThen(logIn: () => Promise<void>) {
+    if (isGuest || localStorage.getItem(PRIVACY_KEY)) return attempt(logIn);
+    setError('');
+    setAfterAccepting(() => logIn);
+  }
+
   function continueAsGuest() {
-    if (!acceptedPrivacy) return setError(t.privacyRequired);
-    attempt(() => api.continueAsGuest(language));
+    askPrivacyThen(() => api.continueAsGuest(language));
   }
 
   function submitEmailForm(event: FormEvent) {
     event.preventDefault();
     if (mode === 'login') return attempt(() => api.logIn(email, password));
-    if (!acceptedPrivacy) return setError(t.privacyRequired);
     if (password.length < 8) return setError(t.passwordTooShort);
-    attempt(() => api.register({ email, password, displayName: name, language, acceptPrivacy: true }));
+    askPrivacyThen(() => api.register({ email, password, displayName: name, language, acceptPrivacy: true }));
   }
 
-  function logInWithGoogle(idToken: string) {
-    attempt(() => api.logInWithGoogle(idToken, language, acceptedPrivacy));
+  /**
+   * Google: an existing account logs straight in. For a new person the API answers 400
+   * (privacy notice not accepted), so the privacy page is shown and the same sign-in is sent again.
+   */
+  async function logInWithGoogle(idToken: string) {
+    setError('');
+    setBusy(true);
+    try {
+      await api.logInWithGoogle(idToken, language, isGuest || localStorage.getItem(PRIVACY_KEY) !== null);
+      onLoggedIn();
+    } catch (e) {
+      if (e instanceof ApiError && e.status === 400) {
+        setAfterAccepting(() => () => api.logInWithGoogle(idToken, language, true));
+      } else {
+        setError(messageFor(e));
+      }
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  if (afterAccepting) {
+    return (
+      <AcceptPrivacy
+        language={language}
+        busy={busy}
+        error={error}
+        onAccept={() => {
+          localStorage.setItem(PRIVACY_KEY, new Date().toISOString());
+          attempt(afterAccepting);
+        }}
+        onBack={() => setAfterAccepting(undefined)}
+      />
+    );
   }
 
   return (
     <main className="screen">
+      {onBack && (
+        <button className="link back" onClick={onBack}>
+          ← {t.back}
+        </button>
+      )}
       <p className="tagline">{t.tagline}</p>
-
-      <section className="card">
-        <label className="checkbox">
-          <input type="checkbox" checked={acceptedPrivacy} onChange={(e) => setAcceptedPrivacy(e.target.checked)} />
-          {t.acceptPrivacy}
-        </label>
-        <details>
-          <summary>{t.privacyTitle}</summary>
-          <PrivacyNotice language={language} />
-        </details>
-      </section>
 
       {!isGuest && (
         <>
@@ -127,11 +165,11 @@ export function SignIn({ language, isGuest, onLoggedIn, onBack }: Props) {
         </p>
       )}
 
-      {onBack && (
-        <button className="link" onClick={onBack}>
-          {t.back}
-        </button>
-      )}
+      {/* Anyone can read the notice at any time. */}
+      <details className="privacy-link">
+        <summary>{t.privacyTitle}</summary>
+        <PrivacyNotice language={language} />
+      </details>
     </main>
   );
 }
