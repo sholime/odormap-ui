@@ -19,11 +19,11 @@ describe('Menu', () => {
   it('shows the administration section only to admins', async () => {
     const { unmount } = render(<Menu language="sr" current="report" isAdmin={false} onChange={vi.fn()} />);
     await userEvent.click(screen.getByRole('button', { name: 'Meni' }));
-    expect(screen.queryByRole('button', { name: 'Sve prijave' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Pregled prijava' })).not.toBeInTheDocument();
     unmount();
 
     render(<Menu language="sr" current="report" isAdmin onChange={vi.fn()} />);
     await userEvent.click(screen.getByRole('button', { name: 'Meni' }));
-    expect(screen.getByRole('button', { name: 'Sve prijave' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Pregled prijava' })).toBeInTheDocument();
   });
 });

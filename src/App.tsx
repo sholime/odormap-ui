@@ -13,13 +13,13 @@ import { Menu } from './components/Menu';
 import { TEXTS } from './texts';
 import { Account } from './views/Account';
 import { AllReports } from './views/AllReports';
-import { MyReports } from './views/MyReports';
 import { ReportForm } from './views/ReportForm';
+import { Reports } from './views/Reports';
 import { SignIn } from './views/SignIn';
 
 const LANGUAGE_KEY = 'odormap.language';
 
-type Screen = 'report' | 'myReports' | 'account' | 'createAccount' | 'allReports';
+type Screen = 'report' | 'reports' | 'account' | 'createAccount' | 'allReports';
 
 export function App() {
   const [language, setLanguage] = useState<Language>(savedLanguage);
@@ -107,7 +107,7 @@ export function App() {
         <SignIn language={language} isGuest onLoggedIn={handleLoggedIn} />
       )}
 
-      {loggedIn && screen === 'myReports' && <MyReports language={language} />}
+      {loggedIn && screen === 'reports' && <Reports language={language} />}
 
       {loggedIn && screen === 'allReports' && user?.role === 'admin' && <AllReports language={language} />}
 

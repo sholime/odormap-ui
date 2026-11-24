@@ -6,7 +6,7 @@ import { useEffect, useState, type ReactNode } from 'react';
 import type { Language } from '@odormap/common';
 import { TEXTS } from '../texts';
 
-export type MenuItem = 'report' | 'myReports' | 'account' | 'allReports';
+export type MenuItem = 'report' | 'reports' | 'account' | 'allReports';
 
 type Item = { id: MenuItem; label: string; icon: ReactNode };
 
@@ -22,7 +22,7 @@ export function Menu({ language, current, isAdmin, onChange }: Props) {
   const t = TEXTS[language];
   const items: Item[] = [
     { id: 'report', label: t.reportTab, icon: <PinIcon /> },
-    { id: 'myReports', label: t.myReports, icon: <ListIcon /> },
+    { id: 'reports', label: t.reports, icon: <ListIcon /> },
     { id: 'account', label: t.myAccount, icon: <PersonIcon /> },
   ];
   const adminItems: Item[] = [{ id: 'allReports', label: t.allReports, icon: <TableIcon /> }];
