@@ -19,8 +19,6 @@ export const TEXTS = {
     noReports: 'Još nemaš nijednu prijavu.',
     loading: 'Učitavam…',
     wind: 'Vetar',
-    humidity: 'Vlažnost',
-    pressure: 'Pritisak',
     guestNotice: 'Koristiš aplikaciju kao gost.',
     createAccount: 'Napravi nalog da sačuvaš prijave',
 
@@ -84,8 +82,6 @@ export const TEXTS = {
     noReports: 'Még nincs bejelentésed.',
     loading: 'Betöltés…',
     wind: 'Szél',
-    humidity: 'Páratartalom',
-    pressure: 'Légnyomás',
     guestNotice: 'Vendégként használod az alkalmazást.',
     createAccount: 'Hozz létre fiókot a bejelentéseid megőrzéséhez',
 
