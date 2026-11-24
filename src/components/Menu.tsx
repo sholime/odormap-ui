@@ -1,57 +1,83 @@
 // The ☰ button in the header, once someone is logged in. It opens a side panel with the
 // main screens; the current one is highlighted. Tapping a screen, the dark area beside
-// the panel, or pressing Escape closes it.
+// the panel, or pressing Escape closes it. Admins also see an "Administration" section.
 
-import { useEffect, useState, type ReactNode } from 'react';
-import type { Language } from '@odormap/common';
-import { TEXTS } from '../texts';
+import { useEffect, useState, type ReactNode } from "react";
+import type { Language } from "@odormap/common";
+import { TEXTS } from "../texts";
 
-export type MenuItem = 'report' | 'myReports' | 'account';
+export type MenuItem = "report" | "myReports" | "account" | "allReports";
+
+type Item = { id: MenuItem; label: string; icon: ReactNode };
 
 type Props = {
   language: Language;
   current: MenuItem;
+  isAdmin: boolean;
   onChange: (item: MenuItem) => void;
 };
 
-export function Menu({ language, current, onChange }: Props) {
+export function Menu({ language, current, isAdmin, onChange }: Props) {
   const [open, setOpen] = useState(false);
   const t = TEXTS[language];
-  const items: { id: MenuItem; label: string; icon: ReactNode }[] = [
-    { id: 'report', label: t.reportTab, icon: <PinIcon /> },
-    { id: 'myReports', label: t.myReports, icon: <ListIcon /> },
-    { id: 'account', label: t.myAccount, icon: <PersonIcon /> },
+  const items: Item[] = [
+    { id: "report", label: t.reportTab, icon: <PinIcon /> },
+    { id: "myReports", label: t.myReports, icon: <ListIcon /> },
+    { id: "account", label: t.myAccount, icon: <PersonIcon /> },
   ];
+  const adminItems: Item[] = [
+    { id: "allReports", label: t.allReports, icon: <TableIcon /> },
+  ];
+
+  function renderItem(item: Item) {
+    return (
+      <button
+        key={item.id}
+        className={item.id === current ? "current" : ""}
+        aria-current={item.id === current ? "page" : undefined}
+        onClick={() => {
+          setOpen(false);
+          onChange(item.id);
+        }}
+      >
+        {item.icon}
+        {item.label}
+      </button>
+    );
+  }
 
   useEffect(() => {
     if (!open) return;
-    const onKey = (event: KeyboardEvent) => event.key === 'Escape' && setOpen(false);
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
+    const onKey = (event: KeyboardEvent) =>
+      event.key === "Escape" && setOpen(false);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
   }, [open]);
 
   return (
     <>
-      <button className="menu-button" aria-label={t.menu} aria-expanded={open} onClick={() => setOpen(true)}>
+      <button
+        className="menu-button"
+        aria-label={t.menu}
+        aria-expanded={open}
+        onClick={() => setOpen(true)}
+      >
         ☰
       </button>
       {open && (
         <div className="menu-shade" onClick={() => setOpen(false)}>
-          <nav className="menu-panel" aria-label={t.menu} onClick={(event) => event.stopPropagation()}>
-            {items.map((item) => (
-              <button
-                key={item.id}
-                className={item.id === current ? 'current' : ''}
-                aria-current={item.id === current ? 'page' : undefined}
-                onClick={() => {
-                  setOpen(false);
-                  onChange(item.id);
-                }}
-              >
-                {item.icon}
-                {item.label}
-              </button>
-            ))}
+          <nav
+            className="menu-panel"
+            aria-label={t.menu}
+            onClick={(event) => event.stopPropagation()}
+          >
+            {items.map(renderItem)}
+            {isAdmin && (
+              <>
+                <h3 className="menu-section">{t.admin}</h3>
+                {adminItems.map(renderItem)}
+              </>
+            )}
           </nav>
         </div>
       )}
@@ -82,7 +108,18 @@ function PersonIcon() {
 function ListIcon() {
   return (
     <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
-      <path d="M4 5h2v2H4zm4 0h12v2H8zM4 11h2v2H4zm4 0h12v2H8zM4 17h2v2H4zm4 0h12v2H8z" fill="currentColor" />
+      <path
+        d="M4 5h2v2H4zm4 0h12v2H8zM4 11h2v2H4zm4 0h12v2H8zM4 17h2v2H4zm4 0h12v2H8z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+}
+
+function TableIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
+      <path d="M3 4h18v4H3zm0 6h18v4H3zm0 6h18v4H3z" fill="currentColor" />
     </svg>
   );
 }

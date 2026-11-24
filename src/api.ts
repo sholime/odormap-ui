@@ -11,6 +11,7 @@ import type {
   CreateReportRequest,
   Language,
   OdorReport,
+  PublicReport,
   RegisterRequest,
   User,
 } from '@odormap/common';
@@ -133,4 +134,8 @@ export const api = {
 
   /** The last 50 reports of the logged-in person, newest first. */
   myReports: () => send<OdorReport[]>('GET', '/reports/mine'),
+
+  /** Everyone's reports in one area between two times (anonymous). "unknown" works for admins only. */
+  reports: (areaId: string, from: string, to: string) =>
+    send<PublicReport[]>('GET', '/reports?' + new URLSearchParams({ areaId, from, to })),
 };
