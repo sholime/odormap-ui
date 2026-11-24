@@ -44,7 +44,7 @@ export const TEXTS = {
     locationDenied: 'Pregledač ne dozvoljava pristup lokaciji. Dozvoli ga u podešavanjima pregledača, pa pokušaj ponovo.',
     unknownArea: 'Nepoznato područje',
     tryAgain: 'Pokušaj ponovo',
-    howStrong: 'Koliko je jak neprijatan miris?',
+    howStrong: 'Jačina neprijatnog mirisa',
     odorKindOptional: 'Vrsta neprijatnog mirisa (nije obavezno)',
     describeOther: 'Opiši neprijatan miris',
     removeOdorKind: 'Ukloni vrstu mirisa',
