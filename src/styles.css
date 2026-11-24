@@ -337,13 +337,6 @@ button.danger {
   margin: 0;
 }
 
-/* "← Back" at the top of a screen. */
-button.link.back {
-  align-self: flex-start;
-  text-decoration: none;
-  font-weight: 600;
-}
-
 /* The chosen odor kind, shown in the closed section's title, with a button to remove it. */
 .chosen-kind {
   display: inline-flex;
@@ -374,4 +367,41 @@ details.privacy-link summary {
   font-weight: normal;
   color: var(--muted);
   font-size: 0.9rem;
+}
+
+/* Tab bar fixed at the bottom of the screen (logged in only). */
+.bottom-nav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  background: var(--card);
+  border-top: 1px solid var(--border);
+  /* Keep clear of the iPhone home bar. */
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.bottom-nav button {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 4px;
+  border: none;
+  border-radius: 0;
+  background: none;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.bottom-nav button.current {
+  color: var(--green);
+  font-weight: 600;
+}
+
+/* Room at the bottom of each screen so the tab bar never covers its last button. */
+body:has(.bottom-nav) {
+  padding-bottom: calc(72px + env(safe-area-inset-bottom));
 }

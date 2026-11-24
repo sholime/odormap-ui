@@ -10,11 +10,10 @@ type Props = {
   language: Language;
   user: User;
   onCreateAccount: () => void;
-  onBack: () => void;
   onLoggedOut: () => void;
 };
 
-export function Account({ language, user, onCreateAccount, onBack, onLoggedOut }: Props) {
+export function Account({ language, user, onCreateAccount, onLoggedOut }: Props) {
   const t = TEXTS[language];
   const [confirming, setConfirming] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -35,9 +34,6 @@ export function Account({ language, user, onCreateAccount, onBack, onLoggedOut }
 
   return (
     <main className="screen">
-      <button className="link back" onClick={onBack}>
-        ← {t.back}
-      </button>
       <section className="card">
         <h2>{t.myAccount}</h2>
         <dl className="details">

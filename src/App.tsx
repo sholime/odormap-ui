@@ -2,12 +2,14 @@
 // Logged out: the sign-in screen. Logged in: the report form (home), the account screen,
 // or (for a guest) the sign-in screen again to create a full account.
 //
-// Moving between screens is kept in the browser history, so the phone's back button
-// returns to the previous screen. Tapping "OdorMap" in the header always goes home.
+// Logged in, a tab bar at the bottom switches between the main screens. Moving between
+// screens is kept in the browser history, so the phone's back button returns to the
+// previous screen. Tapping "OdorMap" in the header always goes home.
 
 import { useEffect, useState } from 'react';
 import { LANGUAGES, type Language, type User } from '@odormap/common';
 import { api, isLoggedIn, logOut } from './api';
+import { BottomNav } from './components/BottomNav';
 import { TEXTS } from './texts';
 import { Account } from './views/Account';
 import { ReportForm } from './views/ReportForm';
@@ -86,17 +88,12 @@ export function App() {
             </button>
           ))}
         </div>
-        {loggedIn && screen === 'report' && (
-          <button className="link" onClick={() => goTo('account')}>
-            {t.myAccount}
-          </button>
-        )}
       </header>
 
       {!loggedIn && <SignIn language={language} isGuest={false} onLoggedIn={handleLoggedIn} />}
 
       {loggedIn && screen === 'createAccount' && (
-        <SignIn language={language} isGuest onLoggedIn={handleLoggedIn} onBack={() => window.history.back()} />
+        <SignIn language={language} isGuest onLoggedIn={handleLoggedIn} />
       )}
 
       {loggedIn && screen === 'account' && user && (
@@ -104,7 +101,6 @@ export function App() {
           language={language}
           user={user}
           onCreateAccount={() => goTo('createAccount')}
-          onBack={() => window.history.back()}
           onLoggedOut={handleLoggedOut}
         />
       )}
@@ -121,6 +117,10 @@ export function App() {
           )}
           <ReportForm language={language} />
         </>
+      )}
+      {loggedIn && (
+        // Creating an account is reached from "My account", so that tab stays highlighted.
+        <BottomNav language={language} current={screen === 'report' ? 'report' : 'account'} onChange={goTo} />
       )}
     </>
   );
