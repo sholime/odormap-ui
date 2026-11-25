@@ -53,21 +53,52 @@ header button {
   color: white;
 }
 
-.languages {
-  display: flex;
-  gap: 4px;
+.language-menu {
+  position: relative;
 }
 
-.languages button {
+.language-button {
   padding: 4px 10px;
   border: 1px solid rgba(255, 255, 255, 0.6);
   background: transparent;
   border-radius: 6px;
 }
 
-.languages button.chosen {
-  background: white;
+/* The list opens below the button, on the right, above the page. */
+.language-list {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  min-width: 150px;
+  padding: 6px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+header .language-list button {
+  color: var(--text);
+  background: none;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 12px;
+  text-align: left;
+}
+
+header .language-list button[aria-pressed='true'] {
+  background: var(--green-light);
   color: var(--green);
+  font-weight: 600;
+}
+
+.language-list .code {
+  display: inline-block;
+  width: 2.2em;
+  color: var(--muted);
 }
 
 .screen {

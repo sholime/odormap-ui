@@ -7,11 +7,16 @@
 // screens is kept in the browser history, so the phone's back button returns to the
 // previous screen, and a refresh stays on the same screen. Tapping "OdorMap" in the header
 // always goes home.
+//
+// The language menu in the header is always there; Serbian is the default. Logged out, the
+// choice is kept on this device and goes into a new account. Logged in, the account's language
+// is used, and a change is saved with the account.
 
 import { useEffect, useState } from 'react';
 import { LANGUAGES, type Language, type User } from '@odormap/common';
 import { api, isLoggedIn, logOut } from './api';
 import { BottomBar } from './components/BottomBar';
+import { LanguageMenu } from './components/LanguageMenu';
 import { Menu } from './components/Menu';
 import { TEXTS } from './texts';
 import { Account } from './views/Account';
@@ -47,11 +52,23 @@ export function App() {
   // Load the profile after logging in, to know whether this is a guest.
   useEffect(() => {
     if (!loggedIn) return setUser(undefined);
-    api.me().then(setUser, () => {
-      logOut();
-      setLoggedIn(false);
-    });
+    api.me().then(
+      (me) => {
+        setUser(me);
+        setLanguage(me.language);
+      },
+      () => {
+        logOut();
+        setLoggedIn(false);
+      },
+    );
   }, [loggedIn, logins]);
+
+  function changeLanguage(next: Language) {
+    setLanguage(next);
+    // Saved with the account too. If that fails, the language still changes on this device.
+    if (loggedIn) api.updateMe({ language: next }).then(setUser, () => {});
+  }
 
   // The phone's back button: show the screen saved in that history entry (home if none).
   useEffect(() => {
@@ -98,13 +115,7 @@ export function App() {
             OdorMap
           </button>
         </h1>
-        <div className="languages">
-          {LANGUAGES.map((code) => (
-            <button key={code} className={code === language ? 'chosen' : ''} onClick={() => setLanguage(code)}>
-              {code.toUpperCase()}
-            </button>
-          ))}
-        </div>
+        <LanguageMenu language={language} onChange={changeLanguage} />
         {loggedIn && (
           // Creating an account is reached from "My account", so that item stays highlighted.
           <Menu
@@ -118,9 +129,7 @@ export function App() {
 
       {!loggedIn && <SignIn language={language} isGuest={false} onLoggedIn={handleLoggedIn} />}
 
-      {loggedIn && screen === 'createAccount' && (
-        <SignIn language={language} isGuest onLoggedIn={handleLoggedIn} />
-      )}
+      {loggedIn && screen === 'createAccount' && <SignIn language={language} isGuest onLoggedIn={handleLoggedIn} />}
 
       {loggedIn && screen === 'reports' && <Reports language={language} />}
 
