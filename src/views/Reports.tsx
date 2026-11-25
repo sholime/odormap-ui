@@ -37,6 +37,8 @@ export function Reports({ language }: Props) {
 }
 
 const AREA_KEY = 'odormap.reportsArea';
+// The choice made while the app is open, kept when moving to another screen and back.
+const SESSION_AREA_KEY = 'odormap.reportsAreaNow';
 const ALL_AREAS = 'all';
 
 /** Where the phone is now, or undefined if that is not known quickly (no permission, no signal). */
@@ -57,16 +59,17 @@ function EveryonesReports({ language }: Props) {
   // Chosen area id or ALL_AREAS; undefined until the starting choice is known.
   const [choice, setChoice] = useState<string>();
   // Where the person is, shown above the area list: still looking, an area name, or not known.
-  const [where, setWhere] = useState<
-    { status: 'locating' } | { status: 'found'; name: string } | { status: 'unknown' }
-  >({
-    status: 'locating',
-  });
+  const [where, setWhere] = useState<{ status: 'locating' } | { status: 'found'; area?: Area } | { status: 'unknown' }>(
+    {
+      status: 'locating',
+    },
+  );
   const [reports, setReports] = useState<PublicReport[]>();
   const [error, setError] = useState(false);
 
-  // Start with the area the person is in now. Elsewhere, or when the location is not known,
-  // start with the choice made last time on this device, or else all areas.
+  // Start with the choice made earlier while the app is open. Otherwise start with the area the
+  // person is in now. Elsewhere, or when the location is not known, start with the choice made
+  // last time on this device, or else all areas.
   useEffect(() => {
     api
       .areas()
@@ -74,8 +77,10 @@ function EveryonesReports({ language }: Props) {
         setAreas(found);
         const point = await currentPoint();
         const here = point && findAreaFor(point, found);
-        setWhere(point ? { status: 'found', name: here?.name ?? t.unknownArea } : { status: 'unknown' });
-        setChoice(here?.areaId ?? localStorage.getItem(AREA_KEY) ?? ALL_AREAS);
+        setWhere(point ? { status: 'found', area: here } : { status: 'unknown' });
+        setChoice(
+          sessionStorage.getItem(SESSION_AREA_KEY) ?? here?.areaId ?? localStorage.getItem(AREA_KEY) ?? ALL_AREAS,
+        );
       })
       .catch(() => setError(true));
   }, []);
@@ -98,6 +103,7 @@ function EveryonesReports({ language }: Props) {
 
   function choose(id: string) {
     localStorage.setItem(AREA_KEY, id);
+    sessionStorage.setItem(SESSION_AREA_KEY, id);
     setChoice(id);
   }
 
@@ -113,7 +119,17 @@ function EveryonesReports({ language }: Props) {
             <span className="spinner" aria-hidden="true" /> {t.locating}
           </p>
         )}
-        {where.status === 'found' && <p className="area">{where.name}</p>}
+        {where.status === 'found' && (
+          <div className="here">
+            <p className="area">{where.area?.name ?? t.unknownArea}</p>
+            {/* A quick way back to the reports from here, when another area is chosen. */}
+            {where.area && severalAreas && choice !== undefined && where.area.areaId !== chosen?.areaId && (
+              <button type="button" onClick={() => choose(where.area!.areaId)}>
+                {t.showHere}
+              </button>
+            )}
+          </div>
+        )}
         {where.status === 'unknown' && <p className="muted">{t.locationUnknown}</p>}
       </section>
       {severalAreas && choice !== undefined && (

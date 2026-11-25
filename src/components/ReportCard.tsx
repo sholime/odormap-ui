@@ -17,35 +17,51 @@ export function ReportCard({ language, report, areaName, mine = false }: Props) 
   const labels = LABELS[language];
   const locale = language === 'hu' ? 'hu-HU' : 'sr-Latn-RS';
 
+  const kind =
+    report.odorKind === 'not_set'
+      ? undefined
+      : report.odorKind === 'other'
+        ? report.odorKindOther
+        : labels.odorKind[report.odorKind];
+
+  // Compact: the strength badge on the left; on the right, strength and kind with the time,
+  // then the area with the wind, then the comment.
   return (
     <article className={mine ? 'card report-item mine' : 'card report-item'}>
-      <div className="report-head">
-        <time dateTime={report.observedAt}>
-          {new Date(report.observedAt).toLocaleString(locale, {
-            dateStyle: 'medium',
-            timeStyle: 'short',
-          })}
-        </time>
-        <span className="muted">
-          {mine && <span className="yours-tag">{t.yours}</span>}
-          {areaName}
-        </span>
-      </div>
-      <div className="report-body">
-        <span className={`strength-badge s${report.strength}`}>{report.strength}</span>
-        <div>
-          <strong>{labels.odorStrength[report.strength]}</strong>
-          {report.odorKind !== 'not_set' && (
-            <div>{report.odorKind === 'other' ? report.odorKindOther : labels.odorKind[report.odorKind]}</div>
+      <span className={`strength-badge s${report.strength}`}>{report.strength}</span>
+      <div className="report-main">
+        <div className="report-line">
+          <span>
+            <strong>{labels.odorStrength[report.strength]}</strong>
+            {kind && (
+              <>
+                {' · '}
+                <span>{kind}</span>
+              </>
+            )}
+          </span>
+          <time className="muted small" dateTime={report.observedAt}>
+            {new Date(report.observedAt).toLocaleString(locale, {
+              day: 'numeric',
+              month: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit',
+            })}
+          </time>
+        </div>
+        <div className="report-line muted small">
+          <span>
+            {mine && <span className="yours-tag">{t.yours}</span>}
+            {areaName}
+          </span>
+          {report.weather && (
+            <span>
+              {t.wind}: {windKmh(report.weather.windSpeedMs)} km/h, {compass(report.weather.windDirectionDeg, language)}
+            </span>
           )}
         </div>
+        {report.comment && <p className="report-comment">„{report.comment}”</p>}
       </div>
-      {report.weather && (
-        <p className="muted small">
-          {t.wind}: {windKmh(report.weather.windSpeedMs)} km/h, {compass(report.weather.windDirectionDeg, language)}
-        </p>
-      )}
-      {report.comment && <p className="report-comment">„{report.comment}”</p>}
     </article>
   );
 }
