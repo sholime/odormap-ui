@@ -2,7 +2,8 @@
 // Logged out: the sign-in screen. Logged in: the report form (home), the account screen,
 // or (for a guest) the sign-in screen again to create a full account.
 //
-// Logged in, the ☰ menu in the header switches between the main screens. Moving between
+// Logged in, the ☰ menu in the header switches between the main screens, and a bar at the
+// bottom is a shortcut to the two used most (report, reports). Moving between
 // screens is kept in the browser history, so the phone's back button returns to the
 // previous screen, and a refresh stays on the same screen. Tapping "OdorMap" in the header
 // always goes home.
@@ -10,6 +11,7 @@
 import { useEffect, useState } from 'react';
 import { LANGUAGES, type Language, type User } from '@odormap/common';
 import { api, isLoggedIn, logOut } from './api';
+import { BottomBar } from './components/BottomBar';
 import { Menu } from './components/Menu';
 import { TEXTS } from './texts';
 import { Account } from './views/Account';
@@ -146,6 +148,8 @@ export function App() {
           <ReportForm language={language} />
         </>
       )}
+
+      {loggedIn && <BottomBar language={language} current={screen} onChange={goTo} />}
     </>
   );
 }

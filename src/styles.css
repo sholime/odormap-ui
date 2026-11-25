@@ -629,3 +629,49 @@ header .menu-button {
   color: var(--green);
   font-weight: 600;
 }
+
+/* Bar fixed at the bottom (logged in): Prijavi / Prijave. */
+body:has(.bottom-bar) {
+  padding-bottom: calc(64px + env(safe-area-inset-bottom));
+}
+
+.bottom-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 5;
+  display: flex;
+  background: var(--card);
+  border-top: 1px solid var(--border);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.bottom-bar button {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  border: none;
+  border-radius: 0;
+  background: none;
+  padding: 8px 4px;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.bottom-bar button[aria-current='page'] {
+  color: var(--green);
+  font-weight: 600;
+}
+
+.bottom-bar svg {
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
