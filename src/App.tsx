@@ -7,12 +7,19 @@
 // screens is kept in the browser history, so the phone's back button returns to the
 // previous screen, and a refresh stays on the same screen. Tapping "OdorMap" in the header
 // always goes home.
+//
+// Languages: Serbian is the default. On the first screen (logged out) every language can be
+// chosen on the Location card. Logged in, the header buttons offer the languages of the area the
+// person is in (Bačka Topola: Serbian and Hungarian; Novi Sad: Serbian only). With one language
+// there are no buttons, and where the area is not known the app is in Serbian.
 
 import { useEffect, useState } from 'react';
-import { LANGUAGES, type Language, type User } from '@odormap/common';
+import { findAreaFor, LANGUAGES, type Language, type User } from '@odormap/common';
 import { api, isLoggedIn, logOut } from './api';
 import { BottomBar } from './components/BottomBar';
+import type { Where } from './components/LocationCard';
 import { Menu } from './components/Menu';
+import { locate } from './location';
 import { TEXTS } from './texts';
 import { Account } from './views/Account';
 import { AllReports } from './views/AllReports';
@@ -21,6 +28,8 @@ import { Reports } from './views/Reports';
 import { SignIn } from './views/SignIn';
 
 const LANGUAGE_KEY = 'odormap.language';
+// Where the area is not known.
+const ONLY_SERBIAN: readonly Language[] = ['sr'];
 
 const SCREENS = ['report', 'reports', 'account', 'createAccount', 'allReports'] as const;
 type Screen = (typeof SCREENS)[number];
@@ -31,8 +40,16 @@ function screenIn(state: unknown): Screen {
 }
 
 export function App() {
-  const [language, setLanguage] = useState<Language>(savedLanguage);
   const [loggedIn, setLoggedIn] = useState(isLoggedIn);
+  // The language the person chose. It is kept even where it is not offered, so it comes back
+  // when they are in an area with that language again.
+  const [chosenLanguage, setChosenLanguage] = useState<Language>(savedLanguage);
+  // Where the person is, shown on the sign-in screen, and the languages offered there.
+  const [where, setWhere] = useState<Where>({ status: 'locating' });
+  // Logged out, every language can be chosen on the Location card. Logged in, the header offers
+  // the languages of the area.
+  const languagesHere = !loggedIn ? LANGUAGES : (where.status === 'found' && where.area?.languages) || ONLY_SERBIAN;
+  const language = languagesHere.includes(chosenLanguage) ? chosenLanguage : languagesHere[0];
   const [user, setUser] = useState<User>();
   const [screen, setScreen] = useState<Screen>(() => screenIn(window.history.state));
   // Goes up on every login, so the profile is loaded again (e.g. when a guest creates an account).
@@ -40,9 +57,22 @@ export function App() {
   const t = TEXTS[language];
 
   useEffect(() => {
-    localStorage.setItem(LANGUAGE_KEY, language);
+    localStorage.setItem(LANGUAGE_KEY, chosenLanguage);
+  }, [chosenLanguage]);
+
+  useEffect(() => {
     document.documentElement.lang = language;
   }, [language]);
+
+  // The languages of the area the person is in. This is asked for when the app opens, before
+  // logging in, so someone who does not speak Serbian can switch language on the sign-in screen.
+  const [locateAttempt, setLocateAttempt] = useState(0);
+  useEffect(() => {
+    setWhere({ status: 'locating' });
+    Promise.all([api.areas().catch(() => []), locate()]).then(([areas, found]) =>
+      setWhere(typeof found === 'string' ? { status: found } : { status: 'found', area: findAreaFor(found, areas) }),
+    );
+  }, [locateAttempt]);
 
   // Load the profile after logging in, to know whether this is a guest.
   useEffect(() => {
@@ -98,13 +128,15 @@ export function App() {
             OdorMap
           </button>
         </h1>
-        <div className="languages">
-          {LANGUAGES.map((code) => (
-            <button key={code} className={code === language ? 'chosen' : ''} onClick={() => setLanguage(code)}>
-              {code.toUpperCase()}
-            </button>
-          ))}
-        </div>
+        {loggedIn && languagesHere.length > 1 && (
+          <div className="languages">
+            {languagesHere.map((code) => (
+              <button key={code} className={code === language ? 'chosen' : ''} onClick={() => setChosenLanguage(code)}>
+                {code.toUpperCase()}
+              </button>
+            ))}
+          </div>
+        )}
         {loggedIn && (
           // Creating an account is reached from "My account", so that item stays highlighted.
           <Menu
@@ -116,11 +148,18 @@ export function App() {
         )}
       </header>
 
-      {!loggedIn && <SignIn language={language} isGuest={false} onLoggedIn={handleLoggedIn} />}
-
-      {loggedIn && screen === 'createAccount' && (
-        <SignIn language={language} isGuest onLoggedIn={handleLoggedIn} />
+      {!loggedIn && (
+        <SignIn
+          language={language}
+          isGuest={false}
+          where={where}
+          onRetryLocation={() => setLocateAttempt((n) => n + 1)}
+          onChangeLanguage={setChosenLanguage}
+          onLoggedIn={handleLoggedIn}
+        />
       )}
+
+      {loggedIn && screen === 'createAccount' && <SignIn language={language} isGuest onLoggedIn={handleLoggedIn} />}
 
       {loggedIn && screen === 'reports' && <Reports language={language} />}
 

@@ -6,10 +6,11 @@
 // - My reports: the person's own reports.
 
 import { useEffect, useState } from 'react';
-import { findAreaFor, type Area, type Language, type Point, type PublicReport } from '@odormap/common';
+import { findAreaFor, type Area, type Language, type PublicReport } from '@odormap/common';
 import { api } from '../api';
 import { AreaPicker } from '../components/AreaPicker';
 import { ReportCard } from '../components/ReportCard';
+import { currentPoint } from '../location';
 import { TEXTS } from '../texts';
 import { MyReports } from './MyReports';
 
@@ -40,18 +41,6 @@ const AREA_KEY = 'odormap.reportsArea';
 // The choice made while the app is open, kept when moving to another screen and back.
 const SESSION_AREA_KEY = 'odormap.reportsAreaNow';
 const ALL_AREAS = 'all';
-
-/** Where the phone is now, or undefined if that is not known quickly (no permission, no signal). */
-function currentPoint(): Promise<Point | undefined> {
-  return new Promise((resolve) => {
-    if (!('geolocation' in navigator)) return resolve(undefined);
-    navigator.geolocation.getCurrentPosition(
-      (position) => resolve({ lat: position.coords.latitude, lon: position.coords.longitude }),
-      () => resolve(undefined),
-      { timeout: 8000, maximumAge: 10 * 60 * 1000 },
-    );
-  });
-}
 
 function EveryonesReports({ language }: Props) {
   const t = TEXTS[language];

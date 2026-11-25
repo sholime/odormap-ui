@@ -702,3 +702,28 @@ body:has(.bottom-bar) {
   stroke-linecap: round;
   stroke-linejoin: round;
 }
+
+/* Choosing the language on the Location card of the first screen. */
+.card-languages {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.card-languages span {
+  margin-right: auto;
+  color: var(--muted);
+}
+
+.card-languages button {
+  padding: 6px 14px;
+}
+
+.card-languages button[aria-pressed='true'] {
+  background: var(--green);
+  border-color: var(--green);
+  color: white;
+}

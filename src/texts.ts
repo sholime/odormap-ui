@@ -12,7 +12,8 @@ export const TEXTS = {
     installWhy: 'Dodaj OdorMap na početni ekran telefona, pa ga otvaraš jednim dodirom, kao aplikaciju.',
     installButton: 'Dodaj na početni ekran',
     installNow: 'Dodaj',
-    installMenu: 'Otvori meni pregledača (⋮ gore desno) i izaberi „Dodaj na početni ekran” ili „Instaliraj aplikaciju”.',
+    installMenu:
+      'Otvori meni pregledača (⋮ gore desno) i izaberi „Dodaj na početni ekran” ili „Instaliraj aplikaciju”.',
     installIos: 'U Safariju dodirni Podeli (kvadrat sa strelicom ⬆), pa „Dodaj na početni ekran”.',
     logOut: 'Odjavi se',
     myAccount: 'Moj nalog',
@@ -70,10 +71,12 @@ export const TEXTS = {
 
     // Report form
     location: 'Lokacija',
+    languageLabel: 'Jezik',
     locating: 'Tražim tvoju lokaciju…',
     locationFound: 'Lokacija pronađena',
     locationOff: 'Uključi lokaciju (GPS) na telefonu, pa pritisni „Pokušaj ponovo”.',
-    locationDenied: 'Pregledač ne dozvoljava pristup lokaciji. Dozvoli ga u podešavanjima pregledača, pa pokušaj ponovo.',
+    locationDenied:
+      'Pregledač ne dozvoljava pristup lokaciji. Dozvoli ga u podešavanjima pregledača, pa pokušaj ponovo.',
     unknownArea: 'Nepoznato područje',
     tryAgain: 'Pokušaj ponovo',
     howStrong: 'Jačina neprijatnog mirisa',
@@ -94,16 +97,19 @@ export const TEXTS = {
     fullAccount: 'Nalog',
     memberSince: 'Član od',
     deleteAccount: 'Obriši nalog',
-    deleteWarning: 'Tvoj nalog se briše. Prijave ostaju na mapi, ali bez veze sa tobom i bez komentara. Ovo ne može da se poništi.',
+    deleteWarning:
+      'Tvoj nalog se briše. Prijave ostaju na mapi, ali bez veze sa tobom i bez komentara. Ovo ne može da se poništi.',
     deleteAreYouSure: 'Da li si siguran/na?',
     deleteForever: 'Da, obriši nalog',
     cancel: 'Otkaži',
   },
   hu: {
-    installWhy: 'Tedd ki az OdorMapot a telefon kezdőképernyőjére, így egy érintéssel megnyithatod, mint egy alkalmazást.',
+    installWhy:
+      'Tedd ki az OdorMapot a telefon kezdőképernyőjére, így egy érintéssel megnyithatod, mint egy alkalmazást.',
     installButton: 'Hozzáadás a kezdőképernyőhöz',
     installNow: 'Hozzáadás',
-    installMenu: 'Nyisd meg a böngésző menüjét (⋮ jobbra fent), és válaszd a „Hozzáadás a kezdőképernyőhöz” vagy az „Alkalmazás telepítése” pontot.',
+    installMenu:
+      'Nyisd meg a böngésző menüjét (⋮ jobbra fent), és válaszd a „Hozzáadás a kezdőképernyőhöz” vagy az „Alkalmazás telepítése” pontot.',
     installIos: 'A Safariban koppints a Megosztás gombra (négyzet nyíllal ⬆), majd a „Főképernyőhöz adás” pontra.',
     logOut: 'Kijelentkezés',
     myAccount: 'Fiókom',
@@ -161,10 +167,12 @@ export const TEXTS = {
 
     // Report form
     location: 'Hely',
+    languageLabel: 'Nyelv',
     locating: 'Helymeghatározás…',
     locationFound: 'Hely megtalálva',
     locationOff: 'Kapcsold be a helymeghatározást (GPS) a telefonon, majd nyomd meg az „Újra” gombot.',
-    locationDenied: 'A böngésző nem engedi a helyhozzáférést. Engedélyezd a böngésző beállításaiban, majd próbáld újra.',
+    locationDenied:
+      'A böngésző nem engedi a helyhozzáférést. Engedélyezd a böngésző beállításaiban, majd próbáld újra.',
     unknownArea: 'Ismeretlen terület',
     tryAgain: 'Újra',
     howStrong: 'Mennyire erős a szag?',
@@ -185,7 +193,8 @@ export const TEXTS = {
     fullAccount: 'Fiók',
     memberSince: 'Regisztráció dátuma',
     deleteAccount: 'Fiók törlése',
-    deleteWarning: 'A fiókod törlődik. A bejelentések a térképen maradnak, de nem köthetők hozzád, és megjegyzés nélkül. Ez nem vonható vissza.',
+    deleteWarning:
+      'A fiókod törlődik. A bejelentések a térképen maradnak, de nem köthetők hozzád, és megjegyzés nélkül. Ez nem vonható vissza.',
     deleteAreYouSure: 'Biztos vagy benne?',
     deleteForever: 'Igen, törlöm a fiókot',
     cancel: 'Mégse',

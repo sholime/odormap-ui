@@ -11,6 +11,7 @@ import { ApiError, api } from '../api';
 import { About } from '../components/About';
 import { GoogleButton } from '../components/GoogleButton';
 import { InstallApp } from '../components/InstallApp';
+import { LocationCard, type Where } from '../components/LocationCard';
 import { PrivacyNotice } from '../components/PrivacyNotice';
 import { TEXTS } from '../texts';
 import { AcceptPrivacy } from './AcceptPrivacy';
@@ -21,10 +22,14 @@ type Props = {
   language: Language;
   /** True when a guest opened this screen to create an account. A guest has already accepted the notice. */
   isGuest: boolean;
+  /** Where the person is. Shown on the first screen, because the languages offered depend on it. */
+  where?: Where;
+  onRetryLocation?: () => void;
+  onChangeLanguage?: (language: Language) => void;
   onLoggedIn: () => void;
 };
 
-export function SignIn({ language, isGuest, onLoggedIn }: Props) {
+export function SignIn({ language, isGuest, where, onRetryLocation, onChangeLanguage, onLoggedIn }: Props) {
   const t = TEXTS[language];
   const [mode, setMode] = useState<'login' | 'register'>(isGuest ? 'register' : 'login');
   const [name, setName] = useState('');
@@ -113,6 +118,14 @@ export function SignIn({ language, isGuest, onLoggedIn }: Props) {
 
   return (
     <main className="screen">
+      {where && (
+        <LocationCard
+          language={language}
+          where={where}
+          onRetry={() => onRetryLocation?.()}
+          onChangeLanguage={(code) => onChangeLanguage?.(code)}
+        />
+      )}
       <About language={language} />
       <InstallApp language={language} />
 
