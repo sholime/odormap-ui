@@ -14,6 +14,7 @@ import type {
   PublicReport,
   RegisterRequest,
   User,
+  UpdateMeRequest,
 } from '@odormap/common';
 
 const API_URL = (import.meta.env.VITE_API_URL ?? 'http://localhost:3000') + '/api/v1';
@@ -121,6 +122,8 @@ export const api = {
     logInWith('/auth/google', { idToken, language, acceptPrivacy }),
 
   me: () => send<User>('GET', '/me'),
+  /** Changes the name or language saved with the account. */
+  updateMe: (changes: UpdateMeRequest) => send<User>('PATCH', '/me', changes),
 
   /** Deletes the account (its reports stay, unlinked), then forgets the login. */
   deleteAccount: async () => {

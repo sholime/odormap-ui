@@ -70,6 +70,7 @@ export const TEXTS = {
 
     // Report form
     location: 'Lokacija',
+    languageLabel: 'Jezik',
     locating: 'Tražim tvoju lokaciju…',
     locationFound: 'Lokacija pronađena',
     locationOff: 'Uključi lokaciju (GPS) na telefonu, pa pritisni „Pokušaj ponovo”.',
@@ -161,6 +162,7 @@ export const TEXTS = {
 
     // Report form
     location: 'Hely',
+    languageLabel: 'Nyelv',
     locating: 'Helymeghatározás…',
     locationFound: 'Hely megtalálva',
     locationOff: 'Kapcsold be a helymeghatározást (GPS) a telefonon, majd nyomd meg az „Újra” gombot.',
