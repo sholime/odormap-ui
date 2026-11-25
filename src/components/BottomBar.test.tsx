@@ -8,7 +8,7 @@ describe('BottomBar', () => {
     const onChange = vi.fn();
     render(<BottomBar language="sr" current="report" onChange={onChange} />);
 
-    expect(screen.getByRole('button', { name: 'Prijavi' })).toHaveAttribute('aria-current', 'page');
+    expect(screen.getByRole('button', { name: 'Nova prijava' })).toHaveAttribute('aria-current', 'page');
     await userEvent.click(screen.getByRole('button', { name: 'Prijave' }));
     expect(onChange).toHaveBeenCalledWith('reports');
   });
