@@ -632,7 +632,7 @@ header .menu-button {
 
 /* Bar fixed at the bottom (logged in): Prijavi / Prijave. */
 body:has(.bottom-bar) {
-  padding-bottom: calc(76px + env(safe-area-inset-bottom));
+  padding-bottom: calc(64px + env(safe-area-inset-bottom));
 }
 
 .bottom-bar {
@@ -651,11 +651,11 @@ body:has(.bottom-bar) {
 .bottom-bar button {
   flex: 1;
   display: flex;
-  flex-direction: column;
+  justify-content: center;
   align-items: center;
-  gap: 2px;
-  padding: 6px 4px;
-  font-size: 0.85rem;
+  gap: 8px;
+  padding: 8px 4px;
+  font-size: 0.95rem;
   border: 1px solid rgba(255, 255, 255, 0.6);
   border-radius: 8px;
   background: transparent;
@@ -670,8 +670,8 @@ body:has(.bottom-bar) {
 }
 
 .bottom-bar svg {
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
   fill: none;
   stroke: currentColor;
   stroke-width: 2;
