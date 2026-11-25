@@ -7,6 +7,7 @@ beforeEach(() => localStorage.setItem('odormap.tokens', JSON.stringify({ accessT
 afterEach(() => {
   vi.unstubAllGlobals();
   localStorage.clear();
+  sessionStorage.clear();
 });
 
 const area = {
@@ -121,5 +122,48 @@ describe('Reports', () => {
     const location = screen.getByRole('heading', { name: 'Lokacija' }).closest('section')!;
     expect(location).toHaveTextContent('Zrenjanin');
     expect(fetch).toHaveBeenLastCalledWith(expect.stringContaining('areaId=zrenjanin'), expect.anything());
+  });
+
+  it('keeps the area chosen earlier while the app is open', async () => {
+    sessionStorage.setItem('odormap.reportsAreaNow', 'novi-sad');
+    const noviSad = { ...area, areaId: 'novi-sad', name: 'Novi Sad' };
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url: string) => Response.json(url.endsWith('/areas') ? [area, noviSad] : [])),
+    );
+    render(<Reports language="sr" />);
+
+    expect(await screen.findByRole('button', { name: /Novi Sad/, expanded: false })).toBeInTheDocument();
+  });
+
+  it('switches to the area the person is in with one tap', async () => {
+    sessionStorage.setItem('odormap.reportsAreaNow', 'backa-topola');
+    const box = (lat: number, lon: number) => [
+      { lat: lat - 0.1, lon: lon - 0.1 },
+      { lat: lat + 0.1, lon: lon - 0.1 },
+      { lat: lat + 0.1, lon: lon + 0.1 },
+      { lat: lat - 0.1, lon: lon + 0.1 },
+    ];
+    const areas = [
+      { ...area, boundary: box(45.8, 19.6) },
+      { ...area, areaId: 'zrenjanin', name: 'Zrenjanin', boundary: box(45.38, 20.39) },
+    ];
+    vi.stubGlobal('navigator', {
+      ...navigator,
+      geolocation: {
+        getCurrentPosition: (ok: PositionCallback) =>
+          ok({ coords: { latitude: 45.38, longitude: 20.39 } } as GeolocationPosition),
+      },
+    });
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url: string) => Response.json(url.endsWith('/areas') ? areas : [])),
+    );
+    render(<Reports language="sr" />);
+
+    await userEvent.click(await screen.findByRole('button', { name: 'Prikaži prijave odavde' }));
+
+    expect(await screen.findByRole('button', { name: /Zrenjanin/, expanded: false })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Prikaži prijave odavde' })).not.toBeInTheDocument();
   });
 });

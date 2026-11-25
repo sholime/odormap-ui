@@ -423,31 +423,41 @@ header .menu-button {
 }
 
 .report-item {
-  gap: 8px;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 12px;
 }
 
-.report-head {
+.report-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.report-line {
   display: flex;
   justify-content: space-between;
+  align-items: baseline;
   gap: 8px;
-  font-size: 0.9rem;
 }
 
-.report-body {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+.report-line time {
+  white-space: nowrap;
 }
 
 /* The strength number in a circle: light yellow for 1 up to dark red for 5. */
 .strength-badge {
   display: grid;
   place-items: center;
-  width: 40px;
-  height: 40px;
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
   font-weight: 700;
-  font-size: 1.1rem;
+  font-size: 1rem;
 }
 .strength-badge.s1 { background: #fff3c4; color: #6b5800; }
 .strength-badge.s2 { background: #ffd98a; color: #6b4300; }
@@ -456,8 +466,22 @@ header .menu-button {
 .strength-badge.s5 { background: #c0392b; color: white; }
 
 .report-comment {
-  margin: 0;
+  margin: 2px 0 0;
   font-style: italic;
+}
+
+/* "Lokacija" on Prijave: the area name with a button to show the reports from there. */
+.here {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.here button {
+  padding: 6px 10px;
+  font-size: 0.9rem;
 }
 
 /* Admin */
