@@ -8,7 +8,9 @@
 import { useState, type FormEvent } from 'react';
 import type { Language } from '@odormap/common';
 import { ApiError, api } from '../api';
+import { About } from '../components/About';
 import { GoogleButton } from '../components/GoogleButton';
+import { InstallApp } from '../components/InstallApp';
 import { PrivacyNotice } from '../components/PrivacyNotice';
 import { TEXTS } from '../texts';
 import { AcceptPrivacy } from './AcceptPrivacy';
@@ -111,7 +113,8 @@ export function SignIn({ language, isGuest, onLoggedIn }: Props) {
 
   return (
     <main className="screen">
-      <p className="tagline">{t.tagline}</p>
+      <About language={language} />
+      <InstallApp language={language} />
 
       {!isGuest && (
         <>

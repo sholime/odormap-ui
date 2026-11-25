@@ -11,6 +11,12 @@ afterEach(() => {
 const tokens = () => Response.json({ accessToken: 'a', refreshToken: 'r' });
 
 describe('SignIn', () => {
+  it('explains what the app is, with how to use it folded away', () => {
+    render(<SignIn language="sr" isGuest={false} onLoggedIn={vi.fn()} />);
+    expect(screen.getByRole('heading', { name: 'Šta je OdorMap?' })).toBeInTheDocument();
+    expect(screen.getByText('Kako se koristi?')).toBeInTheDocument();
+  });
+
   it('shows the privacy notice on its own page before creating a guest', async () => {
     const fetch = vi.fn(async () => tokens());
     vi.stubGlobal('fetch', fetch);
