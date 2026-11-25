@@ -1,12 +1,13 @@
 // "Reports": two tabs.
 // - All reports: everyone's reports in one area from the last 7 days, newest first, with comments but no names.
-//   The person's own reports are highlighted. With more than one area, a list chooses one area or
+//   The person's own reports are highlighted. With more than one area, a searchable list chooses one area or
 //   all of them (all by default; the choice is remembered on this device).
 // - My reports: the person's own reports.
 
 import { useEffect, useState } from 'react';
 import type { Area, Language, PublicReport } from '@odormap/common';
 import { api } from '../api';
+import { AreaPicker } from '../components/AreaPicker';
 import { ReportCard } from '../components/ReportCard';
 import { TEXTS } from '../texts';
 import { MyReports } from './MyReports';
@@ -77,19 +78,12 @@ function EveryonesReports({ language }: Props) {
   return (
     <>
       {severalAreas && (
-        <div className="filters">
-          <label>
-            {t.area}
-            <select value={chosen?.areaId ?? ALL_AREAS} onChange={(e) => choose(e.target.value)}>
-              <option value={ALL_AREAS}>{t.allAreas}</option>
-              {areas.map((a) => (
-                <option key={a.areaId} value={a.areaId}>
-                  {a.name}
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
+        <AreaPicker
+          language={language}
+          areas={areas}
+          value={chosen?.areaId}
+          onChange={(id) => choose(id ?? ALL_AREAS)}
+        />
       )}
       {/* With the area list above, the area name is not repeated here. */}
       {areas?.length === 1 && (

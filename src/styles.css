@@ -563,3 +563,69 @@ header .menu-button {
 .install button {
   width: 100%;
 }
+
+/* Area list with search (Prijave > Sve prijave) */
+.area-picker {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.area-picker-label {
+  font-weight: 500;
+}
+
+.area-picker-button {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  text-align: left;
+}
+
+.area-picker-panel {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  margin-top: 4px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.area-picker-panel hr {
+  width: 100%;
+  margin: 2px 0;
+  border: none;
+  border-top: 1px solid var(--border);
+}
+
+.area-options {
+  display: flex;
+  flex-direction: column;
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.area-option {
+  border: none;
+  text-align: left;
+  border-radius: 8px;
+}
+
+.area-option.all {
+  font-weight: 600;
+}
+
+.area-option[aria-pressed='true'] {
+  background: var(--green-light);
+  color: var(--green);
+  font-weight: 600;
+}

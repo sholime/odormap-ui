@@ -68,9 +68,12 @@ describe('Reports', () => {
     vi.stubGlobal('fetch', fetch);
     render(<Reports language="sr" />);
 
-    await userEvent.selectOptions(await screen.findByLabelText('Područje'), 'Novi Sad');
+    await userEvent.click(await screen.findByRole('button', { name: /Sva područja/ }));
+    await userEvent.type(screen.getByRole('searchbox', { name: 'Pretraži područja' }), 'novi');
+    expect(screen.queryByRole('button', { name: 'Bačka Topola' })).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: 'Novi Sad' }));
 
-    expect(await screen.findByRole('option', { name: 'Novi Sad', selected: true })).toBeInTheDocument();
+    expect(await screen.findByRole('button', { name: /Novi Sad/, expanded: false })).toBeInTheDocument();
     expect(fetch).toHaveBeenLastCalledWith(expect.stringContaining('areaId=novi-sad'), expect.anything());
     expect(localStorage.getItem('odormap.reportsArea')).toBe('novi-sad');
   });
@@ -89,6 +92,6 @@ describe('Reports', () => {
 
     expect(await screen.findByText('„novi-sad”')).toBeInTheDocument();
     expect(screen.getByText('„backa-topola”')).toBeInTheDocument();
-    expect(screen.getByRole('option', { name: 'Sva područja', selected: true })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Sva područja/, expanded: false })).toBeInTheDocument();
   });
 });
