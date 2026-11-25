@@ -57,6 +57,12 @@ function EveryonesReports({ language }: Props) {
   const [areas, setAreas] = useState<Area[]>();
   // Chosen area id or ALL_AREAS; undefined until the starting choice is known.
   const [choice, setChoice] = useState<string>();
+  // Where the person is, shown above the area list: still looking, an area name, or not known.
+  const [where, setWhere] = useState<
+    { status: 'locating' } | { status: 'found'; name: string } | { status: 'unknown' }
+  >({
+    status: 'locating',
+  });
   const [reports, setReports] = useState<PublicReport[]>();
   const [error, setError] = useState(false);
 
@@ -69,6 +75,7 @@ function EveryonesReports({ language }: Props) {
         setAreas(found);
         const point = await currentPoint();
         const here = point && findAreaFor(point, found);
+        setWhere(point ? { status: 'found', name: here?.name ?? t.unknownArea } : { status: 'unknown' });
         setChoice(here?.areaId ?? localStorage.getItem(AREA_KEY) ?? ALL_AREAS);
       })
       .catch(() => setError(true));
@@ -100,6 +107,16 @@ function EveryonesReports({ language }: Props) {
 
   return (
     <>
+      <section className="card">
+        <h2>{t.location}</h2>
+        {where.status === 'locating' && (
+          <p className="locating">
+            <span className="spinner" aria-hidden="true" /> {t.locating}
+          </p>
+        )}
+        {where.status === 'found' && <p className="area">{where.name}</p>}
+        {where.status === 'unknown' && <p className="muted">{t.locationUnknown}</p>}
+      </section>
       {severalAreas && choice !== undefined && (
         <AreaPicker
           language={language}

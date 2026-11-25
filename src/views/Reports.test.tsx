@@ -118,6 +118,8 @@ describe('Reports', () => {
     render(<Reports language="sr" />);
 
     expect(await screen.findByRole('button', { name: /Zrenjanin/, expanded: false })).toBeInTheDocument();
+    const location = screen.getByRole('heading', { name: 'Lokacija' }).closest('section')!;
+    expect(location).toHaveTextContent('Zrenjanin');
     expect(fetch).toHaveBeenLastCalledWith(expect.stringContaining('areaId=zrenjanin'), expect.anything());
   });
 });
