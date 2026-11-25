@@ -4,7 +4,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { Reports } from './Reports';
 
 beforeEach(() => localStorage.setItem('odormap.tokens', JSON.stringify({ accessToken: 'a', refreshToken: 'r' })));
-afterEach(() => vi.unstubAllGlobals());
+afterEach(() => {
+  vi.unstubAllGlobals();
+  localStorage.clear();
+});
 
 const area = {
   areaId: 'backa-topola',
@@ -57,5 +60,18 @@ describe('Reports', () => {
 
     expect(await screen.findByText('Još nemaš nijednu prijavu.')).toBeInTheDocument();
     expect(fetch.mock.calls.some(([url]) => String(url).endsWith('/reports/mine'))).toBe(true);
+  });
+
+  it('lets the person choose another area and remembers it', async () => {
+    const noviSad = { ...area, areaId: 'novi-sad', name: 'Novi Sad' };
+    const fetch = vi.fn(async (url: string) => Response.json(url.endsWith('/areas') ? [area, noviSad] : []));
+    vi.stubGlobal('fetch', fetch);
+    render(<Reports language="sr" />);
+
+    await userEvent.selectOptions(await screen.findByLabelText('Područje'), 'Novi Sad');
+
+    expect(await screen.findByRole('option', { name: 'Novi Sad', selected: true })).toBeInTheDocument();
+    expect(fetch).toHaveBeenLastCalledWith(expect.stringContaining('areaId=novi-sad'), expect.anything());
+    expect(localStorage.getItem('odormap.reportsArea')).toBe('novi-sad');
   });
 });
