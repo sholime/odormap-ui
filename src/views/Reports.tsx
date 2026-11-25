@@ -1,11 +1,12 @@
 // "Reports": two tabs.
 // - All reports: everyone's reports in one area from the last 7 days, newest first, with comments but no names.
 //   The person's own reports are highlighted. With more than one area, a searchable list chooses one area or
-//   all of them (all by default; the choice is remembered on this device).
+//   all of them. It starts with the area the person is in, or else the last choice on this
+//   device, or else all areas.
 // - My reports: the person's own reports.
 
 import { useEffect, useState } from 'react';
-import type { Area, Language, PublicReport } from '@odormap/common';
+import { findAreaFor, type Area, type Language, type Point, type PublicReport } from '@odormap/common';
 import { api } from '../api';
 import { AreaPicker } from '../components/AreaPicker';
 import { ReportCard } from '../components/ReportCard';
@@ -39,21 +40,43 @@ export function Reports({ language }: Props) {
 const AREA_KEY = 'odormap.reportsArea';
 const ALL_AREAS = 'all';
 
+/** Where the phone is now, or undefined if that is not known quickly (no permission, no signal). */
+function currentPoint(): Promise<Point | undefined> {
+  return new Promise((resolve) => {
+    if (!('geolocation' in navigator)) return resolve(undefined);
+    navigator.geolocation.getCurrentPosition(
+      (position) => resolve({ lat: position.coords.latitude, lon: position.coords.longitude }),
+      () => resolve(undefined),
+      { timeout: 8000, maximumAge: 10 * 60 * 1000 },
+    );
+  });
+}
+
 function EveryonesReports({ language }: Props) {
   const t = TEXTS[language];
   const [areas, setAreas] = useState<Area[]>();
-  // The choice made last time on this device, or else all areas.
-  const [choice, setChoice] = useState(() => localStorage.getItem(AREA_KEY) ?? ALL_AREAS);
+  // Chosen area id or ALL_AREAS; undefined until the starting choice is known.
+  const [choice, setChoice] = useState<string>();
   const [reports, setReports] = useState<PublicReport[]>();
   const [error, setError] = useState(false);
 
+  // Start with the area the person is in now. Elsewhere, or when the location is not known,
+  // start with the choice made last time on this device, or else all areas.
   useEffect(() => {
-    api.areas().then(setAreas, () => setError(true));
+    api
+      .areas()
+      .then(async (found) => {
+        setAreas(found);
+        const point = await currentPoint();
+        const here = point && findAreaFor(point, found);
+        setChoice(here?.areaId ?? localStorage.getItem(AREA_KEY) ?? ALL_AREAS);
+      })
+      .catch(() => setError(true));
   }, []);
 
   // The areas to show: the chosen one, or all of them (also when a remembered area no longer exists).
   const chosen = areas?.find((a) => a.areaId === choice);
-  const shown = areas && (chosen ? [chosen] : areas);
+  const shown = areas && choice !== undefined ? (chosen ? [chosen] : areas) : undefined;
 
   useEffect(() => {
     if (!shown) return;
@@ -77,7 +100,7 @@ function EveryonesReports({ language }: Props) {
 
   return (
     <>
-      {severalAreas && (
+      {severalAreas && choice !== undefined && (
         <AreaPicker
           language={language}
           areas={areas}
@@ -91,9 +114,9 @@ function EveryonesReports({ language }: Props) {
           {areas[0].name} · {t.lastDays}
         </p>
       )}
-      {severalAreas && <p className="muted small">{t.lastDaysTitle}</p>}
+      {severalAreas && choice !== undefined && <p className="muted small">{t.lastDaysTitle}</p>}
       {error && <p className="error">{t.somethingWrong}</p>}
-      {!error && shown && !reports && <p className="muted">{t.loading}</p>}
+      {!error && !reports && <p className="muted">{t.loading}</p>}
       {reports?.length === 0 && <p className="muted">{t.noReportsYet}</p>}
       {reports?.map((report) => (
         <ReportCard

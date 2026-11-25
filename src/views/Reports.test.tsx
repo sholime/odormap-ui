@@ -94,4 +94,30 @@ describe('Reports', () => {
     expect(screen.getByText('„backa-topola”')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Sva područja/, expanded: false })).toBeInTheDocument();
   });
+
+  it('starts with the area the person is in', async () => {
+    const box = (lat: number, lon: number) => [
+      { lat: lat - 0.1, lon: lon - 0.1 },
+      { lat: lat + 0.1, lon: lon - 0.1 },
+      { lat: lat + 0.1, lon: lon + 0.1 },
+      { lat: lat - 0.1, lon: lon + 0.1 },
+    ];
+    const areas = [
+      { ...area, boundary: box(45.8, 19.6) },
+      { ...area, areaId: 'zrenjanin', name: 'Zrenjanin', boundary: box(45.38, 20.39) },
+    ];
+    vi.stubGlobal('navigator', {
+      ...navigator,
+      geolocation: {
+        getCurrentPosition: (ok: PositionCallback) =>
+          ok({ coords: { latitude: 45.38, longitude: 20.39 } } as GeolocationPosition),
+      },
+    });
+    const fetch = vi.fn(async (url: string) => Response.json(url.endsWith('/areas') ? areas : []));
+    vi.stubGlobal('fetch', fetch);
+    render(<Reports language="sr" />);
+
+    expect(await screen.findByRole('button', { name: /Zrenjanin/, expanded: false })).toBeInTheDocument();
+    expect(fetch).toHaveBeenLastCalledWith(expect.stringContaining('areaId=zrenjanin'), expect.anything());
+  });
 });
