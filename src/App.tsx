@@ -4,7 +4,8 @@
 //
 // Logged in, the ☰ menu in the header switches between the main screens. Moving between
 // screens is kept in the browser history, so the phone's back button returns to the
-// previous screen. Tapping "OdorMap" in the header always goes home.
+// previous screen, and a refresh stays on the same screen. Tapping "OdorMap" in the header
+// always goes home.
 
 import { useEffect, useState } from 'react';
 import { LANGUAGES, type Language, type User } from '@odormap/common';
@@ -19,13 +20,19 @@ import { SignIn } from './views/SignIn';
 
 const LANGUAGE_KEY = 'odormap.language';
 
-type Screen = 'report' | 'reports' | 'account' | 'createAccount' | 'allReports';
+const SCREENS = ['report', 'reports', 'account', 'createAccount', 'allReports'] as const;
+type Screen = (typeof SCREENS)[number];
+
+/** The screen saved in a browser history entry. The browser keeps it on refresh, too. */
+function screenIn(state: unknown): Screen {
+  return SCREENS.includes(state as Screen) ? (state as Screen) : 'report';
+}
 
 export function App() {
   const [language, setLanguage] = useState<Language>(savedLanguage);
   const [loggedIn, setLoggedIn] = useState(isLoggedIn);
   const [user, setUser] = useState<User>();
-  const [screen, setScreen] = useState<Screen>('report');
+  const [screen, setScreen] = useState<Screen>(() => screenIn(window.history.state));
   // Goes up on every login, so the profile is loaded again (e.g. when a guest creates an account).
   const [logins, setLogins] = useState(0);
   const t = TEXTS[language];
@@ -46,7 +53,7 @@ export function App() {
 
   // The phone's back button: show the screen saved in that history entry (home if none).
   useEffect(() => {
-    const onBack = (event: PopStateEvent) => setScreen((event.state as Screen | null) ?? 'report');
+    const onBack = (event: PopStateEvent) => setScreen(screenIn(event.state));
     window.addEventListener('popstate', onBack);
     return () => window.removeEventListener('popstate', onBack);
   }, []);
@@ -62,8 +69,14 @@ export function App() {
     goTo('report');
   }
 
+  /** Shows a screen without a new history entry, so a refresh does not bring back the old one. */
+  function replaceScreen(next: Screen) {
+    window.history.replaceState(next, '');
+    setScreen(next);
+  }
+
   function handleLoggedIn() {
-    setScreen('report');
+    replaceScreen('report');
     setLoggedIn(true);
     setLogins((n) => n + 1);
   }
@@ -72,7 +85,7 @@ export function App() {
   function handleLoggedOut() {
     logOut();
     setLoggedIn(false);
-    setScreen('report');
+    replaceScreen('report');
   }
 
   return (

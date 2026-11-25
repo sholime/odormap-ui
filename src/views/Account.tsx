@@ -35,6 +35,8 @@ export function Account({ language, user, onCreateAccount, onLoggedOut }: Props)
 
   return (
     <main className="screen">
+      <InstallApp language={language} />
+
       <section className="card">
         <h2>{t.myAccount}</h2>
         <dl className="details">
@@ -85,8 +87,6 @@ export function Account({ language, user, onCreateAccount, onLoggedOut }: Props)
           </p>
         )}
       </section>
-
-      <InstallApp language={language} />
     </main>
   );
 }

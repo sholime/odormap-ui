@@ -5,10 +5,17 @@ import { InstallApp } from './InstallApp';
 
 afterEach(() => {
   vi.restoreAllMocks();
+  vi.unstubAllGlobals();
 });
 
 describe('InstallApp', () => {
-  it('shows nothing on a browser that cannot add the app', () => {
+  it('explains the browser menu steps when the browser offers no install prompt', () => {
+    render(<InstallApp language="sr" />);
+    expect(screen.getByText(/Otvori meni pregledača/)).toBeInTheDocument();
+  });
+
+  it('shows nothing when the app is already opened from the home screen', () => {
+    vi.stubGlobal('matchMedia', () => ({ matches: true }));
     const { container } = render(<InstallApp language="sr" />);
     expect(container).toBeEmptyDOMElement();
   });
@@ -22,6 +29,16 @@ describe('InstallApp', () => {
     });
     expect(event.defaultPrevented).toBe(true);
 
+    await userEvent.click(screen.getByText('Dodaj na početni ekran'));
+    await userEvent.click(screen.getByRole('button', { name: 'Dodaj' }));
+    expect(prompt).toHaveBeenCalledOnce();
+  });
+
+  it('keeps an install prompt that came before the card was shown', async () => {
+    const prompt = vi.fn(async () => {});
+    window.dispatchEvent(Object.assign(new Event('beforeinstallprompt', { cancelable: true }), { prompt }));
+
+    render(<InstallApp language="sr" />);
     await userEvent.click(screen.getByText('Dodaj na početni ekran'));
     await userEvent.click(screen.getByRole('button', { name: 'Dodaj' }));
     expect(prompt).toHaveBeenCalledOnce();
