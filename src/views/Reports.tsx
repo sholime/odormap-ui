@@ -23,7 +23,6 @@ export function Reports({ language }: Props) {
 
   return (
     <main className="screen">
-      <h2>{t.reports}</h2>
       <div className="tabs" role="tablist">
         <button role="tab" aria-selected={tab === 'all'} onClick={() => setTab('all')}>
           {t.allReportsTab}
