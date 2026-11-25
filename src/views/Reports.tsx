@@ -1,11 +1,14 @@
 // "Reports": two tabs.
-// - All reports: everyone's reports in the area from the last 7 days, newest first, with comments but no names.
-//   The person's own reports are highlighted.
+// - All reports: everyone's reports in one area from the last 7 days, newest first, with comments but no names.
+//   The person's own reports are highlighted. With more than one area, a searchable list chooses one area or
+//   all of them. It starts with the area the person is in, or else the last choice on this
+//   device, or else all areas.
 // - My reports: the person's own reports.
 
 import { useEffect, useState } from 'react';
-import type { Area, Language, PublicReport } from '@odormap/common';
+import { findAreaFor, type Area, type Language, type Point, type PublicReport } from '@odormap/common';
 import { api } from '../api';
+import { AreaPicker } from '../components/AreaPicker';
 import { ReportCard } from '../components/ReportCard';
 import { TEXTS } from '../texts';
 import { MyReports } from './MyReports';
@@ -20,7 +23,6 @@ export function Reports({ language }: Props) {
 
   return (
     <main className="screen">
-      <h2>{t.reports}</h2>
       <div className="tabs" role="tablist">
         <button role="tab" aria-selected={tab === 'all'} onClick={() => setTab('all')}>
           {t.allReportsTab}
@@ -34,33 +36,101 @@ export function Reports({ language }: Props) {
   );
 }
 
+const AREA_KEY = 'odormap.reportsArea';
+const ALL_AREAS = 'all';
+
+/** Where the phone is now, or undefined if that is not known quickly (no permission, no signal). */
+function currentPoint(): Promise<Point | undefined> {
+  return new Promise((resolve) => {
+    if (!('geolocation' in navigator)) return resolve(undefined);
+    navigator.geolocation.getCurrentPosition(
+      (position) => resolve({ lat: position.coords.latitude, lon: position.coords.longitude }),
+      () => resolve(undefined),
+      { timeout: 8000, maximumAge: 10 * 60 * 1000 },
+    );
+  });
+}
+
 function EveryonesReports({ language }: Props) {
   const t = TEXTS[language];
-  const [area, setArea] = useState<Area>();
+  const [areas, setAreas] = useState<Area[]>();
+  // Chosen area id or ALL_AREAS; undefined until the starting choice is known.
+  const [choice, setChoice] = useState<string>();
+  // Where the person is, shown above the area list: still looking, an area name, or not known.
+  const [where, setWhere] = useState<
+    { status: 'locating' } | { status: 'found'; name: string } | { status: 'unknown' }
+  >({
+    status: 'locating',
+  });
   const [reports, setReports] = useState<PublicReport[]>();
   const [error, setError] = useState(false);
 
+  // Start with the area the person is in now. Elsewhere, or when the location is not known,
+  // start with the choice made last time on this device, or else all areas.
   useEffect(() => {
-    // For now there is one area; the first one is shown.
-    const to = new Date();
-    const from = new Date(to.getTime() - DAYS_SHOWN * 24 * 60 * 60 * 1000);
     api
       .areas()
-      .then(async ([first]) => {
-        setArea(first);
-        const found = first ? await api.reports(first.areaId, from.toISOString(), to.toISOString()) : [];
-        setReports([...found].sort((a, b) => b.observedAt.localeCompare(a.observedAt)));
+      .then(async (found) => {
+        setAreas(found);
+        const point = await currentPoint();
+        const here = point && findAreaFor(point, found);
+        setWhere(point ? { status: 'found', name: here?.name ?? t.unknownArea } : { status: 'unknown' });
+        setChoice(here?.areaId ?? localStorage.getItem(AREA_KEY) ?? ALL_AREAS);
       })
       .catch(() => setError(true));
   }, []);
 
+  // The areas to show: the chosen one, or all of them (also when a remembered area no longer exists).
+  const chosen = areas?.find((a) => a.areaId === choice);
+  const shown = areas && choice !== undefined ? (chosen ? [chosen] : areas) : undefined;
+
+  useEffect(() => {
+    if (!shown) return;
+    setReports(undefined);
+    const to = new Date().toISOString();
+    const from = new Date(Date.now() - DAYS_SHOWN * 24 * 60 * 60 * 1000).toISOString();
+    // One request per area, put together newest first.
+    Promise.all(shown.map((area) => api.reports(area.areaId, from, to)))
+      .then((lists) => setReports(lists.flat().sort((a, b) => b.observedAt.localeCompare(a.observedAt))))
+      .catch(() => setError(true));
+    // Runs again only when the choice or the list of areas changes.
+  }, [areas, chosen]);
+
+  function choose(id: string) {
+    localStorage.setItem(AREA_KEY, id);
+    setChoice(id);
+  }
+
+  const areaName = (id: string) => areas?.find((a) => a.areaId === id)?.name ?? t.unknownArea;
+  const severalAreas = areas !== undefined && areas.length > 1;
+
   return (
     <>
-      {area && (
+      <section className="card">
+        <h2>{t.location}</h2>
+        {where.status === 'locating' && (
+          <p className="locating">
+            <span className="spinner" aria-hidden="true" /> {t.locating}
+          </p>
+        )}
+        {where.status === 'found' && <p className="area">{where.name}</p>}
+        {where.status === 'unknown' && <p className="muted">{t.locationUnknown}</p>}
+      </section>
+      {severalAreas && choice !== undefined && (
+        <AreaPicker
+          language={language}
+          areas={areas}
+          value={chosen?.areaId}
+          onChange={(id) => choose(id ?? ALL_AREAS)}
+        />
+      )}
+      {/* With the area list above, the area name is not repeated here. */}
+      {areas?.length === 1 && (
         <p className="muted small">
-          {area.name} · {t.lastDays}
+          {areas[0].name} · {t.lastDays}
         </p>
       )}
+      {severalAreas && choice !== undefined && <p className="muted small">{t.lastDaysTitle}</p>}
       {error && <p className="error">{t.somethingWrong}</p>}
       {!error && !reports && <p className="muted">{t.loading}</p>}
       {reports?.length === 0 && <p className="muted">{t.noReportsYet}</p>}
@@ -69,7 +139,7 @@ function EveryonesReports({ language }: Props) {
           key={report.id}
           language={language}
           report={report}
-          areaName={area?.name ?? t.unknownArea}
+          areaName={areaName(report.areaId)}
           mine={report.isMine}
         />
       ))}

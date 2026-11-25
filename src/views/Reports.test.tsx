@@ -4,7 +4,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { Reports } from './Reports';
 
 beforeEach(() => localStorage.setItem('odormap.tokens', JSON.stringify({ accessToken: 'a', refreshToken: 'r' })));
-afterEach(() => vi.unstubAllGlobals());
+afterEach(() => {
+  vi.unstubAllGlobals();
+  localStorage.clear();
+});
 
 const area = {
   areaId: 'backa-topola',
@@ -57,5 +60,66 @@ describe('Reports', () => {
 
     expect(await screen.findByText('Još nemaš nijednu prijavu.')).toBeInTheDocument();
     expect(fetch.mock.calls.some(([url]) => String(url).endsWith('/reports/mine'))).toBe(true);
+  });
+
+  it('lets the person choose another area and remembers it', async () => {
+    const noviSad = { ...area, areaId: 'novi-sad', name: 'Novi Sad' };
+    const fetch = vi.fn(async (url: string) => Response.json(url.endsWith('/areas') ? [area, noviSad] : []));
+    vi.stubGlobal('fetch', fetch);
+    render(<Reports language="sr" />);
+
+    await userEvent.click(await screen.findByRole('button', { name: /Sva područja/ }));
+    await userEvent.type(screen.getByRole('searchbox', { name: 'Pretraži područja' }), 'novi');
+    expect(screen.queryByRole('button', { name: 'Bačka Topola' })).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: 'Novi Sad' }));
+
+    expect(await screen.findByRole('button', { name: /Novi Sad/, expanded: false })).toBeInTheDocument();
+    expect(fetch).toHaveBeenLastCalledWith(expect.stringContaining('areaId=novi-sad'), expect.anything());
+    expect(localStorage.getItem('odormap.reportsArea')).toBe('novi-sad');
+  });
+
+  it('shows all areas together by default', async () => {
+    const noviSad = { ...area, areaId: 'novi-sad', name: 'Novi Sad' };
+    const fetch = vi.fn(async (url: string) => {
+      if (url.endsWith('/areas')) return Response.json([area, noviSad]);
+      const id = new URL(url, 'http://x').searchParams.get('areaId');
+      return Response.json([
+        { ...report(`019a9a3c-6b1e-7000-8000-0000000000c${id === 'novi-sad' ? 1 : 2}`, false, id!), areaId: id },
+      ]);
+    });
+    vi.stubGlobal('fetch', fetch);
+    render(<Reports language="sr" />);
+
+    expect(await screen.findByText('„novi-sad”')).toBeInTheDocument();
+    expect(screen.getByText('„backa-topola”')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Sva područja/, expanded: false })).toBeInTheDocument();
+  });
+
+  it('starts with the area the person is in', async () => {
+    const box = (lat: number, lon: number) => [
+      { lat: lat - 0.1, lon: lon - 0.1 },
+      { lat: lat + 0.1, lon: lon - 0.1 },
+      { lat: lat + 0.1, lon: lon + 0.1 },
+      { lat: lat - 0.1, lon: lon + 0.1 },
+    ];
+    const areas = [
+      { ...area, boundary: box(45.8, 19.6) },
+      { ...area, areaId: 'zrenjanin', name: 'Zrenjanin', boundary: box(45.38, 20.39) },
+    ];
+    vi.stubGlobal('navigator', {
+      ...navigator,
+      geolocation: {
+        getCurrentPosition: (ok: PositionCallback) =>
+          ok({ coords: { latitude: 45.38, longitude: 20.39 } } as GeolocationPosition),
+      },
+    });
+    const fetch = vi.fn(async (url: string) => Response.json(url.endsWith('/areas') ? areas : []));
+    vi.stubGlobal('fetch', fetch);
+    render(<Reports language="sr" />);
+
+    expect(await screen.findByRole('button', { name: /Zrenjanin/, expanded: false })).toBeInTheDocument();
+    const location = screen.getByRole('heading', { name: 'Lokacija' }).closest('section')!;
+    expect(location).toHaveTextContent('Zrenjanin');
+    expect(fetch).toHaveBeenLastCalledWith(expect.stringContaining('areaId=zrenjanin'), expect.anything());
   });
 });

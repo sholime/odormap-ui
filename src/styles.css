@@ -563,3 +563,118 @@ header .menu-button {
 .install button {
   width: 100%;
 }
+
+/* Area list with search (Prijave > Sve prijave) */
+.area-picker {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.area-picker-label {
+  font-weight: 500;
+}
+
+.area-picker-button {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  text-align: left;
+}
+
+.area-picker-panel {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  margin-top: 4px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.area-picker-panel hr {
+  width: 100%;
+  margin: 2px 0;
+  border: none;
+  border-top: 1px solid var(--border);
+}
+
+.area-options {
+  display: flex;
+  flex-direction: column;
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.area-option {
+  border: none;
+  text-align: left;
+  border-radius: 8px;
+}
+
+.area-option.all {
+  font-weight: 600;
+}
+
+.area-option[aria-pressed='true'] {
+  background: var(--green-light);
+  color: var(--green);
+  font-weight: 600;
+}
+
+/* Bar fixed at the bottom (logged in): Prijavi / Prijave. */
+body:has(.bottom-bar) {
+  padding-bottom: calc(64px + env(safe-area-inset-bottom));
+}
+
+.bottom-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 5;
+  display: flex;
+  gap: 8px;
+  padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
+  background: var(--green);
+}
+
+/* Like the language buttons in the header: outlined, and the current one filled white. */
+.bottom-bar button {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 4px;
+  font-size: 0.95rem;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 8px;
+  background: transparent;
+  color: white;
+}
+
+.bottom-bar button[aria-current='page'] {
+  background: white;
+  border-color: white;
+  color: var(--green);
+  font-weight: 600;
+}
+
+.bottom-bar svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
