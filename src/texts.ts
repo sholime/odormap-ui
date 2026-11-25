@@ -9,7 +9,10 @@ import type { Language } from '@odormap/common';
 
 export const TEXTS = {
   sr: {
-    tagline: 'Prijavi neprijatan miris u svom kraju.',
+    installWhy: 'Dodaj OdorMap na početni ekran telefona, pa ga otvaraš jednim dodirom, kao aplikaciju.',
+    installButton: 'Dodaj na početni ekran',
+    installNow: 'Dodaj',
+    installIos: 'U Safariju dodirni Podeli (kvadrat sa strelicom ⬆), pa „Dodaj na početni ekran”.',
     logOut: 'Odjavi se',
     myAccount: 'Moj nalog',
     home: 'Početna',
@@ -89,7 +92,10 @@ export const TEXTS = {
     cancel: 'Otkaži',
   },
   hu: {
-    tagline: 'Jelentsd a kellemetlen szagot a környékeden.',
+    installWhy: 'Tedd ki az OdorMapot a telefon kezdőképernyőjére, így egy érintéssel megnyithatod, mint egy alkalmazást.',
+    installButton: 'Hozzáadás a kezdőképernyőhöz',
+    installNow: 'Hozzáadás',
+    installIos: 'A Safariban koppints a Megosztás gombra (négyzet nyíllal ⬆), majd a „Főképernyőhöz adás” pontra.',
     logOut: 'Kijelentkezés',
     myAccount: 'Fiókom',
     home: 'Főoldal',

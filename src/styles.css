@@ -218,11 +218,6 @@ details summary {
   color: var(--muted);
 }
 
-.tagline {
-  margin: 0;
-  font-size: 1.1rem;
-}
-
 .or {
   margin: 0;
   text-align: center;
@@ -543,4 +538,28 @@ header .menu-button {
   background: var(--green);
   color: white;
   font-size: 0.8rem;
+}
+
+/* "What is OdorMap?" on the sign-in screen. */
+.about ol {
+  margin: 8px 0;
+  padding-left: 22px;
+}
+
+.about li {
+  margin: 4px 0;
+}
+
+/* "Add to home screen" */
+.install {
+  background: var(--green-light);
+  border-color: var(--green);
+}
+
+.install p {
+  margin: 8px 0;
+}
+
+.install button {
+  width: 100%;
 }

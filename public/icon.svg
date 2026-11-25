@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- OdorMap icon: a map pin with three smell waves above it, white on green. -->
+  <rect width="512" height="512" fill="#2f6f4f"/>
+  <g fill="none" stroke="#ffffff" stroke-width="22" stroke-linecap="round">
+    <path d="M196 150c-18-22 18-40 0-62s18-40 0-62" transform="translate(0 30)"/>
+    <path d="M256 140c-18-22 18-40 0-62s18-40 0-62" transform="translate(0 30)"/>
+    <path d="M316 150c-18-22 18-40 0-62s18-40 0-62" transform="translate(0 30)"/>
+  </g>
+  <path fill="#ffffff" d="M256 210c-62 0-112 50-112 112 0 84 112 166 112 166s112-82 112-166c0-62-50-112-112-112zm0 152a40 40 0 1 1 0-80 40 40 0 0 1 0 80z"/>
+</svg>

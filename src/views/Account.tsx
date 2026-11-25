@@ -4,6 +4,7 @@
 import { useState } from 'react';
 import type { Language, User } from '@odormap/common';
 import { api } from '../api';
+import { InstallApp } from '../components/InstallApp';
 import { TEXTS } from '../texts';
 
 type Props = {
@@ -84,6 +85,8 @@ export function Account({ language, user, onCreateAccount, onLoggedOut }: Props)
           </p>
         )}
       </section>
+
+      <InstallApp language={language} />
     </main>
   );
 }
