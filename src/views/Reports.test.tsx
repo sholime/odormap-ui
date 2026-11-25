@@ -74,4 +74,21 @@ describe('Reports', () => {
     expect(fetch).toHaveBeenLastCalledWith(expect.stringContaining('areaId=novi-sad'), expect.anything());
     expect(localStorage.getItem('odormap.reportsArea')).toBe('novi-sad');
   });
+
+  it('shows all areas together by default', async () => {
+    const noviSad = { ...area, areaId: 'novi-sad', name: 'Novi Sad' };
+    const fetch = vi.fn(async (url: string) => {
+      if (url.endsWith('/areas')) return Response.json([area, noviSad]);
+      const id = new URL(url, 'http://x').searchParams.get('areaId');
+      return Response.json([
+        { ...report(`019a9a3c-6b1e-7000-8000-0000000000c${id === 'novi-sad' ? 1 : 2}`, false, id!), areaId: id },
+      ]);
+    });
+    vi.stubGlobal('fetch', fetch);
+    render(<Reports language="sr" />);
+
+    expect(await screen.findByText('„novi-sad”')).toBeInTheDocument();
+    expect(screen.getByText('„backa-topola”')).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'Sva područja', selected: true })).toBeInTheDocument();
+  });
 });

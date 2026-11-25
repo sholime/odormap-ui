@@ -1,7 +1,7 @@
 // "Reports": two tabs.
 // - All reports: everyone's reports in one area from the last 7 days, newest first, with comments but no names.
-//   The person's own reports are highlighted. With more than one area, a list chooses the area
-//   (remembered on this device).
+//   The person's own reports are highlighted. With more than one area, a list chooses one area or
+//   all of them (all by default; the choice is remembered on this device).
 // - My reports: the person's own reports.
 
 import { useEffect, useState } from 'react';
@@ -36,12 +36,13 @@ export function Reports({ language }: Props) {
 }
 
 const AREA_KEY = 'odormap.reportsArea';
+const ALL_AREAS = 'all';
 
 function EveryonesReports({ language }: Props) {
   const t = TEXTS[language];
   const [areas, setAreas] = useState<Area[]>();
-  // The area chosen last time on this device, or else the first one.
-  const [areaId, setAreaId] = useState(() => localStorage.getItem(AREA_KEY) ?? '');
+  // The choice made last time on this device, or else all areas.
+  const [choice, setChoice] = useState(() => localStorage.getItem(AREA_KEY) ?? ALL_AREAS);
   const [reports, setReports] = useState<PublicReport[]>();
   const [error, setError] = useState(false);
 
@@ -49,31 +50,38 @@ function EveryonesReports({ language }: Props) {
     api.areas().then(setAreas, () => setError(true));
   }, []);
 
-  const area = areas?.find((a) => a.areaId === areaId) ?? areas?.[0];
+  // The areas to show: the chosen one, or all of them (also when a remembered area no longer exists).
+  const chosen = areas?.find((a) => a.areaId === choice);
+  const shown = areas && (chosen ? [chosen] : areas);
 
   useEffect(() => {
-    if (!area) return;
+    if (!shown) return;
     setReports(undefined);
-    const to = new Date();
-    const from = new Date(to.getTime() - DAYS_SHOWN * 24 * 60 * 60 * 1000);
-    api
-      .reports(area.areaId, from.toISOString(), to.toISOString())
-      .then((found) => setReports([...found].sort((a, b) => b.observedAt.localeCompare(a.observedAt))))
+    const to = new Date().toISOString();
+    const from = new Date(Date.now() - DAYS_SHOWN * 24 * 60 * 60 * 1000).toISOString();
+    // One request per area, put together newest first.
+    Promise.all(shown.map((area) => api.reports(area.areaId, from, to)))
+      .then((lists) => setReports(lists.flat().sort((a, b) => b.observedAt.localeCompare(a.observedAt))))
       .catch(() => setError(true));
-  }, [area]);
+    // Runs again only when the choice or the list of areas changes.
+  }, [areas, chosen]);
 
-  function chooseArea(id: string) {
+  function choose(id: string) {
     localStorage.setItem(AREA_KEY, id);
-    setAreaId(id);
+    setChoice(id);
   }
+
+  const areaName = (id: string) => areas?.find((a) => a.areaId === id)?.name ?? t.unknownArea;
+  const severalAreas = areas !== undefined && areas.length > 1;
 
   return (
     <>
-      {areas && areas.length > 1 && area && (
+      {severalAreas && (
         <div className="filters">
           <label>
             {t.area}
-            <select value={area.areaId} onChange={(e) => chooseArea(e.target.value)}>
+            <select value={chosen?.areaId ?? ALL_AREAS} onChange={(e) => choose(e.target.value)}>
+              <option value={ALL_AREAS}>{t.allAreas}</option>
               {areas.map((a) => (
                 <option key={a.areaId} value={a.areaId}>
                   {a.name}
@@ -84,14 +92,24 @@ function EveryonesReports({ language }: Props) {
         </div>
       )}
       {/* With the area list above, the area name is not repeated here. */}
-      {area && <p className="muted small">{areas!.length > 1 ? t.lastDaysTitle : `${area.name} · ${t.lastDays}`}</p>}
+      {areas?.length === 1 && (
+        <p className="muted small">
+          {areas[0].name} · {t.lastDays}
+        </p>
+      )}
+      {severalAreas && <p className="muted small">{t.lastDaysTitle}</p>}
       {error && <p className="error">{t.somethingWrong}</p>}
-      {!error && area && !reports && <p className="muted">{t.loading}</p>}
+      {!error && shown && !reports && <p className="muted">{t.loading}</p>}
       {reports?.length === 0 && <p className="muted">{t.noReportsYet}</p>}
-      {area &&
-        reports?.map((report) => (
-          <ReportCard key={report.id} language={language} report={report} areaName={area.name} mine={report.isMine} />
-        ))}
+      {reports?.map((report) => (
+        <ReportCard
+          key={report.id}
+          language={language}
+          report={report}
+          areaName={areaName(report.areaId)}
+          mine={report.isMine}
+        />
+      ))}
     </>
   );
 }
