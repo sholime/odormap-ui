@@ -47,16 +47,13 @@ export function ReportDetails({ language, report, areaName, backLabel, onBack, o
 
       {/* Only admins get the sender: shown like the top of the user's page. */}
       {author && (
-        <section className="card">
-          <div className="user-head">
-            <span className="avatar big" aria-hidden="true">
-              {initials(authorName(language, author))}
-            </span>
-            <div>
-              <div className="muted small">{t.sentBy}</div>
-              <strong>{authorName(language, author)}</strong>
-              {author.email && <div className="muted small">{author.email}</div>}
-            </div>
+        <section className="card sender">
+          <span className="avatar big" aria-hidden="true">
+            {initials(authorName(language, author))}
+          </span>
+          <div className="sender-name">
+            <strong>{authorName(language, author)}</strong>
+            {author.email && <div className="muted small">{author.email}</div>}
           </div>
           {onOpenUser && author.displayName !== undefined && (
             <button onClick={() => onOpenUser(author.id)}>{t.seeUser}</button>
