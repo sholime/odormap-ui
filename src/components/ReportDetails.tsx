@@ -13,7 +13,8 @@ type Props = {
   report: PublicReport | OdorReport;
   areaName: string;
   /** The screen to go back to, shown on the back button, e.g. "Prijave". */
-  backLabel: string;
+  /** No back link without it: e.g. from a user's page, "Vidi korisnika" goes back. */
+  backLabel?: string;
   onBack: () => void;
   /** Shows this place on the app's map. */
   onShowOnMap: (point: Point) => void;
@@ -44,9 +45,11 @@ export function ReportDetails(props: Props) {
 
   return (
     <>
-      <button className="link back" onClick={onBack}>
-        ‹ {backLabel}
-      </button>
+      {backLabel && (
+        <button className="link back" onClick={onBack}>
+          ‹ {backLabel}
+        </button>
+      )}
 
       {/* Only admins get the sender: shown like the top of the user's page. */}
       {author && (

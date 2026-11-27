@@ -132,8 +132,9 @@ describe('Users', () => {
     await userEvent.click(await screen.findByText('Marko Jovanović'));
 
     await userEvent.click(await screen.findByText('„Kod škole”'));
-    expect(screen.getByRole('button', { name: '‹ Marko Jovanović' })).toBeInTheDocument();
     expect(screen.queryByText('Tvoja')).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: 'Vidi korisnika' }));
+    expect(await screen.findByText('Prijave (poslednjih 50)')).toBeVisible();
   });
 
   it("offers no actions on the admin's own account", async () => {
