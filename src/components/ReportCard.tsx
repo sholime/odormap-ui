@@ -1,12 +1,15 @@
 // One report in a list: when and where, how strong, what kind, the wind, and the comment (if any).
 // Used by both tabs of "Reports" and by the admin overview. The person's own reports can be highlighted.
 
-import { LABELS, type Language, type OdorReport } from '@odormap/common';
-import { TEXTS } from '../texts';
+import { LABELS, type Language, type OdorReport, type ReportAuthor } from '@odormap/common';
+import { authorName, TEXTS } from '../texts';
 
 type Props = {
   language: Language;
-  report: Pick<OdorReport, 'observedAt' | 'strength' | 'odorKind' | 'odorKindOther' | 'comment' | 'weather'>;
+  /** author comes only for admins. */
+  report: Pick<OdorReport, 'observedAt' | 'strength' | 'odorKind' | 'odorKindOther' | 'comment' | 'weather'> & {
+    author?: ReportAuthor;
+  };
   areaName: string;
   /** Highlights the card and adds a "yours" tag. */
   mine?: boolean;
@@ -68,6 +71,13 @@ export function ReportCard({ language, report, areaName, mine = false, onOpen }:
           )}
         </span>
         {report.comment && <span className="report-comment">„{report.comment}”</span>}
+        {report.author && (
+          <span className="report-line muted small">
+            <span>
+              {t.sentBy}: {authorName(language, report.author)}
+            </span>
+          </span>
+        )}
       </span>
     </Root>
   );

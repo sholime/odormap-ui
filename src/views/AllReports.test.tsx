@@ -51,6 +51,30 @@ function fakeApi() {
 }
 
 describe('AllReports', () => {
+  it('shows who sent each report and opens the sender', async () => {
+    const author = { id: '019a9a3c-6b1e-7000-8000-0000000000aa', displayName: 'Ana', email: 'ana@example.com' };
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url: string) =>
+        Response.json(
+          url.endsWith('/areas')
+            ? [area]
+            : url.includes('areaId=backa-topola')
+              ? [{ ...reports[0], author }, { ...reports[1], author: { id: '00000000-0000-0000-0000-000000000000' } }]
+              : [],
+        ),
+      ),
+    );
+    const openUser = vi.fn();
+    render(<AllReports language="sr" onShowOnMap={() => {}} onOpenUser={openUser} />);
+
+    expect(await screen.findByText('Poslao/la: Ana (ana@example.com)')).toBeInTheDocument();
+    expect(screen.getByText('Poslao/la: Obrisan nalog')).toBeInTheDocument();
+    await userEvent.click(screen.getByText('Trulo meso'));
+    await userEvent.click(screen.getByRole('button', { name: 'Ana (ana@example.com)' }));
+    expect(openUser).toHaveBeenCalledWith(author.id);
+  });
+
   it('starts with the reports of all areas, including outside the known areas, with totals', async () => {
     const fetch = fakeApi();
     render(<AllReports language="sr" onShowOnMap={() => {}} />);

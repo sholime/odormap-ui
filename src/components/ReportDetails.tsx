@@ -4,7 +4,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { LABELS, type Language, type OdorReport, type Point, type PublicReport } from '@odormap/common';
-import { TEXTS } from '../texts';
+import { authorName, TEXTS } from '../texts';
 import { compass, windKmh } from './ReportCard';
 
 type Props = {
@@ -16,9 +16,11 @@ type Props = {
   onBack: () => void;
   /** Shows this place on the app's map. */
   onShowOnMap: (point: Point) => void;
+  /** Opens the sender on the admin "Users" screen. */
+  onOpenUser?: (userId: string) => void;
 };
 
-export function ReportDetails({ language, report, areaName, backLabel, onBack, onShowOnMap }: Props) {
+export function ReportDetails({ language, report, areaName, backLabel, onBack, onShowOnMap, onOpenUser }: Props) {
   const t = TEXTS[language];
   const labels = LABELS[language];
   const locale = language === 'hu' ? 'hu-HU' : 'sr-Latn-RS';
@@ -26,6 +28,8 @@ export function ReportDetails({ language, report, areaName, backLabel, onBack, o
   // Reports from "My reports" carry the userId; the others say isMine.
   const mine = 'userId' in report || report.isMine;
   const { lat, lon } = report.location;
+  // Only admins get the sender.
+  const author = 'author' in report ? report.author : undefined;
 
   const kind =
     report.odorKind === 'not_set'
@@ -62,6 +66,20 @@ export function ReportDetails({ language, report, areaName, backLabel, onBack, o
           <dd>{kind}</dd>
           <dt>{t.area}</dt>
           <dd>{areaName}</dd>
+          {author && (
+            <>
+              <dt>{t.sentBy}</dt>
+              <dd>
+                {onOpenUser && author.displayName !== undefined ? (
+                  <button className="link" onClick={() => onOpenUser(author.id)}>
+                    {authorName(language, author)}
+                  </button>
+                ) : (
+                  authorName(language, author)
+                )}
+              </dd>
+            </>
+          )}
         </dl>
         {report.comment && <p className="report-comment">„{report.comment}”</p>}
       </section>

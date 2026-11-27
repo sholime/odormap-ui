@@ -1,6 +1,6 @@
 // Admin screen "All reports": every report in one area, or in all areas, between two dates (at most 31 days),
 // with a few totals and a CSV download that opens in Excel.
-// Reports are anonymous here: no names, no comments, locations rounded to about 200 m.
+// Admins see who sent each report; locations are rounded to about 200 m, as everywhere.
 // The menu shows this screen only to admins.
 
 import { useEffect, useState } from 'react';
@@ -17,9 +17,9 @@ import { withUndefinedArea } from '../undefinedArea';
 // "All areas": every known area and the unknown one, loaded one by one and put together.
 const ALL_AREAS = 'all';
 
-type Props = { language: Language; onShowOnMap: (point: Point) => void };
+type Props = { language: Language; onShowOnMap: (point: Point) => void; onOpenUser?: (userId: string) => void };
 
-export function AllReports({ language, onShowOnMap }: Props) {
+export function AllReports({ language, onShowOnMap, onOpenUser }: Props) {
   const t = TEXTS[language];
   const [areas, setAreas] = useState<Area[]>([]);
   const [areaId, setAreaId] = useState(ALL_AREAS);
@@ -69,6 +69,7 @@ export function AllReports({ language, onShowOnMap }: Props) {
           backLabel={t.allReports}
           onBack={details.close}
           onShowOnMap={onShowOnMap}
+          onOpenUser={onOpenUser}
         />
       )}
       <div className="screen-part" hidden={!!details.open}>

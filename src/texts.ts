@@ -5,7 +5,7 @@
 //
 // These translations still need checking by native speakers.
 
-import type { Language } from '@odormap/common';
+import type { Language, ReportAuthor } from '@odormap/common';
 
 export const TEXTS = {
   sr: {
@@ -42,6 +42,9 @@ export const TEXTS = {
     resetFilters: 'Poništi filtere',
     done: 'Gotovo',
     yours: 'Tvoja',
+    sentBy: 'Poslao/la',
+    authorGuest: 'Gost',
+    authorDeleted: 'Obrisan nalog',
     noReports: 'Još nemaš nijednu prijavu.',
     loading: 'Učitavam…',
     wind: 'Vetar',
@@ -188,6 +191,9 @@ export const TEXTS = {
     resetFilters: 'Szűrők törlése',
     done: 'Kész',
     yours: 'Saját',
+    sentBy: 'Beküldő',
+    authorGuest: 'Vendég',
+    authorDeleted: 'Törölt fiók',
     noReports: 'Még nincs bejelentésed.',
     loading: 'Betöltés…',
     wind: 'Szél',
@@ -316,4 +322,12 @@ export function reportsWord(language: Language, count: number): string {
 /** "1 prijava", "3 prijave", "5 prijava" */
 export function countReports(language: Language, count: number): string {
   return `${count} ${reportsWord(language, count)}`;
+}
+
+/** Who sent a report, as admins see it: "Name (email)", or that it was a guest or a deleted account. */
+export function authorName(language: Language, author: ReportAuthor): string {
+  const t = TEXTS[language];
+  if (author.displayName === undefined) return t.authorDeleted;
+  if (author.email === undefined) return t.authorGuest;
+  return `${author.displayName} (${author.email})`;
 }

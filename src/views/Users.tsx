@@ -12,15 +12,16 @@ const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 const FILTERS = ['all', 'accounts', 'guests', 'admins', 'blocked'] as const;
 type Filter = (typeof FILTERS)[number];
 
-type Props = { language: Language; currentUserId: string };
+/** openUserId: a user to show right away, e.g. the sender of a report. */
+type Props = { language: Language; currentUserId: string; openUserId?: string };
 
-export function Users({ language, currentUserId }: Props) {
+export function Users({ language, currentUserId, openUserId }: Props) {
   const t = TEXTS[language];
   const [users, setUsers] = useState<AdminUser[]>();
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<Filter>('all');
-  const [openId, setOpenId] = useState<string>();
+  const [openId, setOpenId] = useState(openUserId);
 
   useEffect(() => {
     api.users().then(setUsers, () => setError(t.somethingWrong));

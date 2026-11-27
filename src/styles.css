@@ -352,6 +352,11 @@ dl.details dd {
   overflow-wrap: anywhere;
 }
 
+dl.details dd button.link {
+  padding: 0;
+  text-align: left;
+}
+
 button.danger {
   background: white;
   border-color: var(--error);

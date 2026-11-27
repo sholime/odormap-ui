@@ -19,9 +19,9 @@ import { currentPoint } from '../location';
 import { MyReports } from './MyReports';
 
 
-type Props = { language: Language; onShowOnMap: (point: Point) => void };
+type Props = { language: Language; onShowOnMap: (point: Point) => void; onOpenUser?: (userId: string) => void };
 
-export function Reports({ language, onShowOnMap }: Props) {
+export function Reports({ language, onShowOnMap, onOpenUser }: Props) {
   const t = TEXTS[language];
   const [tab, setTab] = useState<'all' | 'mine'>('all');
   const details = useOpenReport();
@@ -37,6 +37,7 @@ export function Reports({ language, onShowOnMap }: Props) {
           backLabel={t.reports}
           onBack={details.close}
           onShowOnMap={onShowOnMap}
+          onOpenUser={onOpenUser}
         />
       )}
       <div className="tabs" role="tablist" hidden={!!details.open}>
