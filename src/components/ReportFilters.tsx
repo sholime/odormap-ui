@@ -50,8 +50,8 @@ export function ReportFilters({ language, filters, onChange, total, shown, overl
   const active = [
     filters.momentOn && filters.moment && `${momentText(filters.moment)} ±${hours(filters.windowHours)}`,
     filters.winds.length > 0 &&
-      `${t.wind.toLowerCase()} ${filters.winds.map((s) => compass(s * 45, language)).join(', ')}`,
-    filters.strengths.length > 0 && `${t.strengthShort} ${filters.strengths.join(', ')}`,
+      filters.winds.map((s) => compass(s * 45, language)).join(', '),
+    filters.strengths.length > 0 && filters.strengths.join(', '),
   ].filter(Boolean);
 
   return (
