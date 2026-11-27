@@ -4,6 +4,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { LABELS, type Language, type OdorReport, type Point, type PublicReport } from '@odormap/common';
+import { initials } from '../initials';
 import { authorName, TEXTS } from '../texts';
 import { compass, windKmh } from './ReportCard';
 
@@ -44,6 +45,25 @@ export function ReportDetails({ language, report, areaName, backLabel, onBack, o
         ‹ {backLabel}
       </button>
 
+      {/* Only admins get the sender: shown like the top of the user's page. */}
+      {author && (
+        <section className="card">
+          <div className="user-head">
+            <span className="avatar big" aria-hidden="true">
+              {initials(authorName(language, author))}
+            </span>
+            <div>
+              <div className="muted small">{t.sentBy}</div>
+              <strong>{authorName(language, author)}</strong>
+              {author.email && <div className="muted small">{author.email}</div>}
+            </div>
+          </div>
+          {onOpenUser && author.displayName !== undefined && (
+            <button onClick={() => onOpenUser(author.id)}>{t.seeUser}</button>
+          )}
+        </section>
+      )}
+
       <section className={mine ? 'card mine' : 'card'}>
         <div className="report-head">
           <span className={`strength-badge big s${report.strength}`}>{report.strength}</span>
@@ -66,20 +86,6 @@ export function ReportDetails({ language, report, areaName, backLabel, onBack, o
           <dd>{kind}</dd>
           <dt>{t.area}</dt>
           <dd>{areaName}</dd>
-          {author && (
-            <>
-              <dt>{t.sentBy}</dt>
-              <dd>
-                {onOpenUser && author.displayName !== undefined ? (
-                  <button className="link" onClick={() => onOpenUser(author.id)}>
-                    {authorName(language, author)}
-                  </button>
-                ) : (
-                  authorName(language, author)
-                )}
-              </dd>
-            </>
-          )}
         </dl>
         {report.comment && <p className="report-comment">„{report.comment}”</p>}
       </section>

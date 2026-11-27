@@ -68,10 +68,10 @@ describe('AllReports', () => {
     const openUser = vi.fn();
     render(<AllReports language="sr" onShowOnMap={() => {}} onOpenUser={openUser} />);
 
-    expect(await screen.findByText('Poslao/la: Ana (ana@example.com)')).toBeInTheDocument();
-    expect(screen.getByText('Poslao/la: Obrisan nalog')).toBeInTheDocument();
+    expect(await screen.findByText('ana@example.com')).toBeInTheDocument();
+    expect(screen.getByText('Obrisan nalog')).toBeInTheDocument();
     await userEvent.click(screen.getByText('Trulo meso'));
-    await userEvent.click(screen.getByRole('button', { name: 'Ana (ana@example.com)' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Vidi korisnika' }));
     expect(openUser).toHaveBeenCalledWith(author.id);
   });
 

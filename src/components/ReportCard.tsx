@@ -2,7 +2,7 @@
 // Used by both tabs of "Reports" and by the admin overview. The person's own reports can be highlighted.
 
 import { LABELS, type Language, type OdorReport, type ReportAuthor } from '@odormap/common';
-import { authorName, TEXTS } from '../texts';
+import { authorEmail, TEXTS } from '../texts';
 
 type Props = {
   language: Language;
@@ -59,6 +59,8 @@ export function ReportCard({ language, report, areaName, mine = false, onOpen }:
             })}
           </time>
         </span>
+        {/* Only admins get the sender: small, under strength and kind. */}
+        {report.author && <span className="report-author muted">{authorEmail(language, report.author)}</span>}
         <span className="report-line muted small">
           <span>
             {mine && <span className="yours-tag">{t.yours}</span>}
@@ -71,13 +73,6 @@ export function ReportCard({ language, report, areaName, mine = false, onOpen }:
           )}
         </span>
         {report.comment && <span className="report-comment">„{report.comment}”</span>}
-        {report.author && (
-          <span className="report-line muted small">
-            <span>
-              {t.sentBy}: {authorName(language, report.author)}
-            </span>
-          </span>
-        )}
       </span>
     </Root>
   );

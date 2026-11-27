@@ -43,6 +43,7 @@ export const TEXTS = {
     done: 'Gotovo',
     yours: 'Tvoja',
     sentBy: 'Poslao/la',
+    seeUser: 'Vidi korisnika',
     authorGuest: 'Gost',
     authorDeleted: 'Obrisan nalog',
     noReports: 'Još nemaš nijednu prijavu.',
@@ -192,6 +193,7 @@ export const TEXTS = {
     done: 'Kész',
     yours: 'Saját',
     sentBy: 'Beküldő',
+    seeUser: 'Felhasználó megnyitása',
     authorGuest: 'Vendég',
     authorDeleted: 'Törölt fiók',
     noReports: 'Még nincs bejelentésed.',
@@ -324,10 +326,16 @@ export function countReports(language: Language, count: number): string {
   return `${count} ${reportsWord(language, count)}`;
 }
 
-/** Who sent a report, as admins see it: "Name (email)", or that it was a guest or a deleted account. */
+/** Who sent a report, as admins see it on a card: the email, or that it was a guest or a deleted account. */
+export function authorEmail(language: Language, author: ReportAuthor): string {
+  const t = TEXTS[language];
+  if (author.displayName === undefined) return t.authorDeleted;
+  return author.email ?? t.authorGuest;
+}
+
+/** The sender's name, or that it was a guest or a deleted account. */
 export function authorName(language: Language, author: ReportAuthor): string {
   const t = TEXTS[language];
   if (author.displayName === undefined) return t.authorDeleted;
-  if (author.email === undefined) return t.authorGuest;
-  return `${author.displayName} (${author.email})`;
+  return author.email === undefined ? t.authorGuest : author.displayName;
 }

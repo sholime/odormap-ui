@@ -6,6 +6,7 @@
 import { useEffect, useState } from 'react';
 import type { AdminUser, Language } from '@odormap/common';
 import { api } from '../api';
+import { initials } from '../initials';
 import { countReports, TEXTS, type Texts } from '../texts';
 
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
@@ -278,16 +279,6 @@ function matchesFilter(user: AdminUser, filter: Filter): boolean {
   if (filter === 'admins') return user.role === 'admin';
   if (filter === 'blocked') return user.blocked;
   return true;
-}
-
-/** "Ana Nagy" -> "AN", "Gost" -> "G". */
-function initials(name: string): string {
-  return name
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((word) => word[0]!.toUpperCase())
-    .join('');
 }
 
 /** The whole date with the year, e.g. "20.11.2026." in Serbian, "2026.11.20." in Hungarian. */

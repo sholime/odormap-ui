@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { authorName, countReports } from './texts';
+import { authorEmail, authorName, countReports } from './texts';
 
 describe('countReports', () => {
   it('uses the Serbian form that goes with the number', () => {
@@ -24,8 +24,9 @@ describe('countReports', () => {
 describe('authorName', () => {
   it('names the sender, a guest or a deleted account', () => {
     const id = '019a9a3c-6b1e-7000-8000-0000000000aa';
-    expect(authorName('sr', { id, displayName: 'Ana', email: 'ana@example.com' })).toBe('Ana (ana@example.com)');
-    expect(authorName('sr', { id, displayName: 'Guest' })).toBe('Gost');
-    expect(authorName('hu', { id })).toBe('Törölt fiók');
+    expect(authorName('sr', { id, displayName: 'Ana', email: 'ana@example.com' })).toBe('Ana');
+    expect(authorEmail('sr', { id, displayName: 'Ana', email: 'ana@example.com' })).toBe('ana@example.com');
+    expect(authorEmail('sr', { id, displayName: 'Guest' })).toBe('Gost');
+    expect(authorEmail('hu', { id })).toBe('Törölt fiók');
   });
 });
