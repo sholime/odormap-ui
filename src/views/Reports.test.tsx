@@ -30,6 +30,30 @@ const report = (id: string, isMine: boolean, comment: string) => ({
 });
 
 describe('Reports', () => {
+  it('opens a report on the whole screen and goes back to the list', async () => {
+    const withWeather = {
+      ...report('019a9a3c-6b1e-7000-8000-0000000000b1', false, 'Kod škole'),
+      weather: { windSpeedMs: 4, windDirectionDeg: 315, temperatureC: 6.4, humidityPercent: 81, pressureHpa: 1018 },
+    };
+    vi.stubGlobal('fetch', vi.fn(async (url: string) => Response.json(url.endsWith('/areas') ? [area] : [withWeather])));
+    render(<Reports language="sr" />);
+
+    await userEvent.click(await screen.findByText('„Kod škole”'));
+    expect(screen.getByRole('button', { name: '‹ Prijave' })).toBeInTheDocument();
+    expect(screen.getByText('14 km/h, iz pravca SZ')).toBeInTheDocument();
+    expect(screen.getByText('6,4 °C')).toBeInTheDocument();
+    expect(screen.getByText('1018 hPa')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Otvori na mapi' })).toHaveAttribute(
+      'href',
+      'https://www.openstreetmap.org/?mlat=45.816&mlon=19.632#map=16/45.816/19.632',
+    );
+    expect(screen.queryByRole('tab', { name: 'Sve prijave' })).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: '‹ Prijave' }));
+    expect(await screen.findByRole('tab', { name: 'Sve prijave' })).toBeInTheDocument();
+    expect(screen.queryByText('Otvori na mapi')).not.toBeInTheDocument();
+  });
+
   it("shows everyone's reports with comments and marks the person's own", async () => {
     vi.stubGlobal(
       'fetch',
@@ -47,7 +71,7 @@ describe('Reports', () => {
     render(<Reports language="sr" />);
 
     expect(await screen.findByText('„Ne može da se otvori prozor”')).toBeInTheDocument();
-    const mine = screen.getByText('„Kod škole”').closest('article')!;
+    const mine = screen.getByText('„Kod škole”').closest('.report-item')!;
     expect(mine).toHaveClass('mine');
     expect(screen.getAllByText('Tvoja')).toHaveLength(1);
   });

@@ -497,6 +497,7 @@ header .menu-button {
 .strength-badge.s5 { background: #c0392b; color: white; }
 
 .report-comment {
+  display: block;
   margin: 2px 0 0;
   font-style: italic;
 }
@@ -581,7 +582,8 @@ header .menu-button {
   font-weight: 600;
 }
 
-.report-item.mine {
+.report-item.mine,
+.card.mine {
   border: 2px solid var(--green);
   background: #f3f8f5;
 }
@@ -858,4 +860,47 @@ button.user-item {
 
 button.link.back {
   align-self: flex-start;
+}
+
+/* One report on the whole screen */
+.report-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.strength-badge.big {
+  width: 48px;
+  height: 48px;
+  font-size: 1.3rem;
+}
+
+a.button {
+  display: block;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: white;
+  color: var(--text);
+  text-align: center;
+  text-decoration: none;
+}
+
+/* A report card that opens the report when tapped. */
+button.report-item {
+  display: flex;
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+}
+
+/* Keeps a list in the page (with its place) while one report is shown instead. */
+.screen-part {
+  display: contents;
+}
+
+[hidden] {
+  display: none !important;
 }

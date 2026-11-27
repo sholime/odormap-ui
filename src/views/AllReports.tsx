@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 import { LABELS, type Area, type Language, type PublicReport } from '@odormap/common';
 import { api } from '../api';
 import { compass, ReportCard, windKmh } from '../components/ReportCard';
+import { ReportDetails, useOpenReport } from '../components/ReportDetails';
 import { TEXTS } from '../texts';
 
 const UNKNOWN_AREA_ID = 'unknown';
@@ -26,6 +27,7 @@ export function AllReports({ language }: Props) {
   const [to, setTo] = useState(dateInputValue(new Date()));
   const [reports, setReports] = useState<PublicReport[]>();
   const [error, setError] = useState('');
+  const details = useOpenReport();
 
   useEffect(() => {
     api.areas().then(
@@ -60,78 +62,95 @@ export function AllReports({ language }: Props) {
 
   return (
     <main className="screen">
-      <h2>{t.allReports}</h2>
-
-      <section className="card filters">
-        <label>
-          {t.area}
-          <select value={areaId} onChange={(e) => setAreaId(e.target.value)}>
-            <option value={ALL_AREAS}>{t.allAreas}</option>
-            <option disabled>──────────</option>
-            {areas.map((area) => (
-              <option key={area.areaId} value={area.areaId}>
-                {area.name}
-              </option>
-            ))}
-            <option value={UNKNOWN_AREA_ID}>{t.unknownArea}</option>
-          </select>
-        </label>
-        <div className="date-range">
-          <label>
-            {t.from}
-            <input type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
-          </label>
-          <label>
-            {t.to}
-            <input type="date" value={to} onChange={(e) => setTo(e.target.value)} />
-          </label>
-        </div>
-      </section>
-
-      {error && <p className="error">{error}</p>}
-      {!error && !reports && <p className="muted">{t.loading}</p>}
-
-      {reports && (
-        <>
-          <Totals language={language} reports={reports} />
-          {reports.length > 0 && (
-            <button onClick={() => downloadCsv(reports, language, areaName, `odormap-${areaId}-${from}-${to}.csv`)}>
-              {t.downloadCsv}
-            </button>
-          )}
-          {reports.map((report) => (
-            <ReportCard key={report.id} language={language} report={report} areaName={areaName(report.areaId)} />
-          ))}
-        </>
+      {details.open && (
+        <ReportDetails
+          language={language}
+          report={details.open.report}
+          areaName={details.open.areaName}
+          backLabel={t.allReports}
+          onBack={details.close}
+        />
       )}
-    </main>
-  );
-}
+      <div className="screen-part" hidden={!!details.open}>
+        <h2>{t.allReports}</h2>
 
-/** Number of reports, average strength and the most common wind direction. */
-function Totals({ language, reports }: { language: Language; reports: PublicReport[] }) {
-  const t = TEXTS[language];
-  const average = reports.length ? reports.reduce((sum, r) => sum + r.strength, 0) / reports.length : 0;
-  const winds = reports.flatMap((r) => (r.weather ? [compass(r.weather.windDirectionDeg, language)] : []));
-  const commonWind = mostCommon(winds) ?? '–';
+        <section className="card filters">
+          <label>
+            {t.area}
+            <select value={areaId} onChange={(e) => setAreaId(e.target.value)}>
+              <option value={ALL_AREAS}>{t.allAreas}</option>
+              <option disabled>──────────</option>
+              {areas.map((area) => (
+                <option key={area.areaId} value={area.areaId}>
+                  {area.name}
+                </option>
+              ))}
+              <option value={UNKNOWN_AREA_ID}>{t.unknownArea}</option>
+            </select>
+          </label>
+          <div className="date-range">
+            <label>
+              {t.from}
+              <input type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
+            </label>
+            <label>
+              {t.to}
+              <input type="date" value={to} onChange={(e) => setTo(e.target.value)} />
+            </label>
+          </div>
+        </section>
 
-  return (
-    <div className="card totals">
-      <div>
-        <strong>{reports.length}</strong>
-        <span className="muted small">{t.reportsCount}</span>
-      </div>
-      <div>
-        <strong>
-          {reports.length
-            ? average.toLocaleString(language === 'hu' ? 'hu-HU' : 'sr-Latn-RS', { maximumFractionDigits: 1 })
-            : '–'}
-        </strong>
-        <span className="muted small">{t.averageStrength}</span>
-      </div>
-      <div>
-        <strong>{commonWind}</strong>
-        <span className="muted small">{t.commonWind}</span>
+        {error && <p className="error">{error}</p>}
+        {!error && !reports && <p className="muted">{t.loading}</p>}
+
+        {reports && (
+          <>
+            <Totals language={language} reports={reports} />
+            {reports.length > 0 && (
+              <button onClick={() => downloadCsv(reports, language, areaName, `odormap-${areaId}-${from}-${to}.csv`)}>
+                {t.downloadCsv}
+              </button>
+            )}
+            {reports.map((report) => (
+              <ReportCard
+                key={report.id}
+                language={language}
+                report={report}
+                areaName={areaName(report.areaId)}
+                onOpen={() => details.show(report, areaName(report.areaId))}
+              />
+            ))}
+          </>
+        )}
+        </div>
+      </main>
+    );
+  }
+
+  /** Number of reports, average strength and the most common wind direction. */
+  function Totals({ language, reports }: { language: Language; reports: PublicReport[] }) {
+    const t = TEXTS[language];
+    const average = reports.length ? reports.reduce((sum, r) => sum + r.strength, 0) / reports.length : 0;
+    const winds = reports.flatMap((r) => (r.weather ? [compass(r.weather.windDirectionDeg, language)] : []));
+    const commonWind = mostCommon(winds) ?? '–';
+
+    return (
+      <div className="card totals">
+        <div>
+          <strong>{reports.length}</strong>
+          <span className="muted small">{t.reportsCount}</span>
+        </div>
+        <div>
+          <strong>
+            {reports.length
+              ? average.toLocaleString(language === 'hu' ? 'hu-HU' : 'sr-Latn-RS', { maximumFractionDigits: 1 })
+              : '–'}
+          </strong>
+          <span className="muted small">{t.averageStrength}</span>
+        </div>
+        <div>
+          <strong>{commonWind}</strong>
+          <span className="muted small">{t.commonWind}</span>
       </div>
     </div>
   );
