@@ -1,4 +1,7 @@
 // "Map": everyone's reports from the last 7 days as dots on a map, in all areas.
+// It starts on the area the person is in (on its reports, if it has any). Outside the known areas it starts around the person,
+// showing about as much as one area. When the location is not known, it starts on the area
+// chosen last time on "Reports", or else the first area. Reports elsewhere are seen by moving the map.
 // Each dot shows the strength (1 to 5) in its color; the person's own reports have a green ring.
 // Locations of other people's reports are rounded to about 100 m by the API.
 // Tapping a dot opens the report on the whole screen.
@@ -9,14 +12,16 @@
 import { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import type { Area, Language, PublicReport } from '@odormap/common';
+import { findAreaFor, type Area, type Language, type Point, type PublicReport } from '@odormap/common';
 import { api } from '../api';
 import { ReportDetails, useOpenReport } from '../components/ReportDetails';
+import { currentPoint } from '../location';
 import { TEXTS } from '../texts';
+import { AREA_KEY } from './Reports';
 
 const DAYS_SHOWN = 7;
 const DAY_MS = 24 * 60 * 60 * 1000;
-// Where the map starts before reports are loaded: Bačka Topola.
+// Where the map is while the location is being found: Bačka Topola.
 const START = { lat: 45.815, lon: 19.635, zoom: 12 };
 
 type Props = { language: Language };
@@ -37,8 +42,13 @@ export function MapView({ language }: Props) {
       .areas()
       .then(async (known) => {
         setAreas(known);
-        const lists = await Promise.all(known.map((a) => api.reports(a.areaId, from.toISOString(), to.toISOString())));
-        setReports(lists.flat());
+        const [point, lists] = await Promise.all([
+          currentPoint(),
+          Promise.all(known.map((a) => api.reports(a.areaId, from.toISOString(), to.toISOString()))),
+        ]);
+        const all = lists.flat();
+        setReports(all);
+        map.current?.fitBounds(startBounds(known, point, all), { padding: [30, 30], maxZoom: 14 });
       })
       .catch(() => setError(true));
   }, []);
@@ -74,12 +84,6 @@ export function MapView({ language }: Props) {
         }).on('click', () => details.show(report, areaName(report.areaId))),
       );
     const layer = L.layerGroup(dots).addTo(map.current);
-    if (dots.length > 0) {
-      map.current.fitBounds(L.latLngBounds(reports.map((r) => [r.location.lat, r.location.lon])), {
-        padding: [40, 40],
-        maxZoom: 14,
-      });
-    }
     return () => {
       layer.remove();
     };
@@ -106,11 +110,32 @@ export function MapView({ language }: Props) {
       <div className="screen-part" hidden={!!details.open}>
         <p className="muted small">
           {t.lastDaysTitle}
-          {reports && ` · ${reports.length} ${t.reportsCount}`}
         </p>
         {error && <p className="error">{t.somethingWrong}</p>}
         <div ref={mapBox} className="map" />
       </div>
     </main>
   );
+}
+
+/** The part of the map to show first (see the top of this file). */
+function startBounds(areas: Area[], point: Point | undefined, reports: PublicReport[]): L.LatLngBounds {
+  const here = point && findAreaFor(point, areas);
+  const saved = areas.find((a) => a.areaId === localStorage.getItem(AREA_KEY));
+  const area = point ? here : (saved ?? areas[0]);
+  if (area) {
+    // The area's reports, if it has any (an area's box is much bigger than its town), else the whole area.
+    const inArea = reports.filter((r) => r.areaId === area.areaId);
+    const points = inArea.length > 0 ? inArea.map((r) => r.location) : area.boundary;
+    return L.latLngBounds(points.map((p) => [p.lat, p.lon]));
+  }
+  if (!point) return L.latLngBounds([[START.lat, START.lon]]).pad(0.1);
+
+  // Outside the known areas: as much around the person as an average area covers.
+  const sizes = areas.map((a) => L.latLngBounds(a.boundary.map((p) => [p.lat, p.lon])));
+  const average = (size: (b: L.LatLngBounds) => number) =>
+    sizes.length ? sizes.reduce((sum, b) => sum + size(b), 0) / sizes.length : 0.2;
+  const halfLat = average((b) => b.getNorth() - b.getSouth()) / 2;
+  const halfLon = average((b) => b.getEast() - b.getWest()) / 2;
+  return L.latLngBounds([point.lat - halfLat, point.lon - halfLon], [point.lat + halfLat, point.lon + halfLon]);
 }

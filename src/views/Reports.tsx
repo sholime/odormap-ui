@@ -6,12 +6,13 @@
 // - My reports: the person's own reports.
 
 import { useEffect, useState } from 'react';
-import { findAreaFor, type Area, type Language, type Point, type PublicReport } from '@odormap/common';
+import { findAreaFor, type Area, type Language, type PublicReport } from '@odormap/common';
 import { api } from '../api';
 import { AreaPicker } from '../components/AreaPicker';
 import { ReportCard } from '../components/ReportCard';
 import { ReportDetails, useOpenReport } from '../components/ReportDetails';
 import { TEXTS } from '../texts';
+import { currentPoint } from '../location';
 import { MyReports } from './MyReports';
 
 const DAYS_SHOWN = 7;
@@ -54,22 +55,11 @@ export function Reports({ language }: Props) {
   );
 }
 
-const AREA_KEY = 'odormap.reportsArea';
+/** The area chosen last time on this device (the map starts there, too, when the location is not known). */
+export const AREA_KEY = 'odormap.reportsArea';
 // The choice made while the app is open, kept when moving to another screen and back.
 const SESSION_AREA_KEY = 'odormap.reportsAreaNow';
 const ALL_AREAS = 'all';
-
-/** Where the phone is now, or undefined if that is not known quickly (no permission, no signal). */
-function currentPoint(): Promise<Point | undefined> {
-  return new Promise((resolve) => {
-    if (!('geolocation' in navigator)) return resolve(undefined);
-    navigator.geolocation.getCurrentPosition(
-      (position) => resolve({ lat: position.coords.latitude, lon: position.coords.longitude }),
-      () => resolve(undefined),
-      { timeout: 8000, maximumAge: 10 * 60 * 1000 },
-    );
-  });
-}
 
 type ListProps = Props & { onOpen: (report: PublicReport, areaName: string) => void };
 
