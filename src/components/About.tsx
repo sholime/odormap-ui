@@ -6,7 +6,7 @@ const ABOUT = {
   sr: {
     title: 'Šta je OdorMap?',
     intro: 'OdorMap je aplikacija u kojoj korisnici prijavljuju neprijatne mirise u svom kraju.',
-    why: 'Svaka prijava čuva mesto, vreme, jačinu mirisa i meteorološke prilike u tom trenutku. Što više prijava, to preciznije možemo da otkrijemo izvor mirisa.',
+    why: 'Svaka prijava čuva mesto, vreme, jačinu neprijatnog mirisa i meteorološke prilike u tom trenutku. Što više prijava, to preciznije možemo da otkrijemo izvor neprijatnog mirisa.',
     howTitle: 'Kako se koristi?',
     steps: [
       'Kada osetiš neprijatan miris, otvori aplikaciju i dozvoli lokaciju.',
