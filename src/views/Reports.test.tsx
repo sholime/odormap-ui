@@ -37,10 +37,10 @@ describe('Reports', () => {
     };
     vi.stubGlobal('fetch', vi.fn(async (url: string) => Response.json(url.endsWith('/areas') ? [area] : url.includes('areaId=unknown') ? [] : [withWeather])));
     const showOnMap = vi.fn();
-    render(<Reports language="sr" onShowOnMap={showOnMap} />);
+    render(<Reports language="sr" currentUserId="me" onShowOnMap={showOnMap} />);
 
     await userEvent.click(await screen.findByText('„Kod škole”'));
-    expect(screen.getByRole('button', { name: '‹ Prijave' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '‹ Nazad na prijave' })).toBeInTheDocument();
     expect(screen.getByText('14 km/h, iz pravca SZ')).toBeInTheDocument();
     expect(screen.getByText('6,4 °C')).toBeInTheDocument();
     expect(screen.getByText('1018 hPa')).toBeInTheDocument();
@@ -48,7 +48,7 @@ describe('Reports', () => {
     expect(showOnMap).toHaveBeenCalledWith({ lat: 45.816, lon: 19.632 });
     expect(screen.queryByRole('tab', { name: 'Sve prijave' })).not.toBeInTheDocument();
 
-    await userEvent.click(screen.getByRole('button', { name: '‹ Prijave' }));
+    await userEvent.click(screen.getByRole('button', { name: '‹ Nazad na prijave' }));
     expect(await screen.findByRole('tab', { name: 'Sve prijave' })).toBeInTheDocument();
     expect(screen.queryByText('Otvori na mapi')).not.toBeInTheDocument();
   });
@@ -69,7 +69,7 @@ describe('Reports', () => {
         ),
       ),
     );
-    render(<Reports language="sr" onShowOnMap={() => {}} />);
+    render(<Reports language="sr" currentUserId="me" onShowOnMap={() => {}} />);
 
     expect(await screen.findByText('„Ne može da se otvori prozor”')).toBeInTheDocument();
     const mine = screen.getByText('„Kod škole”').closest('.report-item')!;
@@ -80,7 +80,7 @@ describe('Reports', () => {
   it('switches to the "My reports" tab', async () => {
     const fetch = vi.fn(async (url: string) => Response.json(url.endsWith('/areas') ? [area] : []));
     vi.stubGlobal('fetch', fetch);
-    render(<Reports language="sr" onShowOnMap={() => {}} />);
+    render(<Reports language="sr" currentUserId="me" onShowOnMap={() => {}} />);
 
     await userEvent.click(screen.getByRole('tab', { name: 'Moje prijave' }));
 
@@ -92,7 +92,7 @@ describe('Reports', () => {
     const noviSad = { ...area, areaId: 'novi-sad', name: 'Novi Sad' };
     const fetch = vi.fn(async (url: string) => Response.json(url.endsWith('/areas') ? [area, noviSad] : []));
     vi.stubGlobal('fetch', fetch);
-    render(<Reports language="sr" onShowOnMap={() => {}} />);
+    render(<Reports language="sr" currentUserId="me" onShowOnMap={() => {}} />);
 
     await userEvent.click(await screen.findByRole('button', { name: /Sva područja/ }));
     await userEvent.type(screen.getByRole('searchbox', { name: 'Pretraži područja' }), 'novi');
@@ -114,7 +114,7 @@ describe('Reports', () => {
       ]);
     });
     vi.stubGlobal('fetch', fetch);
-    render(<Reports language="sr" onShowOnMap={() => {}} />);
+    render(<Reports language="sr" currentUserId="me" onShowOnMap={() => {}} />);
 
     expect(await screen.findByText('„novi-sad”')).toBeInTheDocument();
     expect(screen.getByText('„backa-topola”')).toBeInTheDocument();
@@ -143,7 +143,7 @@ describe('Reports', () => {
     });
     const fetch = vi.fn(async (url: string) => Response.json(url.endsWith('/areas') ? areas : []));
     vi.stubGlobal('fetch', fetch);
-    render(<Reports language="sr" onShowOnMap={() => {}} />);
+    render(<Reports language="sr" currentUserId="me" onShowOnMap={() => {}} />);
 
     expect(await screen.findByRole('button', { name: /Zrenjanin/, expanded: false })).toBeInTheDocument();
     const location = screen.getByRole('heading', { name: 'Lokacija' }).closest('section')!;
@@ -158,7 +158,7 @@ describe('Reports', () => {
       'fetch',
       vi.fn(async (url: string) => Response.json(url.endsWith('/areas') ? [area, noviSad] : [])),
     );
-    render(<Reports language="sr" onShowOnMap={() => {}} />);
+    render(<Reports language="sr" currentUserId="me" onShowOnMap={() => {}} />);
 
     expect(await screen.findByRole('button', { name: /Novi Sad/, expanded: false })).toBeInTheDocument();
   });
@@ -186,7 +186,7 @@ describe('Reports', () => {
       'fetch',
       vi.fn(async (url: string) => Response.json(url.endsWith('/areas') ? areas : [])),
     );
-    render(<Reports language="sr" onShowOnMap={() => {}} />);
+    render(<Reports language="sr" currentUserId="me" onShowOnMap={() => {}} />);
 
     await userEvent.click(await screen.findByRole('button', { name: 'Prikaži prijave odavde' }));
 

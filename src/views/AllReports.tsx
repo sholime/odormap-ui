@@ -8,7 +8,7 @@ import { LABELS, type Area, type Language, type Point, type PublicReport } from 
 import { api } from '../api';
 import { AreaPicker } from '../components/AreaPicker';
 import { compass, ReportCard, windKmh } from '../components/ReportCard';
-import { ReportDetails, useOpenReport } from '../components/ReportDetails';
+import { LayerStack, useLayers } from '../components/Layers';
 import { ReportFilters } from '../components/ReportFilters';
 import { applyFilters, dayInput, periodRange, useFilters } from '../filters';
 import { reportsWord, TEXTS } from '../texts';
@@ -17,9 +17,9 @@ import { withUndefinedArea } from '../undefinedArea';
 // "All areas": every known area and the unknown one, loaded one by one and put together.
 const ALL_AREAS = 'all';
 
-type Props = { language: Language; onShowOnMap: (point: Point) => void; onOpenUser?: (userId: string) => void };
+type Props = { language: Language; currentUserId: string; onShowOnMap: (point: Point) => void };
 
-export function AllReports({ language, onShowOnMap, onOpenUser }: Props) {
+export function AllReports({ language, currentUserId, onShowOnMap }: Props) {
   const t = TEXTS[language];
   const [areas, setAreas] = useState<Area[]>([]);
   const [areaId, setAreaId] = useState(ALL_AREAS);
@@ -29,7 +29,7 @@ export function AllReports({ language, onShowOnMap, onOpenUser }: Props) {
   const range = periodRange(filters);
   const [reports, setReports] = useState<PublicReport[]>();
   const [error, setError] = useState('');
-  const details = useOpenReport();
+  const layers = useLayers();
 
   useEffect(() => {
     api.areas().then(
@@ -61,18 +61,14 @@ export function AllReports({ language, onShowOnMap, onOpenUser }: Props) {
 
   return (
     <main className="screen">
-      {details.open && (
-        <ReportDetails
-          language={language}
-          report={details.open.report}
-          areaName={details.open.areaName}
-          backLabel={t.allReports}
-          onBack={details.close}
-          onShowOnMap={onShowOnMap}
-          onOpenUser={onOpenUser}
-        />
-      )}
-      <div className="screen-part" hidden={!!details.open}>
+      <LayerStack
+        language={language}
+        base="allReports"
+        layers={layers}
+        currentUserId={currentUserId}
+        onShowOnMap={onShowOnMap}
+      />
+      <div className="screen-part" hidden={layers.layers.length > 0}>
         <h2>{t.allReports}</h2>
 
         <section className="card">
@@ -120,7 +116,7 @@ export function AllReports({ language, onShowOnMap, onOpenUser }: Props) {
                 language={language}
                 report={report}
                 areaName={areaName(report.areaId)}
-                onOpen={() => details.show(report, areaName(report.areaId))}
+                onOpen={() => layers.open({ kind: 'report', report, areaName: areaName(report.areaId) })}
               />
             ))}
           </>

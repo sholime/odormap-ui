@@ -56,12 +56,17 @@ const markoReport = {
 };
 
 function fakeApi() {
+  // The list is loaded again after a change, so a deleted user stays gone.
+  let current = users;
   const fetch = vi.fn(async (url: string, init?: RequestInit) => {
     if (url.endsWith('/areas')) return Response.json([]);
     if (url.endsWith('/reports')) return Response.json(url.includes(markoId) ? [markoReport] : []);
     if (init?.method === 'PATCH') return Response.json({ ...users[1], ...JSON.parse(init.body as string) });
-    if (init?.method === 'DELETE') return new Response(null, { status: 204 });
-    return Response.json(users);
+    if (init?.method === 'DELETE') {
+      current = current.filter((u) => !url.endsWith(u.id));
+      return new Response(null, { status: 204 });
+    }
+    return Response.json(current);
   });
   vi.stubGlobal('fetch', fetch);
   return fetch;
@@ -133,7 +138,9 @@ describe('Users', () => {
 
     await userEvent.click(await screen.findByText('„Kod škole”'));
     expect(screen.queryByText('Tvoja')).not.toBeInTheDocument();
-    await userEvent.click(screen.getByRole('button', { name: 'Vidi korisnika' }));
+    // "Nazad na korisnika" already goes back to the user, so there is no "Vidi korisnika".
+    expect(screen.queryByRole('button', { name: 'Vidi korisnika' })).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: '‹ Nazad na korisnika' }));
     expect(await screen.findByText('Prijave (poslednjih 50)')).toBeVisible();
   });
 

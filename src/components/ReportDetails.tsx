@@ -1,8 +1,7 @@
 // One report on the whole screen, with everything that was saved: time, strength, odor kind,
 // comment, all the weather values and the location (with a button to see it on the map).
-// Opened by tapping a report card in "Reports" or in the admin "Reports overview".
+// Opened on top of a screen (see Layers.tsx), which adds the "Nazad na …" button above it.
 
-import { useEffect, useRef, useState } from 'react';
 import { LABELS, type Language, type OdorReport, type Point, type PublicReport } from '@odormap/common';
 import { initials } from '../initials';
 import { authorName, TEXTS } from '../texts';
@@ -12,20 +11,16 @@ type Props = {
   language: Language;
   report: PublicReport | OdorReport;
   areaName: string;
-  /** The screen to go back to, shown on the back button, e.g. "Prijave". */
-  /** No back link without it: e.g. from a user's page, "Vidi korisnika" goes back. */
-  backLabel?: string;
-  onBack: () => void;
-  /** Shows this place on the app's map. */
-  onShowOnMap: (point: Point) => void;
+  /** Shows this place on the app's map. No button without it. */
+  onShowOnMap?: (point: Point) => void;
   /** Overrides whether this is the viewer's own report (an admin looking at someone's reports). */
   mine?: boolean;
-  /** Opens the sender on the admin "Users" screen. */
+  /** Opens the sender's page (admins only get the sender). No button without it. */
   onOpenUser?: (userId: string) => void;
 };
 
 export function ReportDetails(props: Props) {
-  const { language, report, areaName, backLabel, onBack, onShowOnMap, onOpenUser } = props;
+  const { language, report, areaName, onShowOnMap, onOpenUser } = props;
   const t = TEXTS[language];
   const labels = LABELS[language];
   const locale = language === 'hu' ? 'hu-HU' : 'sr-Latn-RS';
@@ -45,12 +40,6 @@ export function ReportDetails(props: Props) {
 
   return (
     <>
-      {backLabel && (
-        <button className="link back" onClick={onBack}>
-          ‹ {backLabel}
-        </button>
-      )}
-
       {/* Only admins get the sender: shown like the top of the user's page. */}
       {author && (
         <section className="card sender">
@@ -123,44 +112,8 @@ export function ReportDetails(props: Props) {
           </dd>
         </dl>
         <p className="muted small">{t.roundedLocation}</p>
-        <button onClick={() => onShowOnMap(report.location)}>{t.openMap}</button>
+        {onShowOnMap && <button onClick={() => onShowOnMap(report.location)}>{t.openMap}</button>}
       </section>
     </>
   );
-}
-
-type OpenReport = { report: PublicReport | OdorReport; areaName: string };
-
-/**
- * The report shown on the whole screen, if any, for a list of report cards.
- * Opening one adds a browser history entry, so the phone's back button returns to the list,
- * scrolled to where it was.
- */
-export function useOpenReport() {
-  const [open, setOpen] = useState<OpenReport>();
-  const listScrollY = useRef(0);
-
-  useEffect(() => {
-    const onBack = () => setOpen(undefined);
-    window.addEventListener('popstate', onBack);
-    return () => window.removeEventListener('popstate', onBack);
-  }, []);
-
-  // The report starts at the top; the list comes back where it was.
-  useEffect(() => {
-    window.scrollTo(0, open ? 0 : listScrollY.current);
-  }, [open]);
-
-  return {
-    open,
-    show(report: OpenReport['report'], areaName: string) {
-      listScrollY.current = window.scrollY;
-      window.history.pushState(window.history.state, '');
-      setOpen({ report, areaName });
-    },
-    /** The back button on the screen does the same as the phone's back button. */
-    close() {
-      window.history.back();
-    },
-  };
 }
