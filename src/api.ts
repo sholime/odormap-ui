@@ -6,6 +6,7 @@
 // Both are kept in the browser's localStorage, so the person stays logged in.
 
 import type {
+  AdminUser,
   Area,
   AuthTokens,
   CreateReportRequest,
@@ -13,8 +14,9 @@ import type {
   OdorReport,
   PublicReport,
   RegisterRequest,
-  User,
   UpdateMeRequest,
+  UpdateUserRequest,
+  User,
 } from '@odormap/common';
 
 const API_URL = (import.meta.env.VITE_API_URL ?? 'http://localhost:3000') + '/api/v1';
@@ -141,4 +143,13 @@ export const api = {
   /** Everyone's reports in one area between two times (anonymous). "unknown" works for admins only. */
   reports: (areaId: string, from: string, to: string) =>
     send<PublicReport[]>('GET', '/reports?' + new URLSearchParams({ areaId, from, to })),
+
+  /** Admin: every user, newest first. */
+  users: () => send<AdminUser[]>('GET', '/users'),
+
+  /** Admin: make someone an admin (or not), block or unblock them. */
+  updateUser: (userId: string, changes: UpdateUserRequest) => send<AdminUser>('PATCH', `/users/${userId}`, changes),
+
+  /** Admin: delete an account. Its reports stay, unlinked and without comments. */
+  deleteUser: (userId: string) => send<void>('DELETE', `/users/${userId}`),
 };

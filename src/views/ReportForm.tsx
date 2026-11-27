@@ -66,6 +66,7 @@ export function ReportForm({ language }: { language: Language }) {
       setSent(true);
     } catch (e) {
       if (e instanceof ApiError && e.status === 429) setError(t.tooMany);
+      else if (e instanceof ApiError && e.status === 403) setError(t.blockedAccount);
       else setError(t.somethingWrong);
     } finally {
       setBusy(false);

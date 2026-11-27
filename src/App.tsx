@@ -23,11 +23,12 @@ import { Account } from './views/Account';
 import { AllReports } from './views/AllReports';
 import { ReportForm } from './views/ReportForm';
 import { Reports } from './views/Reports';
+import { Users } from './views/Users';
 import { SignIn } from './views/SignIn';
 
 const LANGUAGE_KEY = 'odormap.language';
 
-const SCREENS = ['report', 'reports', 'account', 'createAccount', 'allReports'] as const;
+const SCREENS = ['report', 'reports', 'account', 'createAccount', 'allReports', 'users'] as const;
 type Screen = (typeof SCREENS)[number];
 
 /** The screen saved in a browser history entry. The browser keeps it on refresh, too. */
@@ -134,6 +135,10 @@ export function App() {
       {loggedIn && screen === 'reports' && <Reports language={language} />}
 
       {loggedIn && screen === 'allReports' && user?.role === 'admin' && <AllReports language={language} />}
+
+      {loggedIn && screen === 'users' && user?.role === 'admin' && (
+        <Users language={language} currentUserId={user.id} />
+      )}
 
       {loggedIn && screen === 'account' && user && (
         <Account

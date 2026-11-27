@@ -733,3 +733,129 @@ body:has(.bottom-bar) {
   stroke-linecap: round;
   stroke-linejoin: round;
 }
+
+/* Admin "Users": filters, a card per user, and one user's details. */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.chips button {
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 0.9rem;
+}
+
+.chips button[aria-pressed='true'] {
+  background: var(--green);
+  border-color: var(--green);
+  color: white;
+}
+
+button.user-item {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 12px;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+}
+
+.user-main {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.user-line {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.user-line > :first-child {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* A long name is cut short, so the labels next to it stay readable. */
+.user-name {
+  display: flex;
+  align-items: center;
+}
+
+.user-name > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.user-name .pill {
+  flex-shrink: 0;
+}
+
+.user-line > :last-child {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.avatar {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--green-light);
+  color: var(--green);
+  font-weight: 600;
+}
+
+.avatar.big {
+  width: 48px;
+  height: 48px;
+  font-size: 1.1rem;
+}
+
+.user-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.pill {
+  margin-left: 6px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.pill.admin {
+  background: var(--green);
+  color: white;
+}
+
+.pill.guest {
+  background: #e8eae9;
+  color: #4a5450;
+}
+
+.pill.blocked {
+  background: #fbe3e1;
+  color: var(--error);
+}
+
+button.link.back {
+  align-self: flex-start;
+}

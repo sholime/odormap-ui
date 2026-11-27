@@ -1,4 +1,4 @@
-// Admin screen "All reports": every report in one area between two dates (at most 31 days),
+// Admin screen "All reports": every report in one area, or in all areas, between two dates (at most 31 days),
 // with a few totals and a CSV download that opens in Excel.
 // Reports are anonymous here: no names, no comments, locations rounded to about 100 m.
 // The menu shows this screen only to admins; the API also refuses the "unknown" area to everyone else.
@@ -10,6 +10,8 @@ import { compass, ReportCard, windKmh } from '../components/ReportCard';
 import { TEXTS } from '../texts';
 
 const UNKNOWN_AREA_ID = 'unknown';
+// "All areas": every known area and the unknown one, loaded one by one and put together.
+const ALL_AREAS = 'all';
 const MAX_DAYS = 31;
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -18,7 +20,8 @@ type Props = { language: Language };
 export function AllReports({ language }: Props) {
   const t = TEXTS[language];
   const [areas, setAreas] = useState<Area[]>([]);
-  const [areaId, setAreaId] = useState('');
+  const [areaId, setAreaId] = useState(ALL_AREAS);
+  const [areasLoaded, setAreasLoaded] = useState(false);
   const [from, setFrom] = useState(dateInputValue(new Date(Date.now() - 7 * DAY_MS)));
   const [to, setTo] = useState(dateInputValue(new Date()));
   const [reports, setReports] = useState<PublicReport[]>();
@@ -28,7 +31,7 @@ export function AllReports({ language }: Props) {
     api.areas().then(
       (known) => {
         setAreas(known);
-        setAreaId((current) => current || known[0]?.areaId || UNKNOWN_AREA_ID);
+        setAreasLoaded(true);
       },
       () => setError(t.somethingWrong),
     );
@@ -36,7 +39,7 @@ export function AllReports({ language }: Props) {
 
   // Load again whenever the area or a date changes.
   useEffect(() => {
-    if (!areaId || !from || !to) return;
+    if (!areasLoaded || !from || !to) return;
     // From the start of the "from" day to the end of the "to" day, in the phone's own time zone.
     const start = new Date(`${from}T00:00:00`);
     const end = new Date(`${to}T23:59:59`);
@@ -46,11 +49,12 @@ export function AllReports({ language }: Props) {
     }
     setError('');
     setReports(undefined);
-    api.reports(areaId, start.toISOString(), end.toISOString()).then(
-      (found) => setReports([...found].sort((a, b) => b.observedAt.localeCompare(a.observedAt))),
+    const ids = areaId === ALL_AREAS ? [...areas.map((a) => a.areaId), UNKNOWN_AREA_ID] : [areaId];
+    Promise.all(ids.map((id) => api.reports(id, start.toISOString(), end.toISOString()))).then(
+      (lists) => setReports(lists.flat().sort((a, b) => b.observedAt.localeCompare(a.observedAt))),
       () => setError(t.somethingWrong),
     );
-  }, [areaId, from, to, t]);
+  }, [areas, areasLoaded, areaId, from, to, t]);
 
   const areaName = (id: string) => areas.find((a) => a.areaId === id)?.name ?? t.unknownArea;
 
@@ -62,6 +66,8 @@ export function AllReports({ language }: Props) {
         <label>
           {t.area}
           <select value={areaId} onChange={(e) => setAreaId(e.target.value)}>
+            <option value={ALL_AREAS}>{t.allAreas}</option>
+            <option disabled>──────────</option>
             {areas.map((area) => (
               <option key={area.areaId} value={area.areaId}>
                 {area.name}
