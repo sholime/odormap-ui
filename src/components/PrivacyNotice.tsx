@@ -27,7 +27,7 @@ function Serbian() {
       </ul>
       <p>
         Drugi korisnici vide prijave i komentare, ali bez tvog imena. Lokaciju svi u aplikaciji, pa i ti, vide zaokruženu na oko
-        100 m. Tačna lokacija se samo čuva i koristi za analizu izvora mirisa.
+        200 m. Tačna lokacija se samo čuva i koristi za analizu izvora mirisa.
       </p>
       <p>
         Nalog možeš da obrišeš u svakom trenutku, pod „Moj nalog”. Tvoje prijave tada ostaju na mapi, ali bez ikakve veze sa
@@ -52,7 +52,7 @@ function Hungarian() {
       </ul>
       <p>
         A többi felhasználó látja a bejelentéseket és a megjegyzéseket, de a neved nélkül. A helyet az alkalmazásban mindenki, te
-        is, kb. 100 m-re kerekítve látja. A pontos helyet csak tároljuk, és a szagforrások elemzéséhez használjuk.
+        is, kb. 200 m-re kerekítve látja. A pontos helyet csak tároljuk, és a szagforrások elemzéséhez használjuk.
       </p>
       <p>
         A fiókodat bármikor törölheted a „Fiókom” menüpontban. A bejelentéseid ekkor a térképen maradnak, de nem köthetők
