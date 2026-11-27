@@ -4,7 +4,7 @@
 // The menu shows this screen only to admins; the API also refuses the "unknown" area to everyone else.
 
 import { useEffect, useState } from 'react';
-import { LABELS, type Area, type Language, type PublicReport } from '@odormap/common';
+import { LABELS, type Area, type Language, type Point, type PublicReport } from '@odormap/common';
 import { api } from '../api';
 import { compass, ReportCard, windKmh } from '../components/ReportCard';
 import { ReportDetails, useOpenReport } from '../components/ReportDetails';
@@ -16,9 +16,9 @@ const ALL_AREAS = 'all';
 const MAX_DAYS = 31;
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-type Props = { language: Language };
+type Props = { language: Language; onShowOnMap: (point: Point) => void };
 
-export function AllReports({ language }: Props) {
+export function AllReports({ language, onShowOnMap }: Props) {
   const t = TEXTS[language];
   const [areas, setAreas] = useState<Area[]>([]);
   const [areaId, setAreaId] = useState(ALL_AREAS);
@@ -69,6 +69,7 @@ export function AllReports({ language }: Props) {
           areaName={details.open.areaName}
           backLabel={t.allReports}
           onBack={details.close}
+          onShowOnMap={onShowOnMap}
         />
       )}
       <div className="screen-part" hidden={!!details.open}>

@@ -1,9 +1,9 @@
 // One report on the whole screen, with everything that was saved: time, strength, odor kind,
-// comment, all the weather values and the location (with a link to see it on a map).
+// comment, all the weather values and the location (with a button to see it on the map).
 // Opened by tapping a report card in "Reports" or in the admin "Reports overview".
 
 import { useEffect, useRef, useState } from 'react';
-import { LABELS, type Language, type OdorReport, type PublicReport } from '@odormap/common';
+import { LABELS, type Language, type OdorReport, type Point, type PublicReport } from '@odormap/common';
 import { TEXTS } from '../texts';
 import { compass, windKmh } from './ReportCard';
 
@@ -14,9 +14,11 @@ type Props = {
   /** The screen to go back to, shown on the back button, e.g. "Prijave". */
   backLabel: string;
   onBack: () => void;
+  /** Shows this place on the app's map. */
+  onShowOnMap: (point: Point) => void;
 };
 
-export function ReportDetails({ language, report, areaName, backLabel, onBack }: Props) {
+export function ReportDetails({ language, report, areaName, backLabel, onBack, onShowOnMap }: Props) {
   const t = TEXTS[language];
   const labels = LABELS[language];
   const locale = language === 'hu' ? 'hu-HU' : 'sr-Latn-RS';
@@ -24,7 +26,6 @@ export function ReportDetails({ language, report, areaName, backLabel, onBack }:
   // Reports from "My reports" carry the userId; the others say isMine.
   const mine = 'userId' in report || report.isMine;
   const { lat, lon } = report.location;
-  const mapUrl = `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lon}#map=16/${lat}/${lon}`;
 
   const kind =
     report.odorKind === 'not_set'
@@ -95,9 +96,7 @@ export function ReportDetails({ language, report, areaName, backLabel, onBack }:
           </dd>
         </dl>
         <p className="muted small">{t.roundedLocation}</p>
-        <a className="button" href={mapUrl} target="_blank" rel="noreferrer">
-          {t.openMap}
-        </a>
+        <button onClick={() => onShowOnMap(report.location)}>{t.openMap}</button>
       </section>
     </>
   );

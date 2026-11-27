@@ -53,7 +53,7 @@ function fakeApi() {
 describe('AllReports', () => {
   it('starts with the reports of all areas, including outside the known areas, with totals', async () => {
     const fetch = fakeApi();
-    render(<AllReports language="sr" />);
+    render(<AllReports language="sr" onShowOnMap={() => {}} />);
 
     expect(await screen.findByText('Trulo meso')).toBeInTheDocument();
     expect(screen.getByText('Svinjski stajnjak')).toBeInTheDocument();
@@ -66,7 +66,7 @@ describe('AllReports', () => {
 
   it('can list the reports of one area', async () => {
     const fetch = fakeApi();
-    render(<AllReports language="sr" />);
+    render(<AllReports language="sr" onShowOnMap={() => {}} />);
     await screen.findByText('Trulo meso');
     fetch.mockClear();
 
@@ -78,7 +78,7 @@ describe('AllReports', () => {
 
   it('can list reports from outside the known areas', async () => {
     const fetch = fakeApi();
-    render(<AllReports language="sr" />);
+    render(<AllReports language="sr" onShowOnMap={() => {}} />);
     await screen.findByText('Trulo meso');
 
     fetch.mockClear();
