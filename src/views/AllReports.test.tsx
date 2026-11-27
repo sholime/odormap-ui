@@ -84,7 +84,7 @@ describe('AllReports', () => {
 
     fetch.mockClear();
     await userEvent.click(screen.getByRole('button', { name: /Sva područja/ }));
-    await userEvent.click(screen.getByRole('button', { name: 'Nepoznato područje' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Nedefinisano područje' }));
 
     expect(fetch.mock.calls.map(([url]) => String(url))).toEqual([expect.stringContaining('areaId=unknown')]);
   });

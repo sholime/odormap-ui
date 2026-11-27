@@ -35,7 +35,7 @@ describe('Reports', () => {
       ...report('019a9a3c-6b1e-7000-8000-0000000000b1', false, 'Kod škole'),
       weather: { windSpeedMs: 4, windDirectionDeg: 315, temperatureC: 6.4, humidityPercent: 81, pressureHpa: 1018 },
     };
-    vi.stubGlobal('fetch', vi.fn(async (url: string) => Response.json(url.endsWith('/areas') ? [area] : [withWeather])));
+    vi.stubGlobal('fetch', vi.fn(async (url: string) => Response.json(url.endsWith('/areas') ? [area] : url.includes('areaId=unknown') ? [] : [withWeather])));
     const showOnMap = vi.fn();
     render(<Reports language="sr" onShowOnMap={showOnMap} />);
 
@@ -60,7 +60,9 @@ describe('Reports', () => {
         Response.json(
           url.endsWith('/areas')
             ? [area]
-            : [
+            : url.includes('areaId=unknown')
+              ? []
+              : [
                 report('019a9a3c-6b1e-7000-8000-0000000000b1', false, 'Ne može da se otvori prozor'),
                 report('019a9a3c-6b1e-7000-8000-0000000000b2', true, 'Kod škole'),
               ],
@@ -102,13 +104,13 @@ describe('Reports', () => {
     expect(localStorage.getItem('odormap.reportsArea')).toBe('novi-sad');
   });
 
-  it('shows all areas together by default', async () => {
+  it('shows all areas together by default, also reports from outside the known areas', async () => {
     const noviSad = { ...area, areaId: 'novi-sad', name: 'Novi Sad' };
     const fetch = vi.fn(async (url: string) => {
       if (url.endsWith('/areas')) return Response.json([area, noviSad]);
       const id = new URL(url, 'http://x').searchParams.get('areaId');
       return Response.json([
-        { ...report(`019a9a3c-6b1e-7000-8000-0000000000c${id === 'novi-sad' ? 1 : 2}`, false, id!), areaId: id },
+        { ...report(`019a9a3c-6b1e-7000-8000-0000000000c${['novi-sad', 'backa-topola', 'unknown'].indexOf(id!)}`, false, id!), areaId: id },
       ]);
     });
     vi.stubGlobal('fetch', fetch);
@@ -116,6 +118,8 @@ describe('Reports', () => {
 
     expect(await screen.findByText('„novi-sad”')).toBeInTheDocument();
     expect(screen.getByText('„backa-topola”')).toBeInTheDocument();
+    expect(screen.getByText('„unknown”')).toBeInTheDocument();
+    expect(screen.getByText('Nedefinisano područje')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Sva područja/, expanded: false })).toBeInTheDocument();
   });
 

@@ -1,7 +1,7 @@
 // Admin screen "All reports": every report in one area, or in all areas, between two dates (at most 31 days),
 // with a few totals and a CSV download that opens in Excel.
 // Reports are anonymous here: no names, no comments, locations rounded to about 200 m.
-// The menu shows this screen only to admins; the API also refuses the "unknown" area to everyone else.
+// The menu shows this screen only to admins.
 
 import { useEffect, useState } from 'react';
 import { LABELS, type Area, type Language, type Point, type PublicReport } from '@odormap/common';
@@ -12,8 +12,8 @@ import { ReportDetails, useOpenReport } from '../components/ReportDetails';
 import { ReportFilters } from '../components/ReportFilters';
 import { applyFilters, dayInput, periodRange, useFilters } from '../filters';
 import { reportsWord, TEXTS } from '../texts';
+import { withUndefinedArea } from '../undefinedArea';
 
-const UNKNOWN_AREA_ID = 'unknown';
 // "All areas": every known area and the unknown one, loaded one by one and put together.
 const ALL_AREAS = 'all';
 
@@ -48,7 +48,7 @@ export function AllReports({ language, onShowOnMap }: Props) {
     if (!range) return setError(t.dateRangeTooLong);
     setError('');
     const [from, to] = [range.from.toISOString(), range.to.toISOString()];
-    const ids = areaId === ALL_AREAS ? [...areas.map((a) => a.areaId), UNKNOWN_AREA_ID] : [areaId];
+    const ids = areaId === ALL_AREAS ? withUndefinedArea(areas, language).map((a) => a.areaId) : [areaId];
     Promise.all(ids.map((id) => api.reports(id, from, to))).then(
       (lists) => setReports(lists.flat().sort((a, b) => b.observedAt.localeCompare(a.observedAt))),
       () => setError(t.somethingWrong),
@@ -75,10 +75,10 @@ export function AllReports({ language, onShowOnMap }: Props) {
         <h2>{t.allReports}</h2>
 
         <section className="card">
-          {/* The same area list as in "All reports", with the unknown area at the end. */}
+          {/* The same area list as in "All reports". */}
           <AreaPicker
             language={language}
-            areas={[...areas, { areaId: UNKNOWN_AREA_ID, name: t.unknownArea } as Area]}
+            areas={withUndefinedArea(areas, language)}
             value={areaId === ALL_AREAS ? undefined : areaId}
             onChange={(id) => setAreaId(id ?? ALL_AREAS)}
           />

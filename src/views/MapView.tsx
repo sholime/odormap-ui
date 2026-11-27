@@ -20,6 +20,7 @@ import { ReportFilters } from '../components/ReportFilters';
 import { applyFilters, periodRange, useFilters } from '../filters';
 import { currentPoint } from '../location';
 import { TEXTS } from '../texts';
+import { withUndefinedArea } from '../undefinedArea';
 import { AREA_KEY } from './Reports';
 
 // Where the map is while the location is being found: Bačka Topola.
@@ -63,7 +64,11 @@ export function MapView({ language, focus: startFocus }: Props) {
         setAreas(known);
         const [point, lists] = await Promise.all([
           started.current ? undefined : currentPoint(),
-          Promise.all(known.map((a) => api.reports(a.areaId, range.from.toISOString(), range.to.toISOString()))),
+          Promise.all(
+            withUndefinedArea(known, language).map((a) =>
+              api.reports(a.areaId, range.from.toISOString(), range.to.toISOString()),
+            ),
+          ),
         ]);
         const all = lists.flat();
         setReports(all);
