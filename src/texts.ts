@@ -39,8 +39,7 @@ export const TEXTS = {
     pressure: 'Pritisak',
     noWeather: 'Podaci o vremenu nisu sačuvani.',
     coordinates: 'Koordinate',
-    accuracy: 'Tačnost',
-    roundedLocation: 'Lokacija je zaokružena na oko 100 m, da se ne vidi tačna adresa.',
+    roundedLocation: 'Lokacija je zaokružena na oko 500 m, da se ne vidi tačna adresa.',
     openMap: 'Otvori na mapi',
 
     // Admin
@@ -174,8 +173,7 @@ export const TEXTS = {
     pressure: 'Légnyomás',
     noWeather: 'Nincsenek mentett időjárási adatok.',
     coordinates: 'Koordináták',
-    accuracy: 'Pontosság',
-    roundedLocation: 'A hely kb. 100 m-re kerekítve, hogy a pontos cím ne látsszon.',
+    roundedLocation: 'A hely kb. 500 m-re kerekítve, hogy a pontos cím ne látsszon.',
     openMap: 'Megnyitás térképen',
 
     // Admin

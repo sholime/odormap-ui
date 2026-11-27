@@ -22,9 +22,9 @@ export function ReportDetails({ language, report, areaName, backLabel, onBack, o
   const t = TEXTS[language];
   const labels = LABELS[language];
   const locale = language === 'hu' ? 'hu-HU' : 'sr-Latn-RS';
-  // Everyone else's reports come with a location rounded to about 100 m; the person's own are exact.
-  const exact = 'userId' in report;
-  const mine = exact || report.isMine;
+  // Locations come rounded to about 500 m, the person's own too (the exact one is only stored).
+  // Reports from "My reports" carry the userId; the others say isMine.
+  const mine = 'userId' in report || report.isMine;
   const { lat, lon } = report.location;
 
   const kind =
@@ -92,16 +92,10 @@ export function ReportDetails({ language, report, areaName, backLabel, onBack, o
         <dl className="details">
           <dt>{t.coordinates}</dt>
           <dd>
-            {lat.toFixed(5)}, {lon.toFixed(5)}
+            {lat.toFixed(3)}, {lon.toFixed(3)}
           </dd>
-          {exact && report.locationAccuracyM !== undefined && (
-            <>
-              <dt>{t.accuracy}</dt>
-              <dd>± {Math.round(report.locationAccuracyM)} m</dd>
-            </>
-          )}
         </dl>
-        {!exact && <p className="muted small">{t.roundedLocation}</p>}
+        <p className="muted small">{t.roundedLocation}</p>
         <button onClick={() => onShowOnMap(report.location)}>{t.openMap}</button>
       </section>
     </>

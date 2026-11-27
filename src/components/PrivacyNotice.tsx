@@ -26,8 +26,8 @@ function Serbian() {
         <li>za svaku prijavu: tačnu lokaciju, vreme, jačinu i vrstu mirisa, komentar i vremenske prilike u tom trenutku.</li>
       </ul>
       <p>
-        Drugi korisnici vide prijave i komentare, ali bez tvog imena, a lokacija je zaokružena na oko 100 m. Tačnu lokaciju vidiš
-        samo ti i administratori, i koristi se za analizu izvora mirisa.
+        Drugi korisnici vide prijave i komentare, ali bez tvog imena. Lokaciju svi u aplikaciji, pa i ti, vide zaokruženu na oko
+        500 m. Tačna lokacija se samo čuva i koristi za analizu izvora mirisa.
       </p>
       <p>
         Nalog možeš da obrišeš u svakom trenutku, pod „Moj nalog”. Tvoje prijave tada ostaju na mapi, ali bez ikakve veze sa
@@ -51,8 +51,8 @@ function Hungarian() {
         <li>minden bejelentésnél: a pontos helyet, az időt, a szag erősségét és fajtáját, a megjegyzést és az akkori időjárást.</li>
       </ul>
       <p>
-        A többi felhasználó látja a bejelentéseket és a megjegyzéseket, de a neved nélkül, a hely pedig kb. 100 m-re kerekítve
-        jelenik meg. A pontos helyet csak te és az adminisztrátorok látjátok; a szagforrások elemzéséhez használjuk.
+        A többi felhasználó látja a bejelentéseket és a megjegyzéseket, de a neved nélkül. A helyet az alkalmazásban mindenki, te
+        is, kb. 500 m-re kerekítve látja. A pontos helyet csak tároljuk, és a szagforrások elemzéséhez használjuk.
       </p>
       <p>
         A fiókodat bármikor törölheted a „Fiókom” menüpontban. A bejelentéseid ekkor a térképen maradnak, de nem köthetők
