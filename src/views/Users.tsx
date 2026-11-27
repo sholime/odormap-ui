@@ -180,7 +180,8 @@ function UserDetails({ language, user, isSelf, onBack, onChanged, onDeleted, onS
       {details.open && (
         <ReportDetails
           language={language}
-          report={details.open.report}
+          // The same page as from "Reports overview", with this user on top (already open, so no button).
+          report={{ ...details.open.report, author: { id: user.id, displayName: user.displayName, email: user.email } }}
           areaName={details.open.areaName}
           mine={isSelf}
           backLabel={user.displayName}
