@@ -6,9 +6,9 @@ import { api } from '../api';
 import { ReportCard } from '../components/ReportCard';
 import { TEXTS } from '../texts';
 
-type Props = { language: Language };
+type Props = { language: Language; onOpen: (report: OdorReport, areaName: string) => void };
 
-export function MyReports({ language }: Props) {
+export function MyReports({ language, onOpen }: Props) {
   const t = TEXTS[language];
   const [reports, setReports] = useState<OdorReport[]>();
   const [areas, setAreas] = useState<Area[]>([]);
@@ -32,7 +32,13 @@ export function MyReports({ language }: Props) {
       {!error && !reports && <p className="muted">{t.loading}</p>}
       {reports?.length === 0 && <p className="muted">{t.noReports}</p>}
       {reports?.map((report) => (
-        <ReportCard key={report.id} language={language} report={report} areaName={areaName(report.areaId)} />
+        <ReportCard
+          key={report.id}
+          language={language}
+          report={report}
+          areaName={areaName(report.areaId)}
+          onOpen={() => onOpen(report, areaName(report.areaId))}
+        />
       ))}
     </>
   );

@@ -38,7 +38,7 @@ describe('MyReports', () => {
       'fetch',
       vi.fn(async (url: string) => Response.json(url.endsWith('/areas') ? [area] : [report])),
     );
-    render(<MyReports language="sr" />);
+    render(<MyReports language="sr" onOpen={() => {}} />);
 
     expect(await screen.findByText('Trulo meso')).toBeInTheDocument();
     expect(screen.getByText('Bačka Topola')).toBeInTheDocument();
@@ -51,7 +51,7 @@ describe('MyReports', () => {
       'fetch',
       vi.fn(async (url: string) => Response.json(url.endsWith('/areas') ? [area] : [])),
     );
-    render(<MyReports language="sr" />);
+    render(<MyReports language="sr" onOpen={() => {}} />);
 
     expect(await screen.findByText('Još nemaš nijednu prijavu.')).toBeInTheDocument();
   });

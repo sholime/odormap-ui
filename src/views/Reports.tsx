@@ -10,6 +10,7 @@ import { findAreaFor, type Area, type Language, type Point, type PublicReport } 
 import { api } from '../api';
 import { AreaPicker } from '../components/AreaPicker';
 import { ReportCard } from '../components/ReportCard';
+import { ReportDetails, useOpenReport } from '../components/ReportDetails';
 import { TEXTS } from '../texts';
 import { MyReports } from './MyReports';
 
@@ -20,10 +21,21 @@ type Props = { language: Language };
 export function Reports({ language }: Props) {
   const t = TEXTS[language];
   const [tab, setTab] = useState<'all' | 'mine'>('all');
+  const details = useOpenReport();
 
+  // The list stays loaded (only hidden) while a report is open, so going back is instant.
   return (
     <main className="screen">
-      <div className="tabs" role="tablist">
+      {details.open && (
+        <ReportDetails
+          language={language}
+          report={details.open.report}
+          areaName={details.open.areaName}
+          backLabel={t.reports}
+          onBack={details.close}
+        />
+      )}
+      <div className="tabs" role="tablist" hidden={!!details.open}>
         <button role="tab" aria-selected={tab === 'all'} onClick={() => setTab('all')}>
           {t.allReportsTab}
         </button>
@@ -31,7 +43,13 @@ export function Reports({ language }: Props) {
           {t.myReports}
         </button>
       </div>
-      {tab === 'all' ? <EveryonesReports language={language} /> : <MyReports language={language} />}
+      <div className="screen-part" hidden={!!details.open}>
+        {tab === 'all' ? (
+          <EveryonesReports language={language} onOpen={details.show} />
+        ) : (
+          <MyReports language={language} onOpen={details.show} />
+        )}
+      </div>
     </main>
   );
 }
@@ -53,7 +71,9 @@ function currentPoint(): Promise<Point | undefined> {
   });
 }
 
-function EveryonesReports({ language }: Props) {
+type ListProps = Props & { onOpen: (report: PublicReport, areaName: string) => void };
+
+function EveryonesReports({ language, onOpen }: ListProps) {
   const t = TEXTS[language];
   const [areas, setAreas] = useState<Area[]>();
   // Chosen area id or ALL_AREAS; undefined until the starting choice is known.
@@ -157,6 +177,7 @@ function EveryonesReports({ language }: Props) {
           report={report}
           areaName={areaName(report.areaId)}
           mine={report.isMine}
+          onOpen={() => onOpen(report, areaName(report.areaId))}
         />
       ))}
     </>
