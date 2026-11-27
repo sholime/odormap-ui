@@ -3,7 +3,7 @@
 // showing about as much as one area. When the location is not known, it starts on the area
 // chosen last time on "Reports", or else the first area. Reports elsewhere are seen by moving the map.
 // Each dot shows the strength (1 to 5) in its color; the person's own reports have a green ring.
-// Locations of all reports are rounded to about 500 m by the API.
+// Locations of all reports are rounded to about 100 m by the API.
 // Tapping a dot opens the report on the whole screen.
 //
 // The map is Leaflet with OpenStreetMap tiles (free; the map must name OpenStreetMap, which

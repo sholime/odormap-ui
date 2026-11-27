@@ -22,7 +22,7 @@ export function ReportDetails({ language, report, areaName, backLabel, onBack, o
   const t = TEXTS[language];
   const labels = LABELS[language];
   const locale = language === 'hu' ? 'hu-HU' : 'sr-Latn-RS';
-  // Locations come rounded to about 500 m, the person's own too (the exact one is only stored).
+  // Locations come rounded to about 100 m, the person's own too (the exact one is only stored).
   // Reports from "My reports" carry the userId; the others say isMine.
   const mine = 'userId' in report || report.isMine;
   const { lat, lon } = report.location;

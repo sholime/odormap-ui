@@ -1,6 +1,6 @@
 // Admin screen "All reports": every report in one area, or in all areas, between two dates (at most 31 days),
 // with a few totals and a CSV download that opens in Excel.
-// Reports are anonymous here: no names, no comments, locations rounded to about 500 m.
+// Reports are anonymous here: no names, no comments, locations rounded to about 100 m.
 // The menu shows this screen only to admins; the API also refuses the "unknown" area to everyone else.
 
 import { useEffect, useState } from 'react';
