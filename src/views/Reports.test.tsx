@@ -36,17 +36,16 @@ describe('Reports', () => {
       weather: { windSpeedMs: 4, windDirectionDeg: 315, temperatureC: 6.4, humidityPercent: 81, pressureHpa: 1018 },
     };
     vi.stubGlobal('fetch', vi.fn(async (url: string) => Response.json(url.endsWith('/areas') ? [area] : [withWeather])));
-    render(<Reports language="sr" />);
+    const showOnMap = vi.fn();
+    render(<Reports language="sr" onShowOnMap={showOnMap} />);
 
     await userEvent.click(await screen.findByText('„Kod škole”'));
     expect(screen.getByRole('button', { name: '‹ Prijave' })).toBeInTheDocument();
     expect(screen.getByText('14 km/h, iz pravca SZ')).toBeInTheDocument();
     expect(screen.getByText('6,4 °C')).toBeInTheDocument();
     expect(screen.getByText('1018 hPa')).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Otvori na mapi' })).toHaveAttribute(
-      'href',
-      'https://www.openstreetmap.org/?mlat=45.816&mlon=19.632#map=16/45.816/19.632',
-    );
+    await userEvent.click(screen.getByRole('button', { name: 'Otvori na mapi' }));
+    expect(showOnMap).toHaveBeenCalledWith({ lat: 45.816, lon: 19.632 });
     expect(screen.queryByRole('tab', { name: 'Sve prijave' })).not.toBeInTheDocument();
 
     await userEvent.click(screen.getByRole('button', { name: '‹ Prijave' }));
@@ -68,7 +67,7 @@ describe('Reports', () => {
         ),
       ),
     );
-    render(<Reports language="sr" />);
+    render(<Reports language="sr" onShowOnMap={() => {}} />);
 
     expect(await screen.findByText('„Ne može da se otvori prozor”')).toBeInTheDocument();
     const mine = screen.getByText('„Kod škole”').closest('.report-item')!;
@@ -79,7 +78,7 @@ describe('Reports', () => {
   it('switches to the "My reports" tab', async () => {
     const fetch = vi.fn(async (url: string) => Response.json(url.endsWith('/areas') ? [area] : []));
     vi.stubGlobal('fetch', fetch);
-    render(<Reports language="sr" />);
+    render(<Reports language="sr" onShowOnMap={() => {}} />);
 
     await userEvent.click(screen.getByRole('tab', { name: 'Moje prijave' }));
 
@@ -91,7 +90,7 @@ describe('Reports', () => {
     const noviSad = { ...area, areaId: 'novi-sad', name: 'Novi Sad' };
     const fetch = vi.fn(async (url: string) => Response.json(url.endsWith('/areas') ? [area, noviSad] : []));
     vi.stubGlobal('fetch', fetch);
-    render(<Reports language="sr" />);
+    render(<Reports language="sr" onShowOnMap={() => {}} />);
 
     await userEvent.click(await screen.findByRole('button', { name: /Sva područja/ }));
     await userEvent.type(screen.getByRole('searchbox', { name: 'Pretraži područja' }), 'novi');
@@ -113,7 +112,7 @@ describe('Reports', () => {
       ]);
     });
     vi.stubGlobal('fetch', fetch);
-    render(<Reports language="sr" />);
+    render(<Reports language="sr" onShowOnMap={() => {}} />);
 
     expect(await screen.findByText('„novi-sad”')).toBeInTheDocument();
     expect(screen.getByText('„backa-topola”')).toBeInTheDocument();
@@ -140,7 +139,7 @@ describe('Reports', () => {
     });
     const fetch = vi.fn(async (url: string) => Response.json(url.endsWith('/areas') ? areas : []));
     vi.stubGlobal('fetch', fetch);
-    render(<Reports language="sr" />);
+    render(<Reports language="sr" onShowOnMap={() => {}} />);
 
     expect(await screen.findByRole('button', { name: /Zrenjanin/, expanded: false })).toBeInTheDocument();
     const location = screen.getByRole('heading', { name: 'Lokacija' }).closest('section')!;
@@ -155,7 +154,7 @@ describe('Reports', () => {
       'fetch',
       vi.fn(async (url: string) => Response.json(url.endsWith('/areas') ? [area, noviSad] : [])),
     );
-    render(<Reports language="sr" />);
+    render(<Reports language="sr" onShowOnMap={() => {}} />);
 
     expect(await screen.findByRole('button', { name: /Novi Sad/, expanded: false })).toBeInTheDocument();
   });
@@ -183,7 +182,7 @@ describe('Reports', () => {
       'fetch',
       vi.fn(async (url: string) => Response.json(url.endsWith('/areas') ? areas : [])),
     );
-    render(<Reports language="sr" />);
+    render(<Reports language="sr" onShowOnMap={() => {}} />);
 
     await userEvent.click(await screen.findByRole('button', { name: 'Prikaži prijave odavde' }));
 

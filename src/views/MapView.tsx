@@ -23,15 +23,22 @@ const DAYS_SHOWN = 7;
 const DAY_MS = 24 * 60 * 60 * 1000;
 // Where the map is while the location is being found: Bačka Topola.
 const START = { lat: 45.815, lon: 19.635, zoom: 12 };
+// How close the map comes to one report's place.
+const FOCUS_ZOOM = 16;
 
-type Props = { language: Language };
+type Props = {
+  language: Language;
+  /** A place to show first, close up (from "Show on the map" on a report). */
+  focus?: Point;
+};
 
-export function MapView({ language }: Props) {
+export function MapView({ language, focus: startFocus }: Props) {
   const t = TEXTS[language];
   const [areas, setAreas] = useState<Area[]>([]);
   const [reports, setReports] = useState<PublicReport[]>();
   const [error, setError] = useState(false);
   const details = useOpenReport();
+  const [focus, setFocus] = useState(startFocus);
   const mapBox = useRef<HTMLDivElement>(null);
   const map = useRef<L.Map>(null);
 
@@ -48,7 +55,7 @@ export function MapView({ language }: Props) {
         ]);
         const all = lists.flat();
         setReports(all);
-        map.current?.fitBounds(startBounds(known, point, all), { padding: [30, 30], maxZoom: 14 });
+        if (!startFocus) map.current?.fitBounds(startBounds(known, point, all), { padding: [30, 30], maxZoom: 14 });
       })
       .catch(() => setError(true));
   }, []);
@@ -92,9 +99,12 @@ export function MapView({ language }: Props) {
   }, [reports, areas, t]);
 
   // Leaflet needs to measure the map again when it is shown after a report was open.
+  // Then it moves close to the place asked for, if any.
   useEffect(() => {
-    if (!details.open) map.current?.invalidateSize();
-  }, [details.open]);
+    if (details.open) return;
+    map.current?.invalidateSize();
+    if (focus) map.current?.setView([focus.lat, focus.lon], FOCUS_ZOOM);
+  }, [details.open, focus]);
 
   return (
     <main className="screen map-screen">
@@ -105,6 +115,10 @@ export function MapView({ language }: Props) {
           areaName={details.open.areaName}
           backLabel={t.map}
           onBack={details.close}
+          onShowOnMap={(point) => {
+            details.close();
+            setFocus(point);
+          }}
         />
       )}
       <div className="screen-part" hidden={!!details.open}>
@@ -119,7 +133,7 @@ export function MapView({ language }: Props) {
 }
 
 /** The part of the map to show first (see the top of this file). */
-function startBounds(areas: Area[], point: Point | undefined, reports: PublicReport[]): L.LatLngBounds {
+export function startBounds(areas: Area[], point: Point | undefined, reports: PublicReport[]): L.LatLngBounds {
   const here = point && findAreaFor(point, areas);
   const saved = areas.find((a) => a.areaId === localStorage.getItem(AREA_KEY));
   const area = point ? here : (saved ?? areas[0]);

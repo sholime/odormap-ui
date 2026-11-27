@@ -6,7 +6,7 @@
 // - My reports: the person's own reports.
 
 import { useEffect, useState } from 'react';
-import { findAreaFor, type Area, type Language, type PublicReport } from '@odormap/common';
+import { findAreaFor, type Area, type Language, type Point, type PublicReport } from '@odormap/common';
 import { api } from '../api';
 import { AreaPicker } from '../components/AreaPicker';
 import { ReportCard } from '../components/ReportCard';
@@ -17,9 +17,9 @@ import { MyReports } from './MyReports';
 
 const DAYS_SHOWN = 7;
 
-type Props = { language: Language };
+type Props = { language: Language; onShowOnMap: (point: Point) => void };
 
-export function Reports({ language }: Props) {
+export function Reports({ language, onShowOnMap }: Props) {
   const t = TEXTS[language];
   const [tab, setTab] = useState<'all' | 'mine'>('all');
   const details = useOpenReport();
@@ -34,6 +34,7 @@ export function Reports({ language }: Props) {
           areaName={details.open.areaName}
           backLabel={t.reports}
           onBack={details.close}
+          onShowOnMap={onShowOnMap}
         />
       )}
       <div className="tabs" role="tablist" hidden={!!details.open}>
@@ -61,7 +62,7 @@ export const AREA_KEY = 'odormap.reportsArea';
 const SESSION_AREA_KEY = 'odormap.reportsAreaNow';
 const ALL_AREAS = 'all';
 
-type ListProps = Props & { onOpen: (report: PublicReport, areaName: string) => void };
+type ListProps = { language: Language; onOpen: (report: PublicReport, areaName: string) => void };
 
 function EveryonesReports({ language, onOpen }: ListProps) {
   const t = TEXTS[language];
