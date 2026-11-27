@@ -147,15 +147,16 @@ function EveryonesReports({ language, onOpen }: ListProps) {
           </div>
         )}
         {where.status === 'unknown' && <p className="muted">{t.locationUnknown}</p>}
+        {/* The area belongs with the location; the filters below are a separate tab. */}
+        {severalAreas && choice !== undefined && (
+          <AreaPicker
+            language={language}
+            areas={areas}
+            value={chosen?.areaId}
+            onChange={(id) => choose(id ?? ALL_AREAS)}
+          />
+        )}
       </section>
-      {severalAreas && choice !== undefined && (
-        <AreaPicker
-          language={language}
-          areas={areas}
-          value={chosen?.areaId}
-          onChange={(id) => choose(id ?? ALL_AREAS)}
-        />
-      )}
       <ReportFilters
         language={language}
         filters={filters}

@@ -5,7 +5,7 @@
 import { useState } from 'react';
 import { LABELS, type Language } from '@odormap/common';
 import { dayInput, isFiltered, WINDOW_HOURS, type Filters, type Period, defaultFilters } from '../filters';
-import { TEXTS } from '../texts';
+import { countReports, reportsWord, TEXTS } from '../texts';
 import { compass } from './ReportCard';
 
 type Props = {
@@ -45,8 +45,9 @@ export function ReportFilters({ language, filters, onChange, total, shown, overl
         ? t.shownOf
             .replace('{shown}', String(shown))
             .replace('{total}', String(total))
+            .replace('{reports}', reportsWord(language, total))
             .replace('{pct}', String(total ? Math.round(((shown ?? 0) / total) * 100) : 0))
-        : t.userReports.replace('{count}', String(total));
+        : countReports(language, total);
   const active = [
     filters.momentOn && filters.moment && `${momentText(filters.moment)} ±${hours(filters.windowHours)}`,
     filters.winds.length > 0 &&

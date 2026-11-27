@@ -32,7 +32,7 @@ export const TEXTS = {
     days7: '7 dana',
     days30: '30 dana',
     customPeriod: 'Od – do',
-    shownOf: '{shown} od {total} prijava ({pct} %)',
+    shownOf: '{shown} od {total} {reports} ({pct} %)',
     periodLabel: 'Period',
     momentLabel: 'Vremenski trenutak',
     momentOn: 'Samo prijave oko izabranog trenutka',
@@ -67,7 +67,6 @@ export const TEXTS = {
     noAreaFound: 'Nijedno područje ne odgovara.',
     from: 'Od',
     to: 'Do',
-    reportsCount: 'prijava',
     averageStrength: 'prosečna jačina',
     commonWind: 'najčešći vetar',
     downloadCsv: 'Preuzmi CSV (Excel)',
@@ -140,7 +139,6 @@ export const TEXTS = {
     guestTag: 'Gost',
     blockedTag: 'Blokiran',
     sinceDate: 'od {date}',
-    userReports: '{count} prijava',
     noUsersFound: 'Nema korisnika.',
     role: 'Uloga',
     roleUser: 'Korisnik',
@@ -180,7 +178,7 @@ export const TEXTS = {
     days7: '7 nap',
     days30: '30 nap',
     customPeriod: 'Tól – ig',
-    shownOf: '{shown} / {total} bejelentés ({pct} %)',
+    shownOf: '{shown} / {total} {reports} ({pct} %)',
     periodLabel: 'Időszak',
     momentLabel: 'Időpont',
     momentOn: 'Csak a kiválasztott időpont körüli bejelentések',
@@ -215,7 +213,6 @@ export const TEXTS = {
     noAreaFound: 'Nincs ilyen terület.',
     from: 'Ettől',
     to: 'Eddig',
-    reportsCount: 'bejelentés',
     averageStrength: 'átlagos erősség',
     commonWind: 'leggyakoribb szél',
     downloadCsv: 'CSV letöltése (Excel)',
@@ -288,7 +285,6 @@ export const TEXTS = {
     guestTag: 'Vendég',
     blockedTag: 'Letiltva',
     sinceDate: '{date} óta',
-    userReports: '{count} bejelentés',
     noUsersFound: 'Nincs találat.',
     role: 'Szerepkör',
     roleUser: 'Felhasználó',
@@ -307,3 +303,17 @@ export const TEXTS = {
 } satisfies Record<Language, unknown>;
 
 export type Texts = (typeof TEXTS)['sr'];
+
+/**
+ * The word "report" in the form that goes with a number. Serbian: 1, 21, 31 … prijava;
+ * 2–4, 22–24 … prijave; 5–20, 25–30 … prijava. Hungarian has one form after numbers.
+ */
+export function reportsWord(language: Language, count: number): string {
+  if (language === 'hu') return 'bejelentés';
+  return new Intl.PluralRules('sr-Latn').select(count) === 'few' ? 'prijave' : 'prijava';
+}
+
+/** "1 prijava", "3 prijave", "5 prijava" */
+export function countReports(language: Language, count: number): string {
+  return `${count} ${reportsWord(language, count)}`;
+}
