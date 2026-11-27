@@ -980,10 +980,20 @@ button.report-item {
   border-radius: 0 0 10px 10px;
 }
 
-/* Open, the bar and the panel are one tab: the bar's bottom corners go, and a thin line divides them. */
+/* Open, the bar and the panel are one tab: the bar's bottom corners go, and the same line as between
+   the filters divides them. */
 .report-filters.open .filter-bar {
   border-radius: 10px 10px 0 0;
-  border-bottom-color: var(--green-light);
+  border-bottom-color: transparent;
+}
+
+.report-filters.open .filter-panel {
+  padding-top: 0;
+}
+
+.report-filters.open .filter-panel::before {
+  content: '';
+  border-top: 1px solid var(--border);
 }
 
 .report-filters.overlay.open .filter-bar {
