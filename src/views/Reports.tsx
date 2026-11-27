@@ -10,7 +10,7 @@ import { findAreaFor, type Area, type Language, type Point, type PublicReport } 
 import { api } from '../api';
 import { AreaPicker } from '../components/AreaPicker';
 import { ReportCard } from '../components/ReportCard';
-import { ReportDetails, useOpenReport } from '../components/ReportDetails';
+import { LayerStack, useLayers } from '../components/Layers';
 import { ReportFilters } from '../components/ReportFilters';
 import { applyFilters, periodRange, useFilters } from '../filters';
 import { TEXTS } from '../texts';
@@ -18,29 +18,25 @@ import { withUndefinedArea } from '../undefinedArea';
 import { currentPoint } from '../location';
 import { MyReports } from './MyReports';
 
+type Props = { language: Language; currentUserId: string; onShowOnMap: (point: Point) => void };
 
-type Props = { language: Language; onShowOnMap: (point: Point) => void; onOpenUser?: (userId: string) => void };
-
-export function Reports({ language, onShowOnMap, onOpenUser }: Props) {
+export function Reports({ language, currentUserId, onShowOnMap }: Props) {
   const t = TEXTS[language];
   const [tab, setTab] = useState<'all' | 'mine'>('all');
-  const details = useOpenReport();
+  const layers = useLayers();
+  const listShown = layers.layers.length === 0;
 
   // The list stays loaded (only hidden) while a report is open, so going back is instant.
   return (
     <main className="screen">
-      {details.open && (
-        <ReportDetails
-          language={language}
-          report={details.open.report}
-          areaName={details.open.areaName}
-          backLabel={t.reports}
-          onBack={details.close}
-          onShowOnMap={onShowOnMap}
-          onOpenUser={onOpenUser}
-        />
-      )}
-      <div className="tabs" role="tablist" hidden={!!details.open}>
+      <LayerStack
+        language={language}
+        base="reports"
+        layers={layers}
+        currentUserId={currentUserId}
+        onShowOnMap={onShowOnMap}
+      />
+      <div className="tabs" role="tablist" hidden={!listShown}>
         <button role="tab" aria-selected={tab === 'all'} onClick={() => setTab('all')}>
           {t.allReportsTab}
         </button>
@@ -48,11 +44,17 @@ export function Reports({ language, onShowOnMap, onOpenUser }: Props) {
           {t.myReports}
         </button>
       </div>
-      <div className="screen-part" hidden={!!details.open}>
+      <div className="screen-part" hidden={!listShown}>
         {tab === 'all' ? (
-          <EveryonesReports language={language} onOpen={details.show} />
+          <EveryonesReports
+            language={language}
+            onOpen={(report, areaName) => layers.open({ kind: 'report', report, areaName })}
+          />
         ) : (
-          <MyReports language={language} onOpen={details.show} />
+          <MyReports
+            language={language}
+            onOpen={(report, areaName) => layers.open({ kind: 'report', report, areaName })}
+          />
         )}
       </div>
     </main>

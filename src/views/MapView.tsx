@@ -15,7 +15,7 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { findAreaFor, type Area, type Language, type Point, type PublicReport } from '@odormap/common';
 import { api } from '../api';
-import { ReportDetails, useOpenReport } from '../components/ReportDetails';
+import { LayerStack, useLayers } from '../components/Layers';
 import { ReportFilters } from '../components/ReportFilters';
 import { applyFilters, periodRange, useFilters } from '../filters';
 import { currentPoint } from '../location';
@@ -30,16 +30,18 @@ const FOCUS_ZOOM = 16;
 
 type Props = {
   language: Language;
+  currentUserId: string;
   /** A place to show first, close up (from "Show on the map" on a report). */
   focus?: Point;
 };
 
-export function MapView({ language, focus: startFocus }: Props) {
+export function MapView({ language, currentUserId, focus: startFocus }: Props) {
   const t = TEXTS[language];
   const [areas, setAreas] = useState<Area[]>([]);
   const [reports, setReports] = useState<PublicReport[]>();
   const [error, setError] = useState(false);
-  const details = useOpenReport();
+  const layers = useLayers();
+  const pageOpen = layers.layers.length > 0;
   const [focus, setFocus] = useState(startFocus);
   const mapBox = useRef<HTMLDivElement>(null);
   const map = useRef<L.Map>(null);
@@ -113,40 +115,38 @@ export function MapView({ language, focus: startFocus }: Props) {
             iconSize: [30, 30],
           }),
           title: t.reportShort,
-        }).on('click', () => details.show(report, areaName(report.areaId))),
+        }).on('click', () => layers.open({ kind: 'report', report, areaName: areaName(report.areaId) })),
       );
     const layer = L.layerGroup(dots).addTo(map.current);
     return () => {
       layer.remove();
     };
-    // details.show is a new function on every render, but does the same each time.
+    // layers.open is a new function on every render, but does the same each time.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reports, filters, areas, t]);
 
   // Leaflet needs to measure the map again when it is shown after a report was open.
   // Then it moves close to the place asked for, if any.
   useEffect(() => {
-    if (details.open) return;
+    if (pageOpen) return;
     map.current?.invalidateSize();
     if (focus) map.current?.setView([focus.lat, focus.lon], FOCUS_ZOOM);
-  }, [details.open, focus]);
+  }, [pageOpen, focus]);
 
   return (
-    <main className="screen map-screen">
-      {details.open && (
-        <ReportDetails
-          language={language}
-          report={details.open.report}
-          areaName={details.open.areaName}
-          backLabel={t.map}
-          onBack={details.close}
-          onShowOnMap={(point) => {
-            details.close();
-            setFocus(point);
-          }}
-        />
-      )}
-      <div className="screen-part" hidden={!!details.open}>
+    // While a page is open the screen scrolls like the others; the map's fixed height would hide its bottom.
+    <main className={pageOpen ? 'screen' : 'screen map-screen'}>
+      <LayerStack
+        language={language}
+        base="map"
+        layers={layers}
+        currentUserId={currentUserId}
+        onShowOnMap={(point) => {
+          layers.closeAll();
+          setFocus(point);
+        }}
+      />
+      <div className="screen-part" hidden={pageOpen}>
         <ReportFilters
           language={language}
           filters={filters}

@@ -895,8 +895,11 @@ button.user-item {
   color: var(--error);
 }
 
-button.link.back {
-  align-self: flex-start;
+/* "Nazad na …" at the top of a report or user page, in the middle. */
+.back-button {
+  align-self: center;
+  padding: 8px 16px;
+  font-size: 0.95rem;
 }
 
 /* One report on the whole screen */

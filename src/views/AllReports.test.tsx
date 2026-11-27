@@ -60,24 +60,43 @@ describe('AllReports', () => {
           url.endsWith('/areas')
             ? [area]
             : url.includes('areaId=backa-topola')
-              ? [{ ...reports[0], author }, { ...reports[1], author: { id: '00000000-0000-0000-0000-000000000000' } }]
-              : [],
+              ? [
+                  { ...reports[0], author },
+                  { ...reports[1], author: { id: '00000000-0000-0000-0000-000000000000' } },
+                ]
+              : url.endsWith('/users')
+                ? [
+                    {
+                      ...author,
+                      isGuest: false,
+                      language: 'sr',
+                      role: 'user',
+                      createdAt: '2026-11-20T10:00:00Z',
+                      signInMethods: ['password'],
+                      blocked: false,
+                      reportCount: 2,
+                    },
+                  ]
+                : [],
         ),
       ),
     );
-    const openUser = vi.fn();
-    render(<AllReports language="sr" onShowOnMap={() => {}} onOpenUser={openUser} />);
+    render(<AllReports language="sr" currentUserId="me" onShowOnMap={() => {}} />);
 
     expect(await screen.findByText('ana@example.com')).toBeInTheDocument();
     expect(screen.getByText('Obrisan nalog')).toBeInTheDocument();
     await userEvent.click(screen.getByText('Trulo meso'));
+    expect(screen.getByRole('button', { name: '‹ Nazad na pregled prijava' })).toBeVisible();
     await userEvent.click(screen.getByRole('button', { name: 'Vidi korisnika' }));
-    expect(openUser).toHaveBeenCalledWith(author.id);
+
+    // The user's page opens on top of the report, with a way back to it.
+    expect(await screen.findByRole('button', { name: '‹ Nazad na prijavu' })).toBeVisible();
+    expect(await screen.findByRole('heading', { name: 'Radnje' })).toBeVisible();
   });
 
   it('starts with the reports of all areas, including outside the known areas, with totals', async () => {
     const fetch = fakeApi();
-    render(<AllReports language="sr" onShowOnMap={() => {}} />);
+    render(<AllReports language="sr" currentUserId="me" onShowOnMap={() => {}} />);
 
     expect(await screen.findByText('Trulo meso')).toBeInTheDocument();
     expect(screen.getByText('Svinjski stajnjak')).toBeInTheDocument();
@@ -90,7 +109,7 @@ describe('AllReports', () => {
 
   it('can list the reports of one area', async () => {
     const fetch = fakeApi();
-    render(<AllReports language="sr" onShowOnMap={() => {}} />);
+    render(<AllReports language="sr" currentUserId="me" onShowOnMap={() => {}} />);
     await screen.findByText('Trulo meso');
     fetch.mockClear();
 
@@ -103,7 +122,7 @@ describe('AllReports', () => {
 
   it('can list reports from outside the known areas', async () => {
     const fetch = fakeApi();
-    render(<AllReports language="sr" onShowOnMap={() => {}} />);
+    render(<AllReports language="sr" currentUserId="me" onShowOnMap={() => {}} />);
     await screen.findByText('Trulo meso');
 
     fetch.mockClear();
