@@ -140,7 +140,10 @@ export const api = {
   /** The last 50 reports of the logged-in person, newest first. */
   myReports: () => send<OdorReport[]>('GET', '/reports/mine'),
 
-  /** Everyone's reports in one area between two times (anonymous). "unknown" works for admins only. */
+  /** Admins only: one user's last 50 reports, newest first. */
+  userReports: (userId: string) => send<OdorReport[]>('GET', `/users/${userId}/reports`),
+
+  /** Everyone's reports in one area between two times. Admins also get who sent each one. */
   reports: (areaId: string, from: string, to: string) =>
     send<PublicReport[]>('GET', '/reports?' + new URLSearchParams({ areaId, from, to })),
 

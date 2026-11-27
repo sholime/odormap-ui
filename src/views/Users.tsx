@@ -4,8 +4,10 @@
 // Admins cannot change their own account here; the API refuses that too.
 
 import { useEffect, useState } from 'react';
-import type { AdminUser, Language } from '@odormap/common';
+import type { AdminUser, Language, Point } from '@odormap/common';
 import { api } from '../api';
+import { ReportDetails, useOpenReport } from '../components/ReportDetails';
+import { MyReports } from './MyReports';
 import { initials } from '../initials';
 import { countReports, TEXTS, type Texts } from '../texts';
 
@@ -14,9 +16,9 @@ const FILTERS = ['all', 'accounts', 'guests', 'admins', 'blocked'] as const;
 type Filter = (typeof FILTERS)[number];
 
 /** openUserId: a user to show right away, e.g. the sender of a report. */
-type Props = { language: Language; currentUserId: string; openUserId?: string };
+type Props = { language: Language; currentUserId: string; openUserId?: string; onShowOnMap: (point: Point) => void };
 
-export function Users({ language, currentUserId, openUserId }: Props) {
+export function Users({ language, currentUserId, openUserId, onShowOnMap }: Props) {
   const t = TEXTS[language];
   const [users, setUsers] = useState<AdminUser[]>();
   const [error, setError] = useState('');
@@ -48,6 +50,7 @@ export function Users({ language, currentUserId, openUserId }: Props) {
         language={language}
         user={open}
         isSelf={open.id === currentUserId}
+        onShowOnMap={onShowOnMap}
         onBack={() => setOpenId(undefined)}
         onChanged={(changed) => setUsers(users.map((u) => (u.id === changed.id ? changed : u)))}
         onDeleted={() => {
@@ -141,9 +144,11 @@ type DetailsProps = {
   onBack: () => void;
   onChanged: (user: AdminUser) => void;
   onDeleted: () => void;
+  onShowOnMap: (point: Point) => void;
 };
 
-function UserDetails({ language, user, isSelf, onBack, onChanged, onDeleted }: DetailsProps) {
+function UserDetails({ language, user, isSelf, onBack, onChanged, onDeleted, onShowOnMap }: DetailsProps) {
+  const details = useOpenReport();
   const t = TEXTS[language];
   const [busy, setBusy] = useState(false);
   const [confirming, setConfirming] = useState(false);
@@ -169,96 +174,120 @@ function UserDetails({ language, user, isSelf, onBack, onChanged, onDeleted }: D
     ? t.lastReport.replace('{count}', String(user.reportCount)).replace('{date}', fullDate(user.lastReportAt, language))
     : String(user.reportCount);
 
+  // The page stays loaded (only hidden) while one of the user's reports is open.
   return (
     <main className="screen">
-      <button className="link back" onClick={onBack}>
-        ‹ {t.users}
-      </button>
+      {details.open && (
+        <ReportDetails
+          language={language}
+          // The same page as from "Reports overview", with this user on top.
+          report={{ ...details.open.report, author: { id: user.id, displayName: user.displayName, email: user.email } }}
+          areaName={details.open.areaName}
+          mine={isSelf}
+          onBack={details.close}
+          // "Vidi korisnika" goes back to this user's page.
+          onOpenUser={details.close}
+          onShowOnMap={onShowOnMap}
+        />
+      )}
+      <div className="screen-part" hidden={!!details.open}>
+        <button className="link back" onClick={onBack}>
+          ‹ {t.users}
+        </button>
 
-      <section className="card">
-        <div className="user-head">
-          <span className="avatar big" aria-hidden="true">
-            {initials(user.displayName)}
-          </span>
-          <div>
-            <strong>
-              {user.displayName}
-              <Tags t={t} user={user} />
-            </strong>
-            {user.email && <div className="muted small">{user.email}</div>}
+        <section className="card">
+          <div className="user-head">
+            <span className="avatar big" aria-hidden="true">
+              {initials(user.displayName)}
+            </span>
+            <div>
+              <strong>
+                {user.displayName}
+                <Tags t={t} user={user} />
+              </strong>
+              {user.email && <div className="muted small">{user.email}</div>}
+            </div>
           </div>
-        </div>
-        <dl className="details">
-          <dt>{t.accountType}</dt>
-          <dd>{kind}</dd>
-          <dt>{t.role}</dt>
-          <dd>{user.role === 'admin' ? t.roleAdmin : t.roleUser}</dd>
-          <dt>{t.languageLabel}</dt>
-          <dd>{user.language.toUpperCase()}</dd>
-          <dt>{t.memberSince}</dt>
-          <dd>{fullDate(user.createdAt, language)}</dd>
-          <dt>{t.reportsLabel}</dt>
-          <dd>{reports}</dd>
-        </dl>
-      </section>
+          <dl className="details">
+            <dt>{t.accountType}</dt>
+            <dd>{kind}</dd>
+            <dt>{t.role}</dt>
+            <dd>{user.role === 'admin' ? t.roleAdmin : t.roleUser}</dd>
+            <dt>{t.languageLabel}</dt>
+            <dd>{user.language.toUpperCase()}</dd>
+            <dt>{t.memberSince}</dt>
+            <dd>{fullDate(user.createdAt, language)}</dd>
+            <dt>{t.reportsLabel}</dt>
+            <dd>{reports}</dd>
+          </dl>
+        </section>
 
-      <section className="card">
-        <h2>{t.actions}</h2>
-        {isSelf ? (
-          <p className="muted">{t.ownAccountNote}</p>
-        ) : (
-          <>
-            <button
-              disabled={busy}
-              onClick={() =>
-                run(async () =>
-                  onChanged(await api.updateUser(user.id, { role: user.role === 'admin' ? 'user' : 'admin' })),
-                )
-              }
-            >
-              {user.role === 'admin' ? t.removeAdmin : t.makeAdmin}
-            </button>
-            <button
-              disabled={busy}
-              onClick={() => run(async () => onChanged(await api.updateUser(user.id, { blocked: !user.blocked })))}
-            >
-              {user.blocked ? t.unblock : t.block}
-            </button>
-            {!confirming ? (
-              <button className="danger" disabled={busy} onClick={() => setConfirming(true)}>
-                {t.deleteAccount}
+        <section className="card">
+          <h2>{t.actions}</h2>
+          {isSelf ? (
+            <p className="muted">{t.ownAccountNote}</p>
+          ) : (
+            <>
+              <button
+                disabled={busy}
+                onClick={() =>
+                  run(async () =>
+                    onChanged(await api.updateUser(user.id, { role: user.role === 'admin' ? 'user' : 'admin' })),
+                  )
+                }
+              >
+                {user.role === 'admin' ? t.removeAdmin : t.makeAdmin}
               </button>
-            ) : (
-              <>
-                <p>
-                  <strong>{t.deleteAreYouSure}</strong>
-                </p>
-                <button
-                  className="danger"
-                  disabled={busy}
-                  onClick={() =>
-                    run(async () => {
-                      await api.deleteUser(user.id);
-                      onDeleted();
-                    })
-                  }
-                >
-                  {t.deleteForever}
+              <button
+                disabled={busy}
+                onClick={() => run(async () => onChanged(await api.updateUser(user.id, { blocked: !user.blocked })))}
+              >
+                {user.blocked ? t.unblock : t.block}
+              </button>
+              {!confirming ? (
+                <button className="danger" disabled={busy} onClick={() => setConfirming(true)}>
+                  {t.deleteAccount}
                 </button>
-                <button disabled={busy} onClick={() => setConfirming(false)}>
-                  {t.cancel}
-                </button>
-              </>
-            )}
-            <p className="muted small">{t.deleteUserNote}</p>
-          </>
-        )}
-        {error && (
-          <p className="error" role="alert">
-            {error}
-          </p>
-        )}
-      </section>
+              ) : (
+                <>
+                  <p>
+                    <strong>{t.deleteAreYouSure}</strong>
+                  </p>
+                  <button
+                    className="danger"
+                    disabled={busy}
+                    onClick={() =>
+                      run(async () => {
+                        await api.deleteUser(user.id);
+                        onDeleted();
+                      })
+                    }
+                  >
+                    {t.deleteForever}
+                  </button>
+                  <button disabled={busy} onClick={() => setConfirming(false)}>
+                    {t.cancel}
+                  </button>
+                </>
+              )}
+              <p className="muted small">{t.deleteUserNote}</p>
+            </>
+          )}
+          {error && (
+            <p className="error" role="alert">
+              {error}
+            </p>
+          )}
+        </section>
+
+        <h2>{t.userReports}</h2>
+        <MyReports
+          language={language}
+          load={() => api.userReports(user.id)}
+          emptyText={t.userNoReports}
+          onOpen={details.show}
+        />
+      </div>
     </main>
   );
 }

@@ -152,11 +152,13 @@ export function App() {
 
       {loggedIn && screen === 'createAccount' && <SignIn language={language} isGuest onLoggedIn={handleLoggedIn} />}
 
-      {loggedIn && screen === 'reports' && <Reports
+      {loggedIn && screen === 'reports' && (
+        <Reports
           language={language}
           onShowOnMap={showOnMap}
           onOpenUser={user?.role === 'admin' ? showUser : undefined}
-        />}
+        />
+      )}
 
       {loggedIn && screen === 'map' && (
         <Suspense fallback={<p className="screen muted">{t.loading}</p>}>
@@ -169,7 +171,7 @@ export function App() {
       )}
 
       {loggedIn && screen === 'users' && user?.role === 'admin' && (
-        <Users language={language} currentUserId={user.id} openUserId={userToOpen} />
+        <Users language={language} currentUserId={user.id} openUserId={userToOpen} onShowOnMap={showOnMap} />
       )}
 
       {loggedIn && screen === 'account' && user && (
