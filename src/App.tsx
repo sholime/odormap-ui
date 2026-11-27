@@ -49,6 +49,7 @@ export function App() {
   const t = TEXTS[language];
   // A report's place to show on the map, from "Show on the map".
   const [mapFocus, setMapFocus] = useState<Point>();
+  const [userToOpen, setUserToOpen] = useState<string>();
 
   useEffect(() => {
     localStorage.setItem(LANGUAGE_KEY, language);
@@ -86,6 +87,7 @@ export function App() {
   /** Opens a screen and adds it to the browser history. */
   function goTo(next: Screen) {
     setMapFocus(undefined);
+    setUserToOpen(undefined);
     if (next === screen) return;
     window.history.pushState(next, '');
     setScreen(next);
@@ -95,6 +97,12 @@ export function App() {
   function showOnMap(point: Point) {
     goTo('map');
     setMapFocus(point);
+  }
+
+  /** Opens a report's sender on the admin "Users" screen. */
+  function showUser(userId: string) {
+    goTo('users');
+    setUserToOpen(userId);
   }
 
   function goHome() {
@@ -144,7 +152,11 @@ export function App() {
 
       {loggedIn && screen === 'createAccount' && <SignIn language={language} isGuest onLoggedIn={handleLoggedIn} />}
 
-      {loggedIn && screen === 'reports' && <Reports language={language} onShowOnMap={showOnMap} />}
+      {loggedIn && screen === 'reports' && <Reports
+          language={language}
+          onShowOnMap={showOnMap}
+          onOpenUser={user?.role === 'admin' ? showUser : undefined}
+        />}
 
       {loggedIn && screen === 'map' && (
         <Suspense fallback={<p className="screen muted">{t.loading}</p>}>
@@ -152,10 +164,12 @@ export function App() {
         </Suspense>
       )}
 
-      {loggedIn && screen === 'allReports' && user?.role === 'admin' && <AllReports language={language} onShowOnMap={showOnMap} />}
+      {loggedIn && screen === 'allReports' && user?.role === 'admin' && (
+        <AllReports language={language} onShowOnMap={showOnMap} onOpenUser={showUser} />
+      )}
 
       {loggedIn && screen === 'users' && user?.role === 'admin' && (
-        <Users language={language} currentUserId={user.id} />
+        <Users language={language} currentUserId={user.id} openUserId={userToOpen} />
       )}
 
       {loggedIn && screen === 'account' && user && (

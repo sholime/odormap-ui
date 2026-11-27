@@ -479,6 +479,42 @@ header .menu-button {
   white-space: nowrap;
 }
 
+/* The sender's email, for admins: small and tight, so it ends level with the strength badge. */
+.report-author {
+  display: block;
+  margin-top: -4px;
+  font-size: 0.75rem;
+  line-height: 1;
+  overflow-wrap: anywhere;
+}
+
+/* The sender at the top of a report, for admins: one low row. */
+.sender {
+  flex-direction: row;
+  align-items: center;
+  padding: 10px 12px;
+}
+
+.sender-name {
+  flex: 1;
+  min-width: 0;
+  line-height: 1.25;
+}
+
+/* A long name or email is cut with "…"; the whole one is on the user's page. */
+.sender-name > * {
+  display: block;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.sender button {
+  padding: 6px 10px;
+  font-size: 0.875rem;
+  white-space: nowrap;
+}
+
 /* The strength number in a circle: light yellow for 1 up to dark red for 5. */
 .strength-badge {
   display: grid;
