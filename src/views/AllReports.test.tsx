@@ -43,13 +43,15 @@ const reports = [
 ];
 
 function fakeApi() {
-  const fetch = vi.fn(async (url: string) => Response.json(url.endsWith('/areas') ? [area] : reports));
+  const fetch = vi.fn(async (url: string) =>
+    Response.json(url.endsWith('/areas') ? [area] : url.includes('areaId=backa-topola') ? reports : []),
+  );
   vi.stubGlobal('fetch', fetch);
   return fetch;
 }
 
 describe('AllReports', () => {
-  it('lists the reports of the first area with totals', async () => {
+  it('starts with the reports of all areas, including outside the known areas, with totals', async () => {
     const fetch = fakeApi();
     render(<AllReports language="sr" />);
 
@@ -57,7 +59,21 @@ describe('AllReports', () => {
     expect(screen.getByText('Svinjski stajnjak')).toBeInTheDocument();
     expect(screen.getByText('3,5')).toBeInTheDocument(); // average strength
     expect(screen.getByText('SZ')).toBeInTheDocument(); // most common wind
-    expect(String(fetch.mock.calls.at(-1)![0])).toContain('areaId=backa-topola');
+    const urls = fetch.mock.calls.map(([url]) => String(url));
+    expect(urls.some((url) => url.includes('areaId=backa-topola'))).toBe(true);
+    expect(urls.some((url) => url.includes('areaId=unknown'))).toBe(true);
+  });
+
+  it('can list the reports of one area', async () => {
+    const fetch = fakeApi();
+    render(<AllReports language="sr" />);
+    await screen.findByText('Trulo meso');
+    fetch.mockClear();
+
+    await userEvent.selectOptions(screen.getByLabelText('Područje'), 'backa-topola');
+
+    expect(await screen.findByText('Trulo meso')).toBeInTheDocument();
+    expect(fetch.mock.calls.map(([url]) => String(url))).toEqual([expect.stringContaining('areaId=backa-topola')]);
   });
 
   it('can list reports from outside the known areas', async () => {
@@ -65,8 +81,9 @@ describe('AllReports', () => {
     render(<AllReports language="sr" />);
     await screen.findByText('Trulo meso');
 
+    fetch.mockClear();
     await userEvent.selectOptions(screen.getByLabelText('Područje'), 'unknown');
 
-    expect(String(fetch.mock.calls.at(-1)![0])).toContain('areaId=unknown');
+    expect(fetch.mock.calls.map(([url]) => String(url))).toEqual([expect.stringContaining('areaId=unknown')]);
   });
 });
