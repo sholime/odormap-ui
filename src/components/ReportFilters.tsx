@@ -35,7 +35,7 @@ export function ReportFilters({ language, filters, onChange, total, shown, overl
 
   const periodText =
     filters.period === 'custom'
-      ? `${shortDay(filters.from)} – ${shortDay(filters.to)}`
+      ? `${fullDay(filters.from, language)} – ${fullDay(filters.to, language)}`
       : { '24h': t.last24h, '7d': t.lastDays, '30d': t.last30d }[filters.period];
   const filtered = isFiltered(filters);
   const headline =
@@ -50,7 +50,7 @@ export function ReportFilters({ language, filters, onChange, total, shown, overl
   const active = [
     filters.momentOn && filters.moment && `${momentText(filters.moment, language)} ±${hours(filters.windowHours)}`,
     filters.winds.length > 0 &&
-      t.windFrom.replace('{dir}', filters.winds.map((s) => compass(s * 45, language)).join(', ')),
+      `${t.wind.toLowerCase()} ${filters.winds.map((s) => compass(s * 45, language)).join(', ')}`,
     filters.strengths.length > 0 && `${t.strengthShort} ${filters.strengths.join(', ')}`,
   ].filter(Boolean);
 
@@ -171,10 +171,11 @@ export function ReportFilters({ language, filters, onChange, total, shown, overl
   );
 }
 
-/** "2026-11-20" -> "20.11." */
-function shortDay(day: string): string {
-  const [, month, date] = day.split('-');
-  return `${Number(date)}.${Number(month)}.`;
+const LOCALE: Record<Language, string> = { sr: 'sr-Latn-RS', hu: 'hu-HU' };
+
+/** "2026-11-20" -> "20. 11. 2026." */
+function fullDay(day: string, language: Language): string {
+  return new Date(`${day}T00:00:00`).toLocaleDateString(LOCALE[language]);
 }
 
 /** 0.5 -> "30 min", 2 -> "2 h" */
@@ -189,7 +190,8 @@ function hourInput(iso: string): string {
 }
 
 function momentText(moment: string, language: Language): string {
-  return new Date(moment).toLocaleString(language === 'hu' ? 'hu-HU' : 'sr-Latn-RS', {
+  return new Date(moment).toLocaleString(LOCALE[language], {
+    year: 'numeric',
     day: 'numeric',
     month: 'numeric',
     hour: '2-digit',
