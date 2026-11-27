@@ -35,7 +35,7 @@ export function ReportFilters({ language, filters, onChange, total, shown, overl
 
   const periodText =
     filters.period === 'custom'
-      ? `${fullDay(filters.from, language)} – ${fullDay(filters.to, language)}`
+      ? `${shortDay(filters.from)} – ${shortDay(filters.to)}`
       : { '24h': t.last24h, '7d': t.lastDays, '30d': t.last30d }[filters.period];
   const filtered = isFiltered(filters);
   const headline =
@@ -48,7 +48,7 @@ export function ReportFilters({ language, filters, onChange, total, shown, overl
             .replace('{pct}', String(total ? Math.round(((shown ?? 0) / total) * 100) : 0))
         : t.userReports.replace('{count}', String(total));
   const active = [
-    filters.momentOn && filters.moment && `${momentText(filters.moment, language)} ±${hours(filters.windowHours)}`,
+    filters.momentOn && filters.moment && `${momentText(filters.moment)} ±${hours(filters.windowHours)}`,
     filters.winds.length > 0 &&
       `${t.wind.toLowerCase()} ${filters.winds.map((s) => compass(s * 45, language)).join(', ')}`,
     filters.strengths.length > 0 && `${t.strengthShort} ${filters.strengths.join(', ')}`,
@@ -171,11 +171,10 @@ export function ReportFilters({ language, filters, onChange, total, shown, overl
   );
 }
 
-const LOCALE: Record<Language, string> = { sr: 'sr-Latn-RS', hu: 'hu-HU' };
-
-/** "2026-11-20" -> "20. 11. 2026." */
-function fullDay(day: string, language: Language): string {
-  return new Date(`${day}T00:00:00`).toLocaleDateString(LOCALE[language]);
+/** "2026-11-20" -> "20.11.26." (short, so the summary fits on one line) */
+function shortDay(day: string): string {
+  const [year, month, date] = day.split('-');
+  return `${Number(date)}.${Number(month)}.${year.slice(2)}.`;
 }
 
 /** 0.5 -> "30 min", 2 -> "2 h" */
@@ -189,12 +188,7 @@ function hourInput(iso: string): string {
   return `${dayInput(date)}T${String(date.getHours()).padStart(2, '0')}:00`;
 }
 
-function momentText(moment: string, language: Language): string {
-  return new Date(moment).toLocaleString(LOCALE[language], {
-    year: 'numeric',
-    day: 'numeric',
-    month: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
+function momentText(moment: string): string {
+  const [day, time] = moment.split('T');
+  return `${shortDay(day)} ${time}`;
 }
