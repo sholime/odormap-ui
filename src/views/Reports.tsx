@@ -11,11 +11,12 @@ import { api } from '../api';
 import { AreaPicker } from '../components/AreaPicker';
 import { ReportCard } from '../components/ReportCard';
 import { ReportDetails, useOpenReport } from '../components/ReportDetails';
+import { ReportFilters } from '../components/ReportFilters';
+import { applyFilters, periodRange, useFilters } from '../filters';
 import { TEXTS } from '../texts';
 import { currentPoint } from '../location';
 import { MyReports } from './MyReports';
 
-const DAYS_SHOWN = 7;
 
 type Props = { language: Language; onShowOnMap: (point: Point) => void };
 
@@ -77,6 +78,8 @@ function EveryonesReports({ language, onOpen }: ListProps) {
   );
   const [reports, setReports] = useState<PublicReport[]>();
   const [error, setError] = useState(false);
+  const [filters, setFilters] = useFilters();
+  const range = periodRange(filters);
 
   // Start with the choice made earlier while the app is open. Otherwise start with the area the
   // person is in now. Elsewhere, or when the location is not known, start with the choice made
@@ -101,16 +104,18 @@ function EveryonesReports({ language, onOpen }: ListProps) {
   const shown = areas && choice !== undefined ? (chosen ? [chosen] : areas) : undefined;
 
   useEffect(() => {
-    if (!shown) return;
+    if (!shown || !range) return;
     setReports(undefined);
-    const to = new Date().toISOString();
-    const from = new Date(Date.now() - DAYS_SHOWN * 24 * 60 * 60 * 1000).toISOString();
+    const [from, to] = [range.from.toISOString(), range.to.toISOString()];
     // One request per area, put together newest first.
     Promise.all(shown.map((area) => api.reports(area.areaId, from, to)))
       .then((lists) => setReports(lists.flat().sort((a, b) => b.observedAt.localeCompare(a.observedAt))))
       .catch(() => setError(true));
-    // Runs again only when the choice or the list of areas changes.
-  }, [areas, chosen]);
+    // Runs again only when the choice, the list of areas or the period changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [areas, chosen, filters.period, filters.from, filters.to]);
+
+  const filtered = reports && applyFilters(reports, filters);
 
   function choose(id: string) {
     localStorage.setItem(AREA_KEY, id);
@@ -151,17 +156,19 @@ function EveryonesReports({ language, onOpen }: ListProps) {
           onChange={(id) => choose(id ?? ALL_AREAS)}
         />
       )}
-      {/* With the area list above, the area name is not repeated here. */}
-      {areas?.length === 1 && (
-        <p className="muted small">
-          {areas[0].name} · {t.lastDays}
-        </p>
-      )}
-      {severalAreas && choice !== undefined && <p className="muted small">{t.lastDaysTitle}</p>}
+      <ReportFilters
+        language={language}
+        filters={filters}
+        onChange={setFilters}
+        total={reports?.length}
+        shown={filtered?.length}
+        newest={reports?.[0]?.observedAt}
+      />
+      {!range && <p className="error">{t.dateRangeTooLong}</p>}
       {error && <p className="error">{t.somethingWrong}</p>}
       {!error && !reports && <p className="muted">{t.loading}</p>}
-      {reports?.length === 0 && <p className="muted">{t.noReportsYet}</p>}
-      {reports?.map((report) => (
+      {filtered?.length === 0 && <p className="muted">{t.noReportsYet}</p>}
+      {filtered?.map((report) => (
         <ReportCard
           key={report.id}
           language={language}

@@ -1,4 +1,5 @@
-// "Map": everyone's reports from the last 7 days as dots on a map, in all areas.
+// "Map": everyone's reports as dots on a map, in all areas, for the period and filters chosen in the
+// bar above it (7 days by default; see filters.ts).
 // It starts on the area the person is in (on its reports, if it has any). Outside the known areas it starts around the person,
 // showing about as much as one area. When the location is not known, it starts on the area
 // chosen last time on "Reports", or else the first area. Reports elsewhere are seen by moving the map.
@@ -15,12 +16,12 @@ import 'leaflet/dist/leaflet.css';
 import { findAreaFor, type Area, type Language, type Point, type PublicReport } from '@odormap/common';
 import { api } from '../api';
 import { ReportDetails, useOpenReport } from '../components/ReportDetails';
+import { ReportFilters } from '../components/ReportFilters';
+import { applyFilters, periodRange, useFilters } from '../filters';
 import { currentPoint } from '../location';
 import { TEXTS } from '../texts';
 import { AREA_KEY } from './Reports';
 
-const DAYS_SHOWN = 7;
-const DAY_MS = 24 * 60 * 60 * 1000;
 // Where the map is while the location is being found: Bačka Topola.
 const START = { lat: 45.815, lon: 19.635, zoom: 12 };
 // How close the map comes to one report's place.
@@ -42,23 +43,35 @@ export function MapView({ language, focus: startFocus }: Props) {
   const mapBox = useRef<HTMLDivElement>(null);
   const map = useRef<L.Map>(null);
 
+  const [filters, setFilters] = useFilters();
+  const range = periodRange(filters);
+  const shown = reports && applyFilters(reports, filters);
+  // The first load decides where the map starts; later ones (another period) leave it where it is.
+  const started = useRef(false);
+
+  // Load the areas, then everyone's reports in the period (again when the period changes).
   useEffect(() => {
-    const to = new Date();
-    const from = new Date(to.getTime() - DAYS_SHOWN * DAY_MS);
+    if (!range) return;
+    setReports(undefined);
     api
       .areas()
       .then(async (known) => {
         setAreas(known);
         const [point, lists] = await Promise.all([
-          currentPoint(),
-          Promise.all(known.map((a) => api.reports(a.areaId, from.toISOString(), to.toISOString()))),
+          started.current ? undefined : currentPoint(),
+          Promise.all(known.map((a) => api.reports(a.areaId, range.from.toISOString(), range.to.toISOString()))),
         ]);
         const all = lists.flat();
         setReports(all);
-        if (!startFocus) map.current?.fitBounds(startBounds(known, point, all), { padding: [30, 30], maxZoom: 14 });
+        if (!started.current && !startFocus) {
+          map.current?.fitBounds(startBounds(known, point, all), { padding: [30, 30], maxZoom: 14 });
+        }
+        started.current = true;
       })
       .catch(() => setError(true));
-  }, []);
+    // Runs again only when the period changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filters.period, filters.from, filters.to]);
 
   // Create the map once.
   useEffect(() => {
@@ -76,9 +89,9 @@ export function MapView({ language, focus: startFocus }: Props) {
 
   // Put a dot for each report, and show them all (stronger ones on top).
   useEffect(() => {
-    if (!map.current || !reports) return;
+    if (!map.current || !shown) return;
     const areaName = (id: string) => areas.find((a) => a.areaId === id)?.name ?? t.unknownArea;
-    const dots = [...reports]
+    const dots = [...shown]
       .sort((a, b) => a.strength - b.strength)
       .map((report) =>
         L.marker([report.location.lat, report.location.lon], {
@@ -96,7 +109,7 @@ export function MapView({ language, focus: startFocus }: Props) {
     };
     // details.show is a new function on every render, but does the same each time.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [reports, areas, t]);
+  }, [reports, filters, areas, t]);
 
   // Leaflet needs to measure the map again when it is shown after a report was open.
   // Then it moves close to the place asked for, if any.
@@ -122,9 +135,16 @@ export function MapView({ language, focus: startFocus }: Props) {
         />
       )}
       <div className="screen-part" hidden={!!details.open}>
-        <p className="muted small">
-          {t.lastDaysTitle}
-        </p>
+        <ReportFilters
+          language={language}
+          filters={filters}
+          onChange={setFilters}
+          total={reports?.length}
+          shown={shown?.length}
+          newest={reports?.reduce((a, r) => (r.observedAt > a ? r.observedAt : a), '') || undefined}
+          overlay
+        />
+        {!range && <p className="error">{t.dateRangeTooLong}</p>}
         {error && <p className="error">{t.somethingWrong}</p>}
         <div ref={mapBox} className="map" />
       </div>

@@ -909,6 +909,8 @@ button.report-item {
 /* "Map": the map fills the screen between the header and the bottom bar. */
 .map-screen {
   max-width: none;
+  /* From under the header down to the bottom bar; the map takes whatever the filter bar leaves. */
+  height: calc(100dvh - 59px - 72px - env(safe-area-inset-bottom));
   padding: 8px 0 0;
   gap: 8px;
 }
@@ -920,7 +922,8 @@ button.report-item {
 }
 
 .map {
-  height: calc(100dvh - 96px - 72px - env(safe-area-inset-bottom));
+  flex: 1;
+  min-height: 0;
   z-index: 0;
 }
 
@@ -936,4 +939,136 @@ button.report-item {
 
 .strength-badge.map-dot.mine {
   border: 3px solid var(--green);
+}
+
+/* Filters above the map and the list of everyone's reports: a bar that says what is shown, and a panel under it. */
+.report-filters {
+  position: relative;
+}
+
+.report-filters.overlay {
+  margin: 0 16px;
+}
+
+.filter-bar {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  text-align: left;
+  font-size: 0.9rem;
+  font-weight: 400;
+}
+
+.filter-active {
+  display: block;
+  color: var(--green);
+  font-weight: 600;
+}
+
+.filter-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 6px;
+  padding: 12px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+/* Over the map, the panel covers it instead of pushing it down. */
+.report-filters.overlay .filter-panel {
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  /* Ends above the bottom bar; scrolls when it is longer. */
+  max-height: calc(100dvh - 225px - env(safe-area-inset-bottom));
+  overflow-y: auto;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+}
+
+.filter-panel fieldset {
+  margin: 0;
+  padding: 0 0 12px;
+  border: 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.filter-panel legend {
+  padding: 0;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.filter-panel .chips {
+  margin-top: 6px;
+}
+
+.filter-panel .date-range,
+.filter-panel .moment {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.filter-panel .checkbox {
+  align-items: center;
+  margin-top: 6px;
+}
+
+.filter-panel .moment input {
+  flex: 1;
+}
+
+/* Wind directions as a compass: N on top, nothing in the middle. */
+.wind-rose {
+  display: grid;
+  grid-template-columns: repeat(3, 56px);
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.wind-rose button {
+  padding: 6px 0;
+  font-size: 0.9rem;
+}
+
+.wind-rose button[aria-pressed='true'] {
+  background: var(--green);
+  border-color: var(--green);
+  color: white;
+}
+
+.strength-chips {
+  display: flex;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.strength-chips .strength-badge {
+  padding: 0;
+  border: 3px solid transparent;
+  opacity: 0.45;
+}
+
+.strength-chips .strength-badge[aria-pressed='true'] {
+  border-color: var(--green);
+  opacity: 1;
+}
+
+/* None chosen means all of them, so they all look chosen. */
+.strength-chips:not(:has([aria-pressed='true'])) .strength-badge {
+  opacity: 1;
+}
+
+.filter-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
 }
