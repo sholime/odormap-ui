@@ -14,6 +14,7 @@ import { ReportDetails, useOpenReport } from '../components/ReportDetails';
 import { ReportFilters } from '../components/ReportFilters';
 import { applyFilters, periodRange, useFilters } from '../filters';
 import { TEXTS } from '../texts';
+import { withUndefinedArea } from '../undefinedArea';
 import { currentPoint } from '../location';
 import { MyReports } from './MyReports';
 
@@ -67,7 +68,9 @@ type ListProps = { language: Language; onOpen: (report: PublicReport, areaName: 
 
 function EveryonesReports({ language, onOpen }: ListProps) {
   const t = TEXTS[language];
-  const [areas, setAreas] = useState<Area[]>();
+  // The known areas, then the undefined one (reports from outside every known area).
+  const [knownAreas, setKnownAreas] = useState<Area[]>();
+  const areas = knownAreas && withUndefinedArea(knownAreas, language);
   // Chosen area id or ALL_AREAS; undefined until the starting choice is known.
   const [choice, setChoice] = useState<string>();
   // Where the person is, shown above the area list: still looking, an area name, or not known.
@@ -88,7 +91,7 @@ function EveryonesReports({ language, onOpen }: ListProps) {
     api
       .areas()
       .then(async (found) => {
-        setAreas(found);
+        setKnownAreas(found);
         const point = await currentPoint();
         const here = point && findAreaFor(point, found);
         setWhere(point ? { status: 'found', area: here } : { status: 'unknown' });
@@ -113,7 +116,7 @@ function EveryonesReports({ language, onOpen }: ListProps) {
       .catch(() => setError(true));
     // Runs again only when the choice, the list of areas or the period changes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [areas, chosen, filters.period, filters.from, filters.to]);
+  }, [knownAreas, choice, filters.period, filters.from, filters.to]);
 
   const filtered = reports && applyFilters(reports, filters);
 

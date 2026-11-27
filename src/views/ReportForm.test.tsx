@@ -65,7 +65,7 @@ describe('ReportForm', () => {
     });
     render(<ReportForm language="sr" />);
 
-    expect(await screen.findByText('Nepoznato područje')).toBeInTheDocument();
+    expect(await screen.findByText('Nedefinisano područje')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /^4/ })).toBeEnabled();
   });
 
