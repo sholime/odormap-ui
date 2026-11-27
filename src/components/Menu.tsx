@@ -6,7 +6,7 @@ import { useEffect, useState, type ReactNode } from 'react';
 import type { Language } from '@odormap/common';
 import { TEXTS } from '../texts';
 
-export type MenuItem = 'report' | 'reports' | 'account' | 'allReports';
+export type MenuItem = 'report' | 'reports' | 'account' | 'allReports' | 'users';
 
 type Item = { id: MenuItem; label: string; icon: ReactNode };
 
@@ -25,7 +25,10 @@ export function Menu({ language, current, isAdmin, onChange }: Props) {
     { id: 'reports', label: t.reports, icon: <ListIcon /> },
     { id: 'account', label: t.myAccount, icon: <PersonIcon /> },
   ];
-  const adminItems: Item[] = [{ id: 'allReports', label: t.allReports, icon: <TableIcon /> }];
+  const adminItems: Item[] = [
+    { id: 'allReports', label: t.allReports, icon: <TableIcon /> },
+    { id: 'users', label: t.users, icon: <PeopleIcon /> },
+  ];
 
   function renderItem(item: Item) {
     return (
@@ -105,6 +108,19 @@ function TableIcon() {
   return (
     <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
       <path d="M3 4h18v4H3zm0 6h18v4H3zm0 6h18v4H3z" fill="currentColor" />
+    </svg>
+  );
+}
+
+function PeopleIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
+      <circle cx="9" cy="8" r="3.5" fill="currentColor" />
+      <circle cx="17" cy="9" r="2.5" fill="currentColor" />
+      <path
+        d="M2 20c0-3.9 3.1-7 7-7s7 3.1 7 7zm14.5 0c0-2.3-.8-4.4-2.2-6 .9-.6 1.9-.9 2.7-.9 2.8 0 5 2.2 5 5v1.9z"
+        fill="currentColor"
+      />
     </svg>
   );
 }
