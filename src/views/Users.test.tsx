@@ -44,8 +44,21 @@ const users = [
   },
 ];
 
+const markoReport = {
+  id: '019a9a3c-6b1e-7000-8000-0000000000b1',
+  userId: markoId,
+  areaId: 'backa-topola',
+  observedAt: '2026-11-26T18:00:00Z',
+  location: { lat: 45.816, lon: 19.632 },
+  strength: 4,
+  odorKind: 'rotten_meat',
+  comment: 'Kod škole',
+};
+
 function fakeApi() {
-  const fetch = vi.fn(async (_url: string, init?: RequestInit) => {
+  const fetch = vi.fn(async (url: string, init?: RequestInit) => {
+    if (url.endsWith('/areas')) return Response.json([]);
+    if (url.endsWith('/reports')) return Response.json(url.includes(markoId) ? [markoReport] : []);
     if (init?.method === 'PATCH') return Response.json({ ...users[1], ...JSON.parse(init.body as string) });
     if (init?.method === 'DELETE') return new Response(null, { status: 204 });
     return Response.json(users);
@@ -57,7 +70,7 @@ function fakeApi() {
 describe('Users', () => {
   it('shows totals and a card per user', async () => {
     fakeApi();
-    render(<Users language="sr" currentUserId={adminId} />);
+    render(<Users language="sr" currentUserId={adminId} onShowOnMap={() => {}} />);
 
     expect(await screen.findByText('Marko Jovanović')).toBeInTheDocument();
     expect(screen.getByText('korisnika').previousSibling).toHaveTextContent('3');
@@ -69,7 +82,7 @@ describe('Users', () => {
 
   it('filters and searches', async () => {
     fakeApi();
-    render(<Users language="sr" currentUserId={adminId} />);
+    render(<Users language="sr" currentUserId={adminId} onShowOnMap={() => {}} />);
     await screen.findByText('Marko Jovanović');
 
     await userEvent.click(screen.getByRole('button', { name: 'Gosti' }));
@@ -84,7 +97,7 @@ describe('Users', () => {
 
   it('blocks a user from their details', async () => {
     const fetch = fakeApi();
-    render(<Users language="sr" currentUserId={adminId} />);
+    render(<Users language="sr" currentUserId={adminId} onShowOnMap={() => {}} />);
     await userEvent.click(await screen.findByText('Marko Jovanović'));
 
     expect(screen.getByText('Email')).toBeInTheDocument(); // signs in with a password
@@ -99,7 +112,7 @@ describe('Users', () => {
 
   it('deletes a user only after confirming', async () => {
     const fetch = fakeApi();
-    render(<Users language="sr" currentUserId={adminId} />);
+    render(<Users language="sr" currentUserId={adminId} onShowOnMap={() => {}} />);
     await userEvent.click(await screen.findByText('Marko Jovanović'));
 
     await userEvent.click(screen.getByRole('button', { name: 'Obriši nalog' }));
@@ -113,9 +126,19 @@ describe('Users', () => {
     expect(screen.queryByText('Marko Jovanović')).not.toBeInTheDocument();
   });
 
+  it("shows the user's reports and opens one", async () => {
+    fakeApi();
+    render(<Users language="sr" currentUserId={adminId} onShowOnMap={() => {}} />);
+    await userEvent.click(await screen.findByText('Marko Jovanović'));
+
+    await userEvent.click(await screen.findByText('„Kod škole”'));
+    expect(screen.getByRole('button', { name: '‹ Marko Jovanović' })).toBeInTheDocument();
+    expect(screen.queryByText('Tvoja')).not.toBeInTheDocument();
+  });
+
   it("offers no actions on the admin's own account", async () => {
     fakeApi();
-    render(<Users language="sr" currentUserId={adminId} />);
+    render(<Users language="sr" currentUserId={adminId} onShowOnMap={() => {}} />);
     await userEvent.click(await screen.findByText('Ana Nagy'));
 
     expect(screen.getByText('Ovo je tvoj nalog. Menjaš ga na stranici Moj nalog.')).toBeInTheDocument();

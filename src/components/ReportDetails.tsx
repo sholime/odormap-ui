@@ -17,17 +17,20 @@ type Props = {
   onBack: () => void;
   /** Shows this place on the app's map. */
   onShowOnMap: (point: Point) => void;
+  /** Overrides whether this is the viewer's own report (an admin looking at someone's reports). */
+  mine?: boolean;
   /** Opens the sender on the admin "Users" screen. */
   onOpenUser?: (userId: string) => void;
 };
 
-export function ReportDetails({ language, report, areaName, backLabel, onBack, onShowOnMap, onOpenUser }: Props) {
+export function ReportDetails(props: Props) {
+  const { language, report, areaName, backLabel, onBack, onShowOnMap, onOpenUser } = props;
   const t = TEXTS[language];
   const labels = LABELS[language];
   const locale = language === 'hu' ? 'hu-HU' : 'sr-Latn-RS';
   // Locations come rounded to about 200 m, the person's own too (the exact one is only stored).
   // Reports from "My reports" carry the userId; the others say isMine.
-  const mine = 'userId' in report || report.isMine;
+  const mine = props.mine ?? ('userId' in report || report.isMine);
   const { lat, lon } = report.location;
   // Only admins get the sender.
   const author = 'author' in report ? report.author : undefined;
