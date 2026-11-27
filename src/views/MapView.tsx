@@ -46,6 +46,10 @@ export function MapView({ language, focus: startFocus }: Props) {
   const [filters, setFilters] = useFilters();
   const range = periodRange(filters);
   const shown = reports && applyFilters(reports, filters);
+  // The part of the map on screen: the counts above the map are of the reports in it.
+  const [view, setView] = useState<L.LatLngBounds>();
+  const inView = (list: PublicReport[] | undefined) =>
+    list && view ? list.filter((r) => view.contains([r.location.lat, r.location.lon])) : list;
   // The first load decides where the map starts; later ones (another period) leave it where it is.
   const started = useRef(false);
 
@@ -77,6 +81,9 @@ export function MapView({ language, focus: startFocus }: Props) {
   useEffect(() => {
     if (!mapBox.current) return;
     map.current = L.map(mapBox.current).setView([START.lat, START.lon], START.zoom);
+    const m = map.current;
+    m.on('moveend', () => setView(m.getBounds()));
+    setView(m.getBounds());
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
       attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
@@ -139,8 +146,8 @@ export function MapView({ language, focus: startFocus }: Props) {
           language={language}
           filters={filters}
           onChange={setFilters}
-          total={reports?.length}
-          shown={shown?.length}
+          total={inView(reports)?.length}
+          shown={inView(shown)?.length}
           newest={reports?.reduce((a, r) => (r.observedAt > a ? r.observedAt : a), '') || undefined}
           overlay
         />

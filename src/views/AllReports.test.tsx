@@ -70,7 +70,8 @@ describe('AllReports', () => {
     await screen.findByText('Trulo meso');
     fetch.mockClear();
 
-    await userEvent.selectOptions(screen.getByLabelText('Područje'), 'backa-topola');
+    await userEvent.click(screen.getByRole('button', { name: /Sva područja/ }));
+    await userEvent.click(screen.getByRole('button', { name: 'Bačka Topola' }));
 
     expect(await screen.findByText('Trulo meso')).toBeInTheDocument();
     expect(fetch.mock.calls.map(([url]) => String(url))).toEqual([expect.stringContaining('areaId=backa-topola')]);
@@ -82,7 +83,8 @@ describe('AllReports', () => {
     await screen.findByText('Trulo meso');
 
     fetch.mockClear();
-    await userEvent.selectOptions(screen.getByLabelText('Područje'), 'unknown');
+    await userEvent.click(screen.getByRole('button', { name: /Sva područja/ }));
+    await userEvent.click(screen.getByRole('button', { name: 'Nepoznato područje' }));
 
     expect(fetch.mock.calls.map(([url]) => String(url))).toEqual([expect.stringContaining('areaId=unknown')]);
   });

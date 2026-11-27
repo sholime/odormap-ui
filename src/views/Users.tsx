@@ -6,7 +6,7 @@
 import { useEffect, useState } from 'react';
 import type { AdminUser, Language } from '@odormap/common';
 import { api } from '../api';
-import { TEXTS, type Texts } from '../texts';
+import { countReports, TEXTS, type Texts } from '../texts';
 
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 const FILTERS = ['all', 'accounts', 'guests', 'admins', 'blocked'] as const;
@@ -122,7 +122,7 @@ export function Users({ language, currentUserId }: Props) {
             </span>
             <span className="user-line muted small">
               <span>{u.email ?? '—'}</span>
-              <span>{t.userReports.replace('{count}', String(u.reportCount))}</span>
+              <span>{countReports(language, u.reportCount)}</span>
             </span>
           </span>
         </button>
