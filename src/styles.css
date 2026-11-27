@@ -973,11 +973,22 @@ button.report-item {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  margin-top: 6px;
   padding: 12px;
   background: var(--card);
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-top: 0;
+  border-radius: 0 0 10px 10px;
+}
+
+/* Open, the bar and the panel are one tab: the bar's bottom corners go, and a thin line divides them. */
+.report-filters.open .filter-bar {
+  border-radius: 10px 10px 0 0;
+  border-bottom-color: var(--green-light);
+}
+
+.report-filters.overlay.open .filter-bar {
+  position: relative;
+  z-index: 1001;
 }
 
 /* Over the map, the panel covers it instead of pushing it down. */

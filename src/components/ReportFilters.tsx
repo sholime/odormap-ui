@@ -55,7 +55,7 @@ export function ReportFilters({ language, filters, onChange, total, shown, overl
   ].filter(Boolean);
 
   return (
-    <div className={overlay ? 'report-filters overlay' : 'report-filters'}>
+    <div className={['report-filters', overlay && 'overlay', open && 'open'].filter(Boolean).join(' ')}>
       <button className="filter-bar" aria-expanded={open} onClick={() => setOpen(!open)}>
         <span>
           <strong>{headline}</strong> · {periodText}
